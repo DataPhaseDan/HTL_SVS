@@ -16,7 +16,7 @@ function App() {
 						label="Vorname">
 						<Form.Control type="text" placeholder="Vorname" />
 						</FloatingLabel>
-					</Form.Group>
+					</Form.Group >
 
 					<Form.Group as={Col} >
 					<FloatingLabel
