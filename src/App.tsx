@@ -95,7 +95,7 @@ function App() {
 						</Form.Group>
 					</Row>
 					<Form.Group className="mb-3" id="formGridCheckbox">
-						<Container className='mt-2 mb-2' style={{ whiteSpace: 'pre-wrap' }}>
+						<Container  className='mt-2 mb-2 p-3 border 5px solid black' style={{ whiteSpace: 'pre-wrap' }}>
 							<Form.Text id="DsgvoState" muted  >
 								<p className='h5'>
 									Datenschutzgrundverordnung
