@@ -90,7 +90,46 @@ function App() {
 					</Form.Group>
 				</Row>
 				<Form.Group className="mb-3" id="formGridCheckbox">
-					<Form.Check type="checkbox" label="Check me out" />
+					<Container className='mt-2 mb-2' style={{ whiteSpace: 'pre-wrap' }}>
+						<Form.Text id="DsgvoState" muted  >
+							<p>
+								Datenschutzgrundverordnung
+							</p>
+							<p>
+
+								Einwilligung
+								Art. 7 DSGVO
+							</p>
+							<p>Ich bin damit einverstanden, dass die angeführten personenbezogenen Daten ausschließlich für schulische und organisatorische Zwecke teilweise oder vollständig verarbeitet werden.</p>
+							<p>
+
+								Speicherdauer:
+								<br />
+								Die personenbezogenen Daten werden von der HTBLuVA Salzburg nur so lange gespeichert, wie es unter Einhaltung der einschlägigen gesetzlichen Bestimmungen zur Erfüllung des jeweils genannten Zwecks notwendig ist, oder solange gespeichert, als gesetzliche Aufbewahrungsfristen bestehen oder Verjährungsfristen betreffen potentieller Rechtsansprüche noch offen sind.
+							</p>
+							<p>
+								Als personenbezogene Daten werden verarbeitet:
+								<br />
+								Vor- und Zuname der/des Studierenden, Wohnadresse, Geburtsdatum, IP-Adressen und Kontaktdaten des Internetproviders, Versicherungsnummer, Religionsbekenntnis, Muttersprache, Staatsbürgerschaft, Telefonnummern.
+							</p>
+							<p>
+								Verwendungszwecke für die personenbezogene Datenverarbeitung sind:
+								<br />
+								<p>
+									WebUntis inkl. Fotos (elektronisches Tagebuch), Klassenlisten, Schulbuchlisten, AUVA Meldungen, Netz- und E-Mail-Account, elektronische Zutrittssysteme, Schulgeldverwaltung (edu.PAY), Schulfotografie, Bezirksverwaltungsbehörden, Magistrat, Polizei.
+								</p>
+								<p>
+									Zudem gebe ich die Einwilligung, dass Fotos bzw. Videos veröffentlicht werden dürfen (z.B. Homepage der Schule, Jahresbericht der Schule, lokale Medien und Berichte in Tageszeitungen, Rundfunk und Fernsehen).
+								</p>
+
+								Dem Unterfertigten steht grundsätzlich das Recht auf Auskunft, Berechtigung, Löschung, Einschränkung, Datenübertragbarkeit, Widerruf und Widerspruch zu. Diese Rechte können gegenüber der HTBLuVA Salzburg geltend gemacht werden, wenn die Verarbeitung der personenbezogenen Daten gegen geltendes Datenschutzrecht verstößt oder datenschutzrechtliche Ansprüche sonst in einer Weise verletzt worden sind. Dann ist eine Beschwerde an die Österreichische Datenschutzbehörde als zuständige Aufsichtsbehörde gemäß Art. 77 DSGVO zu erheben. Durch den Widerruf der Einwilligung wird die Rechtmäßigkeit der aufgrund der Einwilligung bis zum Widerruf erfolgten Verarbeitung nicht berührt.
+							</p>
+						</Form.Text>
+
+					</Container>
+
+					<Form.Check type="checkbox" label="Ich stimme der Datenschutzgrundverordnung der HTBLuVA Salzburg zu." />
+
 				</Form.Group>
 
 				<Button variant="primary" type="submit">
