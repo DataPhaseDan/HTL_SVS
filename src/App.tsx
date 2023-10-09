@@ -15,7 +15,7 @@ function getYear() {
 
 
 function App() {
-	const [validated, setValidated] = useState(false);
+	const [validated, setValidated] = useState(true);
 	const [currentDate] = useState(getYear());
 
 	const handleSubmit = (event: any) => {
@@ -43,7 +43,7 @@ function App() {
 								<FloatingLabel
 									controlId="formVorname"
 									label="Vorname">
-									<Form.Control required type="text" placeholder="Vorname" />
+									<Form.Control  required type="text" placeholder="Vorname" />
 									<Form.Control.Feedback type='invalid' className='mx-2'>Bitte geben Sie den Vornamen des Bewerbers an.</Form.Control.Feedback>
 								</FloatingLabel>
 							</Form.Group >
@@ -52,7 +52,7 @@ function App() {
 								<FloatingLabel
 									controlId="formNachname"
 									label="Nachname">
-									<Form.Control required type="text" placeholder="Nachname" />
+									<Form.Control  required type="text" placeholder="Nachname" />
 									<Form.Control.Feedback type='invalid' className='mx-2'>Bitte geben Sie den Nachnamen des Bewerbers an.</Form.Control.Feedback>
 								</FloatingLabel>
 							</Form.Group>
@@ -65,7 +65,7 @@ function App() {
 							<FloatingLabel
 								label="E-mail"
 								controlId="formEmail">
-								<Form.Control required type="email" placeholder="ihre@email.hier" />
+								<Form.Control  required type="email" placeholder="ihre@email.hier" />
 								<Form.Control.Feedback type='invalid' className='mx-2'>Bitte geben Sie die E-mail des Bewerbers an.</Form.Control.Feedback>
 								<Container className='mt-2'>
 									<Form.Text id="emailHelpBlock" muted >
@@ -85,7 +85,7 @@ function App() {
 							controlId='formSelectFachrichtung'
 							label="Bitte wählen Sie die gewünschte Fachrichtung"
 							className='pt-1 mt-3'>
-							<Form.Select required>
+							<Form.Select  required>
 								<option></option>
 								<option>Abend-HTL für Berufstätige (Bautechnik) </option>
 								<option>Abend-HTL für Berufstätige (Elektrotechnik)</option>
@@ -109,6 +109,7 @@ function App() {
 									type="date"
 									id="inputBirthDate"
 									required
+									
 									title="Bitte geben Sie ihr Geburtsdatum ein."
 
 								/>
