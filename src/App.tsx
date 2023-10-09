@@ -4,7 +4,7 @@
 
 
 import { useState } from 'react';
-import { Form, Button, Col, Row, Container, FloatingLabel } from 'react-bootstrap'
+import { Form, Button, Col, Row, Container, FloatingLabel,ProgressBar } from 'react-bootstrap'
 
 function getYear() {
 	const date = new Date();
@@ -15,29 +15,48 @@ function getYear() {
 
 
 function App() {
+	const [validated, setValidated] = useState(false);
 	const [currentDate] = useState(getYear());
+
+	const handleSubmit = (event: any) => {
+		const form = event.currentTarget;
+		if (form.checkValidity() === false) {
+			event.preventDefault();
+			event.stopPropagation();
+		}
+		setValidated(true);
+	};
 	return (
-		<Container className='p-5' style={{ backgroundColor: 'whitesmoke' }} >
+		<Container className='p-5 border' style={{ backgroundColor: 'whitesmoke' }} >
+				<h2 >Anmeldefortschritt</h2>
+				
+				<ProgressBar animated now={30} label={'33%'} />
 			<Row>
+			
 
 				<h2 className='mt-5 mb-5'>Anmeldung an der HTL für Berufstätige</h2>
-				<h3 className='mt-5 mb-5'>Schuljahr {currentDate} </h3>
-				<Form >
+				<h3 className='mb-5'>Schuljahr {currentDate} </h3>
+				<p><strong>Sie können sich nur einmal anmelden!</strong></p>
+
+				<p className='h6'>Für die Anmeldung sind die Abschlusszeugnisse ihrer bisherigen Ausbildungen notwendig.</p>
+				<Form noValidate validated={validated} onSubmit={handleSubmit}>
 					<Col>
 						<Row className="mb-3 mt-5">
-							<Form.Group as={Col} >
+							<Form.Group as={Col} controlId='validationVorname'>
 								<FloatingLabel
 									controlId="formVorname"
 									label="Vorname">
-									<Form.Control type="text" placeholder="Vorname" />
+									<Form.Control required type="text" placeholder="Vorname" />
+									<Form.Control.Feedback type='invalid' className='mx-2'>Bitte geben Sie den Vornamen des Bewerbers an.</Form.Control.Feedback>
 								</FloatingLabel>
 							</Form.Group >
 
-							<Form.Group as={Col} >
+							<Form.Group as={Col} controlId='validationNachname' >
 								<FloatingLabel
 									controlId="formNachname"
 									label="Nachname">
-									<Form.Control type="text" placeholder="Nachname" />
+									<Form.Control required type="text" placeholder="Nachname" />
+									<Form.Control.Feedback type='invalid' className='mx-2'>Bitte geben Sie den Nachnamen des Bewerbers an.</Form.Control.Feedback>
 								</FloatingLabel>
 							</Form.Group>
 						</Row>
@@ -45,11 +64,12 @@ function App() {
 
 
 					<Col lg={8}>
-						<Form.Group as={Col} className='mt-5 mb-3' >
+						<Form.Group as={Col} className='mt-5 mb-3' controlId='validationEmail' >
 							<FloatingLabel
 								label="E-mail"
 								controlId="formEmail">
-								<Form.Control type="email" placeholder="ihre@email.hier" />
+								<Form.Control required type="email" placeholder="ihre@email.hier" />
+								<Form.Control.Feedback type='invalid' className='mx-2'>Bitte geben Sie die E-mail des Bewerbers an.</Form.Control.Feedback>
 								<Container className='mt-2'>
 									<Form.Text id="emailHelpBlock" muted >
 										Über diese E-Mail Adresse müssen Sie im Verlauf des Aufnahmeprozesses erreichbar sein.
@@ -58,27 +78,30 @@ function App() {
 										Die E-Mail Adresse muss von einem Erziehungsberechtigten abgerufen werden.
 									</Form.Text>
 								</Container>
+
 							</FloatingLabel>
 						</Form.Group>
 					</Col>
 
-					<Form.Group as={Col} className="mb-3 mt-5" >
+					<Form.Group as={Col} className="mb-3 mt-5" controlId='validationFachrichtung'>
 						<FloatingLabel
 							controlId='formSelectFachrichtung'
 							label="Bitte wählen Sie die gewünschte Fachrichtung"
 							className='pt-1 mt-3'>
-							<Form.Select >
+							<Form.Select required>
 								<option></option>
 								<option>Abend-HTL für Berufstätige (Bautechnik) </option>
 								<option>Abend-HTL für Berufstätige (Elektrotechnik)</option>
 								<option>Abend-HTL für Berufstätige (Informatik)</option>
 								<option>Abend-HTL für Berufstätige (Maschinenbau)</option>
 							</Form.Select>
+							<Form.Control.Feedback type='invalid' className='mx-2'>
+								Ihre 1. Wahl:</Form.Control.Feedback>
 						</FloatingLabel>
 					</Form.Group>
 
 					<Row className="mb-3">
-						<Form.Group as={Col} >
+						<Form.Group as={Col} controlId='validationGeburtsdatum' >
 							<FloatingLabel
 								controlId="formGridState"
 								label="Geburtsdatum"
@@ -88,14 +111,17 @@ function App() {
 								<Form.Control
 									type="date"
 									id="inputBirthDate"
+									required
 									title="Bitte geben Sie ihr Geburtsdatum ein."
 
 								/>
+								<Form.Control.Feedback type='invalid' className='mx-2'>
+								Bitte wählen Sie das Geburtsdatum des Bewerbers.</Form.Control.Feedback>
 							</FloatingLabel>
 						</Form.Group>
 					</Row>
 					<Form.Group className="mb-3" id="formGridCheckbox">
-						<Container  className='mt-2 mb-2 p-3 border 5px solid black' style={{ whiteSpace: 'pre-wrap' }}>
+						<Container className='mt-2 mb-2 p-3 border 5px solid black' style={{ whiteSpace: 'pre-wrap' }}>
 							<Form.Text id="DsgvoState" muted  >
 								<p className='h5'>
 									Datenschutzgrundverordnung
@@ -136,12 +162,12 @@ function App() {
 
 						</Container>
 
-						<Form.Check type="checkbox" label="Ich stimme der Datenschutzgrundverordnung der HTBLuVA Salzburg zu." />
+						<Form.Check required type="checkbox" label="Ich stimme der Datenschutzgrundverordnung der HTBLuVA Salzburg zu." />
 
 					</Form.Group>
 
-					<Button variant="primary" type="submit">
-						Submit
+					<Button variant="success" type="submit">
+						Bestätigen
 					</Button>
 
 				</Form>
