@@ -4,7 +4,7 @@
 
 
 import { useState } from 'react';
-import { Form, Button, Col, Row, Container, FloatingLabel,ProgressBar } from 'react-bootstrap'
+import { Form, Button, Col, Row, Container, FloatingLabel, ProgressBar } from 'react-bootstrap'
 
 function getYear() {
 	const date = new Date();
@@ -28,12 +28,9 @@ function App() {
 	};
 	return (
 		<Container className='p-5 border' style={{ backgroundColor: 'whitesmoke' }} >
-				<h2 >Anmeldefortschritt</h2>
-				
-				<ProgressBar animated now={30} label={'33%'} />
+			<h2 >Anmeldefortschritt</h2>
+			<ProgressBar animated now={30} label={`33%`} />
 			<Row>
-			
-
 				<h2 className='mt-5 mb-5'>Anmeldung an der HTL für Berufstätige</h2>
 				<h3 className='mb-5'>Schuljahr {currentDate} </h3>
 				<p><strong>Sie können sich nur einmal anmelden!</strong></p>
@@ -116,7 +113,7 @@ function App() {
 
 								/>
 								<Form.Control.Feedback type='invalid' className='mx-2'>
-								Bitte wählen Sie das Geburtsdatum des Bewerbers.</Form.Control.Feedback>
+									Bitte wählen Sie das Geburtsdatum des Bewerbers.</Form.Control.Feedback>
 							</FloatingLabel>
 						</Form.Group>
 					</Row>
