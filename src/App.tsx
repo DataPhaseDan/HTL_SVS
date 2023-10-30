@@ -2,7 +2,7 @@
 //<Form.Label className='ms-1'>Vorname</Form.Label>
 
 
-import { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Accordion,
   Button,
@@ -12,6 +12,7 @@ import {
   Form,
   ProgressBar,
   Row,
+  Modal
 } from "react-bootstrap";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 
@@ -20,23 +21,46 @@ import { parsePhoneNumberFromString } from "libphonenumber-js";
 function App() {
   const [validated, setValidated] = useState(true);
   const [currentDate] = useState(getYear());
-
-
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
   const [isEmailValid, setIsEmailValid] = useState<boolean>(false);
-
-
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [isValid, setIsValid] = useState<boolean>(false);
+  const [birthdate, setBirthdate] = useState('');
+  const [isBirthdateValid, setIsBirthdateValid] = useState(false);
+  const inputRefVorname = useRef<HTMLInputElement>(null);
+  const inputRefNachname = useRef<HTMLInputElement>(null);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+
+  const handleBirthdateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const birthdateValue = event.target.value;
+    setBirthdate(birthdateValue);
+    setIsBirthdateValid(validateBirthdate(birthdateValue));
+  };
 
   const handlePhoneChange = (event: any) => {
     const inputNumber = parsePhoneNumberFromString(event.target.value);
     setPhoneNumber(event.target.value);
     setIsValid(inputNumber ? inputNumber.isValid() : false);
   };
-  const handleEmailChange = (event: any) => {
-    setEmail(event.target.value);
+
+  const validateBirthdate = (birthdate: string) => {
+    const birthdateParts = birthdate.split('.');
+    const birthdateDate = new Date(`${birthdateParts[2]}-${birthdateParts[1]}-${birthdateParts[0]}`);
+    const currentDate = new Date();
+    const ageDiffMs = currentDate.getTime() - birthdateDate.getTime();
+    const ageDate = new Date(ageDiffMs);
+    const age = Math.abs(ageDate.getUTCFullYear() - 1970);
+    return age >= 17;
+  };
+
+  const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    
     setIsEmailValid(validateEmail(event.target.value));
+    setEmail(event.target.value);
+    
+    
   };
 
   const validateEmail = (email: string) => {
@@ -52,17 +76,56 @@ function App() {
     return `${year}/${nextYear}`;
   }
 
+  const capitalizeFirstLetter = (string: string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+  }
 
-  const handleSubmit = (event: any) => {
-    const form = event.currentTarget;
+  const handleBlurVorname = () => {
+    if (inputRefVorname.current) {
+      const capitalized = capitalizeFirstLetter(inputRefVorname.current.value);
+      inputRefVorname.current.value = capitalized;
+    }
+  };
+
+  const handleBlurNachname = () => {
+    if (inputRefNachname.current) {
+      const capitalized = capitalizeFirstLetter(inputRefNachname.current.value);
+      inputRefNachname.current.value = capitalized;
+    }
+  };
+
+
+  const handleSubmit = (event: React.FormEvent) => {
+    console.log("submitted diiiiiga");
+    const form = event.currentTarget as HTMLFormElement;
     if (form.checkValidity() === false) {
       event.preventDefault();
       event.stopPropagation();
+     
+      //event.persist();
     }
-    setValidated(true);
+      // setShowModal(true);
+      setIsSubmitted(true);
+      setValidated(true);
+      event.preventDefault();
+      
+      
+      
+    
+
   };
+
+  useEffect(() => {
+    if (isSubmitted) {
+      console.log(email)
+      setShowModal(true);
+    }
+  }, [isSubmitted]);
+
   return (
+
     <Container className="p-5 border" style={{ backgroundColor: "whitesmoke" }}>
+      
       <Row className="justify-content-center">
         <Col xs={8} >
           <h2>Anmeldefortschritt</h2>
@@ -91,7 +154,9 @@ function App() {
                     required
                     type="text"
                     placeholder="Vorname"
-                    pattern="[A-Z][a-z]*"
+                    ref={inputRefVorname}
+                    onBlur={handleBlurVorname}
+                  // pattern="[A-Z][a-z]*"
                   />
                   <Form.Control.Feedback type="invalid" className="mx-2 mb-3">
                     Bitte geben Sie den Vornamen des Bewerbers an.
@@ -108,10 +173,14 @@ function App() {
                     required
                     type="text"
                     placeholder="Nachname"
-                    pattern="[A-Z][a-z]*"
+                    ref={inputRefNachname}
+                    onBlur={handleBlurNachname}
+                  //pattern="[A-Z][a-z]*"
                   />
                   <Form.Control.Feedback type="invalid" className="mx-2">
-                    Bitte geben Sie den Nachnamen des Bewerbers an.
+                    Bitte geben Sie den Nachnamen des Bewerbers an. 
+
+                    {email}
                   </Form.Control.Feedback>
                 </FloatingLabel>
               </Form.Group>
@@ -130,7 +199,7 @@ function App() {
               >
                 <Form.Control
                   required
-                  type="text"
+                  type="email"
                   value={email}
                   onChange={handleEmailChange}
                   isInvalid={!isEmailValid}
@@ -224,10 +293,15 @@ function App() {
                     type="date"
                     id="inputBirthDate"
                     required
+                    pattern="\d{2}\.\d{2}\.\d{4}"
                     title="Bitte geben Sie ihr Geburtsdatum ein."
+                    value={birthdate}
+                    onChange={handleBirthdateChange}
+                    isInvalid={!isBirthdateValid}
+                    className={isBirthdateValid ? 'valid-input' : ''}
                   />
-                  <Form.Control.Feedback type="invalid" className="mx-2">
-                    Bitte wählen Sie das Geburtsdatum des Bewerbers.
+                  <Form.Control.Feedback type={isBirthdateValid ? 'valid' : 'invalid'} className="mx-2">
+                    Bitte wählen Sie das Geburtsdatum des Bewerbers, sie müssen mindestens 17 Jahre alt sein .
                   </Form.Control.Feedback>
                 </FloatingLabel>
               </Form.Group>
@@ -342,14 +416,26 @@ function App() {
               className="mb-3"
             />
 
-            <Button variant="success" type="submit">
+            <Button variant="success" type="submit" onClick={handleSubmit}>
               Bestätigen
             </Button>
 
 
           </Form>
         </Col>
+        <Modal show={showModal} onHide={() => setShowModal(false)} backdrop="static">
+        <Modal.Header closeButton>
+          <Modal.Title>E-Mail zur Verifizierung{email}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Um die angegebene E-Mailadresse  zu ver</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
       </Row>
+
 
     </Container>
   );
