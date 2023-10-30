@@ -129,7 +129,7 @@ function App() {
       <Row className="justify-content-center">
         <Col xs={8} >
           <h2>Anmeldefortschritt</h2>
-          <ProgressBar animated now={30} label={`33%`} />
+          <ProgressBar animated now={50} label={`50%`} />
 
           <h2 className="mt-5 mb-5">Anmeldung an der HTL für Berufstätige</h2>
           <h3 className="mb-5">Schuljahr {currentDate}</h3>
