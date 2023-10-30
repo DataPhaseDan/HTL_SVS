@@ -56,11 +56,11 @@ function App() {
   };
 
   const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    
+
     setIsEmailValid(validateEmail(event.target.value));
     setEmail(event.target.value);
-    
-    
+
+
   };
 
   const validateEmail = (email: string) => {
@@ -101,17 +101,17 @@ function App() {
     if (form.checkValidity() === false) {
       event.preventDefault();
       event.stopPropagation();
-     
+
       //event.persist();
     }
-      // setShowModal(true);
-      setIsSubmitted(true);
-      setValidated(true);
-      event.preventDefault();
-      
-      
-      
-    
+    // setShowModal(true);
+    setIsSubmitted(true);
+    setValidated(true);
+    event.preventDefault();
+
+
+
+
 
   };
 
@@ -125,7 +125,7 @@ function App() {
   return (
 
     <Container className="p-5 border" style={{ backgroundColor: "whitesmoke" }}>
-      
+
       <Row className="justify-content-center">
         <Col xs={8} >
           <h2>Anmeldefortschritt</h2>
@@ -144,11 +144,12 @@ function App() {
           <Form validated={validated} onSubmit={handleSubmit}>
 
 
-            <Row className="mb-2 mt-4 ">
+            <Row className="mb-4 mt-4 ">
               <Form.Group controlId="validationVorname">
                 <FloatingLabel
                   controlId="formVorname"
                   label="Vorname"
+                  className="pt-1"
                 >
                   <Form.Control
                     required
@@ -156,6 +157,7 @@ function App() {
                     placeholder="Vorname"
                     ref={inputRefVorname}
                     onBlur={handleBlurVorname}
+                  // className="pt-4"
                   // pattern="[A-Z][a-z]*"
                   />
                   <Form.Control.Feedback type="invalid" className="mx-2 mb-3">
@@ -163,11 +165,14 @@ function App() {
                   </Form.Control.Feedback>
                 </FloatingLabel>
               </Form.Group>
-
+            </Row>
+            <Row className="mb-5 mt-4 ">
               <Form.Group controlId="validationNachname">
                 <FloatingLabel
                   controlId="formNachname"
                   label="Nachname"
+                  className="pt-1"
+
                 >
                   <Form.Control
                     required
@@ -178,7 +183,7 @@ function App() {
                   //pattern="[A-Z][a-z]*"
                   />
                   <Form.Control.Feedback type="invalid" className="mx-2">
-                    Bitte geben Sie den Nachnamen des Bewerbers an. 
+                    Bitte geben Sie den Nachnamen des Bewerbers an.
 
                     {email}
                   </Form.Control.Feedback>
@@ -196,6 +201,8 @@ function App() {
               <FloatingLabel
                 label="E-mail"
                 controlId="formEmail"
+                className="pt-1"
+
               >
                 <Form.Control
                   required
@@ -232,6 +239,8 @@ function App() {
               <FloatingLabel
                 label="Tel. Nr."
                 controlId="formPhone"
+                className="pt-1"
+
               >
                 <Form.Control
                   required
@@ -266,7 +275,9 @@ function App() {
               <FloatingLabel
                 controlId="formSelectFachrichtung"
                 label="Fachrichtung"
-                className="mt-5"
+                // className="mt-5"
+                className="pt-1"
+
               >
                 <Form.Select required>
                   <option></option>
@@ -424,16 +435,17 @@ function App() {
           </Form>
         </Col>
         <Modal show={showModal} onHide={() => setShowModal(false)} backdrop="static">
-        <Modal.Header closeButton>
-          <Modal.Title>E-Mail zur Verifizierung{email}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>Um die angegebene E-Mailadresse  zu ver</Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
+          <Modal.Header closeButton>
+            <Modal.Title>E-Mail zur Verifizierung</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>Um die angegebene E-Mailadresse <strong>{email}</strong> zu verifizieren, wurde eine Nachricht and diese Adresse versendet. Sie können erst mit der Anmeldung fortfahren, wenn Sie den Erhalt dieser Nachricht bestätigt haben.
+            Sollten Sie keine E-Mail erhalten haben, prüfen Sie neben dem Posteingangsordner bitte auch ihren Spam-Ordner.</Modal.Body>
+          <Modal.Footer>
+            <Button variant="success" onClick={() => setShowModal(false)}>
+              OK
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </Row>
 
 
