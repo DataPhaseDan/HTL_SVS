@@ -1,6 +1,7 @@
 //import reactLogo from './assets/react.svg'
 //<Form.Label className='ms-1'>Vorname</Form.Label>
 
+
 import { useState } from "react";
 import {
   Accordion,
@@ -12,30 +13,45 @@ import {
   ProgressBar,
   Row,
 } from "react-bootstrap";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
 
-function getYear() {
-  const date = new Date();
-  const year = date.getFullYear();
-  const nextYear = year + 1;
-  return `${year}/${nextYear}`;
-}
+
 
 function App() {
   const [validated, setValidated] = useState(true);
   const [currentDate] = useState(getYear());
-  const [phone, setPhone] = useState("");
 
-  const handlePhoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setPhone(event.target.value);
+
+  const [email, setEmail] = useState("");
+  const [isEmailValid, setIsEmailValid] = useState<boolean>(false);
+
+
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [isValid, setIsValid] = useState<boolean>(false);
+
+  const handlePhoneChange = (event: any) => {
+    const inputNumber = parsePhoneNumberFromString(event.target.value);
+    setPhoneNumber(event.target.value);
+    setIsValid(inputNumber ? inputNumber.isValid() : false);
   };
-  const isPhoneValid = () => {
-    const phoneRegex = /^\+(?:[0-9] ?){6,14}[0-9]$/;
-    if (phoneRegex.test(phone)) {
-      return "valid";
-    } else {
-      return "invalid";
-    }
+  const handleEmailChange = (event: any) => {
+    setEmail(event.target.value);
+    setIsEmailValid(validateEmail(event.target.value));
   };
+
+  const validateEmail = (email: string) => {
+    var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
+  };
+
+
+  function getYear() {
+    const date = new Date();
+    const year = date.getFullYear();
+    const nextYear = year + 1;
+    return `${year}/${nextYear}`;
+  }
+
 
   const handleSubmit = (event: any) => {
     const form = event.currentTarget;
@@ -115,11 +131,14 @@ function App() {
                 <Form.Control
                   required
                   type="text"
-                  pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/"
+                  value={email}
+                  onChange={handleEmailChange}
+                  isInvalid={!isEmailValid}
+                  className={isEmailValid ? "valid-input" : ""}
                 //placeholder="ihre@email.hier"
                 />
-                <Form.Control.Feedback type="invalid" className="mx-2">
-                  Bitte geben Sie die E-mail des Bewerbers an.
+                <Form.Control.Feedback type={isEmailValid ? "valid" : "invalid"} className="mx-2">
+                  {isEmailValid ? "" : <strong>Bitte geben Sie die E-mail des Bewerbers an.</strong>}
                 </Form.Control.Feedback>
                 <Container className="mt-2">
                   <Form.Text id="emailHelpBlock" muted>
@@ -149,13 +168,12 @@ function App() {
                   required
                   type="tel"
                   // placeholder="+43 123 456 7890"
-                  value={phone}
+                  value={phoneNumber}
                   onChange={handlePhoneChange}
-                // isInvalid={!isPhoneValid()}
+                  isInvalid={!isValid}
                 />
-                <Form.Control.Feedback type={isPhoneValid()} className="mx-2">
-                  Bitte geben Sie die Tel. Nr. des Bewerbers im Format +XX XXX
-                  XXXXXXX ein.
+                <Form.Control.Feedback type={isValid ? "valid" : "invalid"} className="mx-2">
+                  {isValid ? "" : <strong>Bitte geben Sie die Tel. Nr. des Bewerbers im Format +43 664 12345678 ein.</strong>}
                 </Form.Control.Feedback>
                 <Container className="mt-2">
                   <Form.Text id="telHelpBlock" muted>
@@ -214,115 +232,115 @@ function App() {
                 </FloatingLabel>
               </Form.Group>
             </Row>
-         
-              <Form.Group className="mb-3" id="formGridCheckbox">
-                <Accordion>
-                  <Accordion.Item eventKey="0">
-                    <Accordion.Header className='text-break'>Datenschutzgrundverordnung</Accordion.Header>
-                    <Accordion.Body className="text-wrap">
-                      <Container
-                        className="mt-2 mb-2 p-3 border 5px solid black"
-                        style={{  wordWrap:"break-word", whiteSpace: "pre-wrap",overflowWrap: "break-word" }}
-                      >
-                        <Form.Text id="DsgvoState" muted>
-                          <p className="h5">
-                            Datenschutzgrundverordnung
-                          </p>
-                          <p className="h6 mb-4">
-                            Einwilligung Art. 7 DSGVO
-                          </p>
-                          <p>
-                            <em>
-                              Ich bin damit einverstanden, dass die angeführten
-                              personenbezogenen Daten ausschließlich für schulische
-                              und organisatorische Zwecke teilweise oder vollständig
-                              verarbeitet werden.
-                            </em>
-                          </p>
-                          <p className="h6">
-                            Speicherdauer:
-                          </p>
-                          {/* <br className='my-1' /> */}
-                          <p>
-                            <em>
-                              Die personenbezogenen Daten werden von der HTBLuVA
-                              Salzburg nur so lange gespeichert, wie es unter
-                              Einhaltung der einschlägigen gesetzlichen Bestimmungen
-                              zur Erfüllung des jeweils genannten Zwecks notwendig
-                              ist, oder solange gespeichert, als gesetzliche
-                              Aufbewahrungsfristen bestehen oder Verjährungsfristen
-                              betreffen potentieller Rechtsansprüche noch offen
-                              sind.
-                            </em>
-                          </p>
 
-                          <p className="h6">
-                            Als personenbezogene Daten werden verarbeitet:
-                          </p>
+            <Form.Group className="mb-3" id="formGridCheckbox">
+              <Accordion>
+                <Accordion.Item eventKey="0">
+                  <Accordion.Header className='text-break'>Datenschutzgrundverordnung</Accordion.Header>
+                  <Accordion.Body className="text-wrap">
+                    <Container
+                      className="mt-2 mb-2 p-3 border 5px solid black"
+                      style={{ wordWrap: "break-word", whiteSpace: "pre-wrap", overflowWrap: "break-word" }}
+                    >
+                      <Form.Text id="DsgvoState" muted>
+                        <p className="h5">
+                          Datenschutzgrundverordnung
+                        </p>
+                        <p className="h6 mb-4">
+                          Einwilligung Art. 7 DSGVO
+                        </p>
+                        <p>
+                          <em>
+                            Ich bin damit einverstanden, dass die angeführten
+                            personenbezogenen Daten ausschließlich für schulische
+                            und organisatorische Zwecke teilweise oder vollständig
+                            verarbeitet werden.
+                          </em>
+                        </p>
+                        <p className="h6">
+                          Speicherdauer:
+                        </p>
+                        {/* <br className='my-1' /> */}
+                        <p>
+                          <em>
+                            Die personenbezogenen Daten werden von der HTBLuVA
+                            Salzburg nur so lange gespeichert, wie es unter
+                            Einhaltung der einschlägigen gesetzlichen Bestimmungen
+                            zur Erfüllung des jeweils genannten Zwecks notwendig
+                            ist, oder solange gespeichert, als gesetzliche
+                            Aufbewahrungsfristen bestehen oder Verjährungsfristen
+                            betreffen potentieller Rechtsansprüche noch offen
+                            sind.
+                          </em>
+                        </p>
+
+                        <p className="h6">
+                          Als personenbezogene Daten werden verarbeitet:
+                        </p>
+                        {/* <br /> */}
+                        <p>
+                          <em>
+                            Vor- und Zuname der/des Studierenden, Wohnadresse,
+                            Geburtsdatum, IP-Adressen und Kontaktdaten des
+                            Internetproviders, Versicherungsnummer,
+                            Religionsbekenntnis, Muttersprache,
+                            Staatsbürgerschaft, Telefonnummern.
+                          </em>
+                        </p>
+
+                        <p className="h6">
+                          Verwendungszwecke für die personenbezogene
+                          Datenverarbeitung sind:
                           {/* <br /> */}
-                          <p>
-                            <em>
-                              Vor- und Zuname der/des Studierenden, Wohnadresse,
-                              Geburtsdatum, IP-Adressen und Kontaktdaten des
-                              Internetproviders, Versicherungsnummer,
-                              Religionsbekenntnis, Muttersprache,
-                              Staatsbürgerschaft, Telefonnummern.
-                            </em>
-                          </p>
+                        </p>
+                        <p>
+                          <em>
+                            WebUntis inkl. Fotos (elektronisches Tagebuch),
+                            Klassenlisten, Schulbuchlisten, AUVA Meldungen, Netz-
+                            und E-Mail-Account, elektronische Zutrittssysteme,
+                            Schulgeldverwaltung (edu.PAY), Schulfotografie,
+                            Bezirksverwaltungsbehörden, Magistrat, Polizei.
+                          </em>
+                        </p>
+                        <p>
+                          <em>
+                            Zudem gebe ich die Einwilligung, dass Fotos bzw.
+                            Videos veröffentlicht werden dürfen (z.B. Homepage der
+                            Schule, Jahresbericht der Schule, lokale Medien und
+                            Berichte in Tageszeitungen, Rundfunk und Fernsehen).
+                          </em>
+                        </p>
+                        <p>
+                          <em>
+                            Dem Unterfertigten steht grundsätzlich das Recht auf
+                            Auskunft, Berechtigung, Löschung, Einschränkung,
+                            Datenübertragbarkeit, Widerruf und Widerspruch zu.
+                            Diese Rechte können gegenüber der HTBLuVA Salzburg
+                            geltend gemacht werden, wenn die Verarbeitung der
+                            personenbezogenen Daten gegen geltendes
+                            Datenschutzrecht verstößt oder datenschutzrechtliche
+                            Ansprüche sonst in einer Weise verletzt worden sind.
+                            Dann ist eine Beschwerde an die Österreichische
+                            Datenschutzbehörde als zuständige Aufsichtsbehörde
+                            gemäß Art. 77 DSGVO zu erheben. Durch den Widerruf der
+                            Einwilligung wird die Rechtmäßigkeit der aufgrund der
+                            Einwilligung bis zum Widerruf erfolgten Verarbeitung
+                            nicht berührt.
+                          </em>
+                        </p>
+                      </Form.Text>
+                    </Container>
+                  </Accordion.Body>
+                </Accordion.Item>
+              </Accordion>
 
-                          <p className="h6">
-                            Verwendungszwecke für die personenbezogene
-                            Datenverarbeitung sind:
-                            {/* <br /> */}
-                          </p>
-                          <p>
-                            <em>
-                              WebUntis inkl. Fotos (elektronisches Tagebuch),
-                              Klassenlisten, Schulbuchlisten, AUVA Meldungen, Netz-
-                              und E-Mail-Account, elektronische Zutrittssysteme,
-                              Schulgeldverwaltung (edu.PAY), Schulfotografie,
-                              Bezirksverwaltungsbehörden, Magistrat, Polizei.
-                            </em>
-                          </p>
-                          <p>
-                            <em>
-                              Zudem gebe ich die Einwilligung, dass Fotos bzw.
-                              Videos veröffentlicht werden dürfen (z.B. Homepage der
-                              Schule, Jahresbericht der Schule, lokale Medien und
-                              Berichte in Tageszeitungen, Rundfunk und Fernsehen).
-                            </em>
-                          </p>
-                          <p>
-                            <em>
-                              Dem Unterfertigten steht grundsätzlich das Recht auf
-                              Auskunft, Berechtigung, Löschung, Einschränkung,
-                              Datenübertragbarkeit, Widerruf und Widerspruch zu.
-                              Diese Rechte können gegenüber der HTBLuVA Salzburg
-                              geltend gemacht werden, wenn die Verarbeitung der
-                              personenbezogenen Daten gegen geltendes
-                              Datenschutzrecht verstößt oder datenschutzrechtliche
-                              Ansprüche sonst in einer Weise verletzt worden sind.
-                              Dann ist eine Beschwerde an die Österreichische
-                              Datenschutzbehörde als zuständige Aufsichtsbehörde
-                              gemäß Art. 77 DSGVO zu erheben. Durch den Widerruf der
-                              Einwilligung wird die Rechtmäßigkeit der aufgrund der
-                              Einwilligung bis zum Widerruf erfolgten Verarbeitung
-                              nicht berührt.
-                            </em>
-                          </p>
-                        </Form.Text>
-                      </Container>
-                    </Accordion.Body>
-                  </Accordion.Item>
-                </Accordion>
-          
-              </Form.Group>
-              <Form.Check
-                  required
-                  type="checkbox"
-                  label="Ich stimme der Datenschutzgrundverordnung der HTBLuVA Salzburg zu."
-                  className="mb-3"
-                />
+            </Form.Group>
+            <Form.Check
+              required
+              type="checkbox"
+              label="Ich stimme der Datenschutzgrundverordnung der HTBLuVA Salzburg zu."
+              className="mb-3"
+            />
 
             <Button variant="success" type="submit">
               Bestätigen
