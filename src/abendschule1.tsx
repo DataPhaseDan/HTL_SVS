@@ -18,7 +18,7 @@ import { parsePhoneNumberFromString } from "libphonenumber-js";
 
 
 
-function App() {
+function Abendschule1() {
   const [validated, setValidated] = useState(true);
   const [currentDate] = useState(getYear());
   const [email, setEmail] = useState('');
@@ -184,8 +184,6 @@ function App() {
                   />
                   <Form.Control.Feedback type="invalid" className="mx-2">
                     Bitte geben Sie den Nachnamen des Bewerbers an.
-
-                    {email}
                   </Form.Control.Feedback>
                 </FloatingLabel>
               </Form.Group>
@@ -453,4 +451,4 @@ function App() {
   );
 }
 
-export default App;
+export default Abendschule1;
