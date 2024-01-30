@@ -18,25 +18,27 @@ import { parsePhoneNumberFromString } from "libphonenumber-js";
 
 
 
-function Abendschule1() {
-  const [validated, setValidated] = useState(true);
+function Tagesschule1() {
+  const [validated, setValidated] = useState(false);
   const [currentDate] = useState(getYear());
   const [email, setEmail] = useState('');
   const [isEmailValid, setIsEmailValid] = useState<boolean>(false);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isValid, setIsValid] = useState<boolean>(false);
-  const [birthdate, setBirthdate] = useState('');
-  const [isBirthdateValid, setIsBirthdateValid] = useState(false);
+  const [birthdate, setBirthdate] = useState(Date);
+  const [isBirthdateValid, setIsBirthdateValid] = useState<boolean>(false);
   const inputRefVorname = useRef<HTMLInputElement>(null);
   const inputRefNachname = useRef<HTMLInputElement>(null);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const currentDateForOption = new Date();
+  const specificDateCutoff = new Date(currentDateForOption.getFullYear(), 1, 1);
 
 
   const handleBirthdateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const birthdateValue = event.target.value;
-    setBirthdate(birthdateValue);
-    setIsBirthdateValid(validateBirthdate(birthdateValue, 17)); // 17 is the age limit
+    //const birthdateValue = event.target.value;
+    setIsBirthdateValid(validateBirthdate(event.target.value, 14)); // 14 is the age limit
+    setBirthdate(event.target.value);
   };
 
   const handlePhoneChange = (event: any) => {
@@ -47,21 +49,21 @@ function Abendschule1() {
 
   const validateBirthdate = (birthdate: string, ageLimit: number) => {
     const birthdateParts = birthdate.split('.');
-    const birthYear = parseInt(birthdateParts[2], 10);
+    const birthYear = parseInt(birthdateParts[0], 10);
     const birthMonth = parseInt(birthdateParts[1], 10);
-    const birthDay = parseInt(birthdateParts[0], 10);
-  
+    const birthDay = parseInt(birthdateParts[2], 10);
+
     const currentDate = new Date();
     const currentYear = currentDate.getFullYear();
     const currentMonth = currentDate.getMonth() + 1; // getMonth() is zero-based
     const currentDay = currentDate.getDate();
-  
+
     let age = currentYear - birthYear;
-  
+
     if (currentMonth < birthMonth || (currentMonth === birthMonth && currentDay < birthDay)) {
       age--; // Subtract 1 from the age if the current date is before the birthdate in the current year
     }
-  
+
     return age >= ageLimit;
   };
 
@@ -106,24 +108,31 @@ function Abendschule1() {
 
 
   useEffect(() => {
-    if (isSubmitted) {
-      console.log(email);
-      setShowModal(true);
-    }
-  }, [isSubmitted]);
-      const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
+      if (isSubmitted) {
+        console.log(email);
+        setShowModal(true);
+      }
+    }, [isSubmitted]);
+        const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+          event.preventDefault();
 
-        const form = event.currentTarget;
-        const formIsValid = form.checkValidity() && isEmailValid && isValid && isBirthdateValid;
+          const form = event.currentTarget;
+          const formIsValid = form.checkValidity() && isEmailValid && isValid && isBirthdateValid;
 
-        setValidated(true);
+          setValidated(true);
 
-        if (formIsValid && !isSubmitted) {
-          setIsSubmitted(true);
-          setShowModal(true);
-        }
-      };
+          if (formIsValid && !isSubmitted) {
+            setIsSubmitted(true);
+            setShowModal(true);
+          }
+        };
+
+  // useEffect(() => {
+  //   if (isSubmitted) {
+  //     console.log(email)
+  //     setShowModal(true);
+  //   }
+  // }, [isSubmitted]);
 
   return (
 
@@ -134,17 +143,16 @@ function Abendschule1() {
           <h2>Anmeldefortschritt</h2>
           <ProgressBar animated now={50} label={`50%`} />
 
-          <h2 className="mt-5 mb-5">Anmeldung an der HTL für Berufstätige</h2>
+          <h2 className="mt-5 mb-5">Anmeldung an der HTBLuVA Salzburg</h2>
           <h3 className="mb-5">Schuljahr {currentDate}</h3>
           <p>
             <strong>Sie können sich nur einmal anmelden!</strong>
           </p>
 
           <p className="h6">
-            Für die Anmeldung sind die Abschlusszeugnisse ihrer bisherigen
-            Ausbildungen notwendig.
+
           </p>
-          <Form validated={validated} onSubmit={handleSubmit}>
+          <Form noValidate validated={validated} onSubmit={handleSubmit}>
 
 
             <Row className="mb-4 mt-4 ">
@@ -223,11 +231,11 @@ function Abendschule1() {
                     Aufnahmeprozesses erreichbar sein. An diese E-Mail Adresse
                     werden Bestätigungen und Terminverständigungen geschickt.
                     Eine Änderung ist unbedingt bekannt zu geben.
-                    {
-                      /* Die E-Mail
+
+                    Die E-Mail
                     Adresse muss von einem Erziehungsberechtigten abgerufen
-                    werden. */
-                    }
+                    werden.
+
                   </Form.Text>
                 </Container>
               </FloatingLabel>
@@ -258,11 +266,10 @@ function Abendschule1() {
                   <Form.Text id="telHelpBlock" muted>
                     Über diese Tel. Nr. müssen Sie im Verlauf des
                     Aufnahmeprozesses erreichbar sein.
-                    {
-                      /* Die E-Mail
-                    Adresse muss von einem Erziehungsberechtigten abgerufen
-                    werden. */
-                    }
+                    <br />
+                    Die Tel.Nr muss von einem Erziehungsberechtigten abgerufen
+                    werden
+
                   </Form.Text>
                 </Container>
               </FloatingLabel>
@@ -272,6 +279,7 @@ function Abendschule1() {
             <Form.Group
               className="mb-3 mt-5"
               controlId="validationFachrichtung"
+              aria-required
             >
               <FloatingLabel
                 controlId="formSelectFachrichtung"
@@ -279,13 +287,23 @@ function Abendschule1() {
                 // className="mt-5"
                 className="pt-1"
 
+
               >
                 <Form.Select required>
                   <option></option>
-                  <option>Abend-HTL für Berufstätige (Bautechnik)</option>
-                  <option>Abend-HTL für Berufstätige (Elektrotechnik)</option>
-                  <option>Abend-HTL für Berufstätige (Informatik)</option>
-                  <option>Abend-HTL für Berufstätige (Maschinenbau)</option>
+                  <option>Bautechnik (Hochbau)</option>
+                  <option>Bautechnik (Tiefbau)</option>
+                  <option>Biomedizin- und Gesundheitstechnik</option>
+                  <option>Elektronik & technische Informatik (Smart Devices / Coding)</option>
+                  <option>Elektrotechnik (Autonome Robotik)</option>
+                  <option>Elektrotechnik (E-Mobilität)</option>
+                  <option>Informationstechnologie (Künstliche Intelligenz & Data Science / Virtual Engineering)</option>
+                  <option>Maschinenbau (Anlagentechnik mit Kunststofftechnik und Produktdesign)</option>
+                  <option>Maschinenbau (Umwelt- und Verfahrenstechnik)</option>
+                  <option>Maschinenbau (Robotik und Smart Engineering)</option>
+                  {currentDateForOption < specificDateCutoff && <option>Grafik- und Kommunikationsdesign</option>}
+                  {currentDateForOption < specificDateCutoff && <option>Medien (Multimedia-Interaktionsdesign)</option>}
+
                 </Form.Select>
                 <Form.Control.Feedback type="invalid" className="mx-2">
                   Ihre 1. Wahl:
@@ -305,7 +323,7 @@ function Abendschule1() {
                     type="date"
                     id="inputBirthDate"
                     required
-                    pattern="\d{2}\.\d{2}\.\d{4}"
+                    //pattern="\d{2}\.\d{2}\.\d{4}"
                     title="Bitte geben Sie ihr Geburtsdatum ein."
                     value={birthdate}
                     onChange={handleBirthdateChange}
@@ -313,7 +331,9 @@ function Abendschule1() {
                     className={isBirthdateValid ? 'valid-input' : ''}
                   />
                   <Form.Control.Feedback type={isBirthdateValid ? 'valid' : 'invalid'} className="mx-2">
-                  {isBirthdateValid ? "" : "Bitte wählen Sie das Geburtsdatum des Bewerbers, sie müssen mindestens 17 Jahre alt sein ."}
+
+                    {isBirthdateValid ? "" : "Bitte wählen Sie das Geburtsdatum des Bewerbers, sie müssen mindestens 14 Jahre alt sein ."}
+
                   </Form.Control.Feedback>
                 </FloatingLabel>
               </Form.Group>
@@ -439,8 +459,12 @@ function Abendschule1() {
           <Modal.Header closeButton>
             <Modal.Title>E-Mail zur Verifizierung</Modal.Title>
           </Modal.Header>
-          <Modal.Body>Um die angegebene E-Mailadresse <strong>{email}</strong> zu verifizieren, wurde eine Nachricht and diese Adresse versendet. Sie können erst mit der Anmeldung fortfahren, wenn Sie den Erhalt dieser Nachricht bestätigt haben.
-            Sollten Sie keine E-Mail erhalten haben, prüfen Sie neben dem Posteingangsordner bitte auch ihren Spam-Ordner.</Modal.Body>
+          <Modal.Body>Um die angegebene E-Mailadresse <strong>{email}</strong> zu
+            verifizieren, wurde eine Nachricht and diese Adresse versendet.
+            Sie können erst mit der Anmeldung fortfahren,
+            wenn Sie den Erhalt dieser Nachricht bestätigt haben.
+            Sollten Sie keine E-Mail erhalten haben, prüfen Sie neben dem Posteingangsordner
+            bitte auch ihren Spam-Ordner.</Modal.Body>
           <Modal.Footer>
             <Button variant="success" onClick={() => setShowModal(false)}>
               OK
@@ -454,4 +478,4 @@ function Abendschule1() {
   );
 }
 
-export default Abendschule1;
+export default Tagesschule1;
