@@ -1,7 +1,3 @@
-//import reactLogo from './assets/react.svg'
-//<Form.Label className='ms-1'>Vorname</Form.Label>
-
-
 import React, { useState, useRef, useEffect } from "react";
 import {
   Accordion,
@@ -39,7 +35,7 @@ function Abendschule1() {
     setIsBirthdateValid(validateBirthdate(birthdateValue, 17)); // 17 is the age limit
   };
 
-  const handlePhoneChange = (event: any) => {
+  const handlePhoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const inputNumber = parsePhoneNumberFromString(event.target.value);
     setPhoneNumber(event.target.value);
     setIsValid(inputNumber ? inputNumber.isValid() : false);
@@ -74,7 +70,7 @@ function Abendschule1() {
   };
 
   const validateEmail = (email: string) => {
-    var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(String(email).toLowerCase());
   };
 
@@ -107,7 +103,7 @@ function Abendschule1() {
 
   useEffect(() => {
     if (isSubmitted) {
-      console.log(email);
+      
       setShowModal(true);
     }
   }, [isSubmitted]);
@@ -132,7 +128,7 @@ function Abendschule1() {
       <Row className="justify-content-center">
         <Col xs={8} >
           <h2>Anmeldefortschritt</h2>
-          <ProgressBar animated now={50} label={`50%`} />
+          <ProgressBar animated now={50} label={"50%"} />
 
           <h2 className="mt-5 mb-5">Anmeldung an der HTL für Berufstätige</h2>
           <h3 className="mb-5">Schuljahr {currentDate}</h3>
@@ -281,7 +277,7 @@ function Abendschule1() {
 
               >
                 <Form.Select required>
-                  <option></option>
+                  <option />
                   <option>Abend-HTL für Berufstätige (Bautechnik)</option>
                   <option>Abend-HTL für Berufstätige (Elektrotechnik)</option>
                   <option>Abend-HTL für Berufstätige (Informatik)</option>

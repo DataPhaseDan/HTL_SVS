@@ -83,7 +83,7 @@ function Tagesschule2() {
   const handleSvNumberChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     let value = event.target.value.replace(/\s/g, ''); // remove all spaces
     if (value.length > 4) {
-      value = value.slice(0, 4) + ' ' + value.slice(4); // add a space after the 4th character
+      value = `${value.slice(0, 4)} ${value.slice(4)}`; // add a space after the 4th character
     }
     setSvNumber(value);
   };
@@ -97,7 +97,7 @@ function Tagesschule2() {
     setIsBirthdateValid(validateBirthdate(birthdateValue));
   };
 
-  const handlePhoneChange = (event: any) => {
+  const handlePhoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const inputNumber = parsePhoneNumberFromString(event.target.value);
     setPhoneNumber(event.target.value);
     setIsValid(inputNumber ? inputNumber.isValid() : false);
@@ -122,7 +122,7 @@ function Tagesschule2() {
   };
 
   const validateEmail = (email: string) => {
-    var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(String(email).toLowerCase());
   };
 
@@ -178,7 +178,7 @@ function Tagesschule2() {
 
   useEffect(() => {
     if (isSubmitted) {
-      console.log(email)
+      
       setShowModal(true);
     }
   }, [isSubmitted]);
@@ -190,7 +190,7 @@ function Tagesschule2() {
       <Row className="justify-content-center">
         <Col xs={8} >
           <h2>Anmeldefortschritt</h2>
-          <ProgressBar animated now={90} label={`90%`} />
+          <ProgressBar animated now={90} label={"90%"} />
 
           <h2 className="mt-5 mb-5">Anmeldung an der HTBLuVA Salzburg</h2>
           <h3 className="mb-5">Schuljahr {currentDate}</h3>
@@ -283,7 +283,7 @@ function Tagesschule2() {
               >
 
                 <Form.Select disabled required>
-                  <option></option>
+                  <option />
                   <option>Bautechnik (Hochbau)</option>
                   <option>Bautechnik (Tiefbau)</option>
                   <option>Biomedizin- und Gesundheitstechnik</option>
@@ -320,7 +320,7 @@ function Tagesschule2() {
 
               >
                 <Form.Select required>
-                  <option></option>
+                  <option />
                   <option>Bautechnik (Hochbau)</option>
                   <option>Bautechnik (Tiefbau)</option>
                   <option>Biomedizin- und Gesundheitstechnik</option>
@@ -354,7 +354,7 @@ function Tagesschule2() {
 
               >
                 <Form.Select required>
-                  <option></option>
+                  <option />
                   <option>Bautechnik (Hochbau)</option>
                   <option>Bautechnik (Tiefbau)</option>
                   <option>Biomedizin- und Gesundheitstechnik</option>
@@ -388,7 +388,7 @@ function Tagesschule2() {
                       label="Ja"
                       name="groupErstwunschSchule"
                       type="radio"
-                      id={`inline-radio-3`}
+                      id={"inline-radio-3"}
                       value="Ja"
                       checked={radioStateErstwunschSchule === "Ja"}
                       onChange={handleRadioErstwunschSchule}
@@ -399,7 +399,7 @@ function Tagesschule2() {
                       label="Nein"
                       name="groupErstwunschSchule"
                       type="radio"
-                      id={`inline-radio-4`}
+                      id={"inline-radio-4"}
                       value="Nein"
                       checked={radioStateErstwunschSchule === "Nein"}
                       onChange={handleRadioErstwunschSchule}
@@ -410,7 +410,7 @@ function Tagesschule2() {
 
               </Form.Group>
             </Row>
-            <Row className="mb-3 mt-4 ">
+            <Row className="mb-4 mt-4 ">
               <Form.Group controlId="validationZweitwunschSchule">
                 <FloatingLabel
                   controlId="formZweitwunschSchule"
@@ -522,7 +522,7 @@ function Tagesschule2() {
                       label="Männlich"
                       name="groupGeschlecht"
                       type="radio"
-                      id={`inline-radio-2`}
+                      id={"inline-radio-2"}
                       value="Männlich"
                       checked={radioStateGeschlecht === "Männlich"}
                       onChange={handleRadioChangeGeschlecht}
@@ -533,7 +533,7 @@ function Tagesschule2() {
                       label="Weiblich"
                       name="groupGeschlecht"
                       type="radio"
-                      id={`inline-radio-3`}
+                      id={"inline-radio-3"}
                       value="Weiblich"
                       checked={radioStateGeschlecht === "Weiblich"}
                       onChange={handleRadioChangeGeschlecht}
@@ -620,7 +620,7 @@ function Tagesschule2() {
                       label="ja"
                       name="group1"
                       type="radio"
-                      id={`inline-radio-1`}
+                      id={"inline-radio-1"}
                       value="true"
                       checked={radioState === true}
                       onChange={handleRadioChange}
@@ -631,7 +631,7 @@ function Tagesschule2() {
                       label="nein"
                       name="group1"
                       type="radio"
-                      id={`inline-radio-1`}
+                      id={"inline-radio-1"}
                       value="false"
                       checked={radioState === false}
                       onChange={handleRadioChange}
@@ -654,15 +654,13 @@ function Tagesschule2() {
 
                 >
                   <Form.Select required={radioState}  >
-                    <option></option>
-                    <option value="Österreichische Gesundheitskasse"> Österreichische Gesundheitskasse (ÖGK)</option>
-                    <option value="Sozialversicherungsanstalt der Selbständigen">Sozialversicherungsanstalt der Selbständigen (SVS)</option>
-                    <option value="BVAEB" >BVA öB, Eisenbahnen und Bergbau (BVAEB) </option>
+                    <option />
+                   <option value="4">Allgemeine Unfallsversicherungsanstalt (AUVA)</option><option value="6">Krankenfürsorgeanstalten für öffentlich Bedienstete</option><option value="1">Österreichische Gesundheitskasse (ÖGK)</option><option value="5">Pensionsversicherungsanstalt (PVA)</option><option value="2">Sozialversicherungsanstalt der Selbständigen (SVS)</option><option value="3">Versicherungsanstalt öffentlich Bediensteter, Eisenbahnen und Bergbau (BVAEB)</option>
                   </Form.Select>
                   <Form.Control.Feedback type="invalid" className="mx-2">
                     Bitte geben Sie den Sozialversicherungsträger an.
                   </Form.Control.Feedback>
-                  <br></br>
+                  <br />
                   <FloatingLabel
                     controlId="formSVNumber"
                     label="SV-Nummer"
@@ -718,7 +716,7 @@ function Tagesschule2() {
                   className="pt-1"
                 >
                   <Form.Select required>
-                    <option></option>
+                    <option />
                     <option value="Afghanistan">Afghanistan</option>
                     <option value="Albania">Albania</option>
                     <option value="Algeria">Algeria</option>
@@ -927,7 +925,7 @@ function Tagesschule2() {
                   className="pt-1"
                 >
                   <Form.Select required>
-                    <option></option>
+                    <option />
                     <option value="Afghanistan">Afghanistan</option>
                     <option value="Albania">Albania</option>
                     <option value="Algeria">Algeria</option>
@@ -1221,7 +1219,7 @@ function Tagesschule2() {
                   className="pt-1"
                 >
                   <Form.Select required>
-                    <option></option>
+                    <option />
                     <option value="Afghanistan">Afghanistan</option>
                     <option value="Albania">Albania</option>
                     <option value="Algeria">Algeria</option>
@@ -1433,7 +1431,7 @@ function Tagesschule2() {
                   className="pt-1"
                 >
                   <Form.Select required>
-                    <option></option>
+                    <option />
                     <option value="0">0</option>
                     <option value="1">1</option>
                     <option value="2">2</option>
@@ -1460,7 +1458,7 @@ function Tagesschule2() {
                   className="pt-1"
                 >
                   <Form.Select onChange={(event: React.ChangeEvent<HTMLSelectElement>) => handleGeschwisterHtl(event)} required>
-                    <option></option>
+                    <option />
                     <option value="0">0</option>
                     <option value="1">1</option>
                     <option value="2">2</option>
@@ -1534,7 +1532,7 @@ function Tagesschule2() {
                           className="pt-1"
                         >
                           <Form.Select required>
-                            <option></option>
+                            <option />
                             <option value="1">Frau</option>
                             <option value="2">Herr</option>
                             <option value="3">Divers</option>
@@ -1608,7 +1606,7 @@ function Tagesschule2() {
                 </FloatingLabel>
               </Form.Group>
             </Row>
-            <Row className="mb-5 mt-4 ">
+            <Row className="mb-3 mt-4 ">
               <Form.Group controlId="validationNachname">
                 <FloatingLabel
                   controlId="formNachname"
@@ -1673,7 +1671,7 @@ function Tagesschule2() {
                 </FloatingLabel>
               </Form.Group>
             </Row>
-            <Row className="mb-4">
+            <Row >
               <Form.Group controlId="validationWohnland">
                 <FloatingLabel
                   controlId="formWohnland"
@@ -1681,7 +1679,7 @@ function Tagesschule2() {
                   className="pt-1"
                 >
                   <Form.Select required>
-                    <option></option>
+                    <option />
                     <option value="Afghanistan">Afghanistan</option>
                     <option value="Albania">Albania</option>
                     <option value="Algeria">Algeria</option>
@@ -1890,7 +1888,7 @@ function Tagesschule2() {
             </Row>
             <Form.Group
               as={Col}
-              className="mt-5 mb-3"
+              className=" mb-3"
               controlId="validationPhone"
             >
               <FloatingLabel
@@ -1997,7 +1995,7 @@ function Tagesschule2() {
                           className="pt-1"
                         >
                           <Form.Select required>
-                            <option></option>
+                            <option />
                             <option value="1">Frau</option>
                             <option value="2">Herr</option>
                             <option value="3">Divers</option>
@@ -2049,7 +2047,7 @@ function Tagesschule2() {
                       </Form.Group>
 
                     </Row>
-                    <Row className="mb-4 mt-4 ">
+                    <Row className="mb-1 mt-4 ">
               <Form.Group controlId="validationVorname">
                 <FloatingLabel
                   controlId="formVorname"
@@ -2071,7 +2069,7 @@ function Tagesschule2() {
                 </FloatingLabel>
               </Form.Group>
             </Row>
-            <Row className="mb-5 mt-4 ">
+            <Row className="mb-3 mt-4 ">
               <Form.Group controlId="validationNachname">
                 <FloatingLabel
                   controlId="formNachname"
@@ -2136,7 +2134,7 @@ function Tagesschule2() {
                 </FloatingLabel>
               </Form.Group>
             </Row>
-            <Row className="mb-4">
+            <Row >
               <Form.Group controlId="validationWohnland">
                 <FloatingLabel
                   controlId="formWohnland"
@@ -2144,7 +2142,7 @@ function Tagesschule2() {
                   className="pt-1"
                 >
                   <Form.Select required>
-                    <option></option>
+                    <option />
                     <option value="Afghanistan">Afghanistan</option>
                     <option value="Albania">Albania</option>
                     <option value="Algeria">Algeria</option>
