@@ -1,0 +1,52 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=zsv_user
+      - POSTGRES_PASSWORD=zsv_password
+      - POSTGRES_DB=zsv_bewerber
+      - POSTGRES_INITDB_ARGS="--encoding=UTF8"
+    volumes:
+      - ./db_init/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - zsvmesh
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+    ports:
+      - "410:410"
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - POSTGRES_USER=zsv_user
+      - POSTGRES_PASSWORD=zsv_password
+      - POSTGRES_DB=zsv_bewerber
+    networks:
+      - zsvmesh
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+   
+    ports:
+    - "80:80"
+    - "443:443"
+    volumes:
+    - ./app/nginx.conf:/etc/nginx/nginx.conf
+    - ./app/conf.d:/etc/nginx/conf.d
+    depends_on:
+    - app
+    networks:
+    - zsvmesh
+volumes:
+  db_data:
+networks:
+  zsvmesh:
+
+

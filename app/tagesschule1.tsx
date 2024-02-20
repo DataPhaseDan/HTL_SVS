@@ -1,8 +1,9 @@
 //import reactLogo from './assets/react.svg'
 //<Form.Label className='ms-1'>Vorname</Form.Label>
-
-import { parsePhoneNumberFromString } from "libphonenumber-js";
-import React, { useState, useRef, useEffect } from "react";
+import { PhoneNumberUtil, PhoneNumberType } from "google-libphonenumber";
+import axios from "axios";
+import { useState, useRef, useEffect } from "react";
+import { sha3_512 } from "js-sha3";
 import {
 	Accordion,
 	Button,
@@ -29,7 +30,10 @@ function Tagesschule1() {
 	const [showModal, setShowModal] = useState<boolean>(false);
 	const [isSubmitted, setIsSubmitted] = useState(false);
 	const currentDateForOption = new Date();
+	const [hash, setHash] = useState("");
 	const specificDateCutoff = new Date(currentDateForOption.getFullYear(), 1, 1);
+
+	const formData = new FormData();
 
 	const handleBirthdateChange = (
 		event: React.ChangeEvent<HTMLInputElement>,
@@ -38,11 +42,32 @@ function Tagesschule1() {
 		setIsBirthdateValid(validateBirthdate(event.target.value, 14)); // 14 is the age limit
 		setBirthdate(event.target.value);
 	};
+	const generateHash = () => {
+		const combinedInput =
+			email + phoneNumber + inputRefNachname + inputRefVorname;
+		const hash = sha3_512(combinedInput).substring(0, 20); // Adjust length as needed
+		setHash(hash);
+	};
 
 	const handlePhoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const inputNumber = parsePhoneNumberFromString(event.target.value);
-		setPhoneNumber(event.target.value);
-		setIsValid(inputNumber ? inputNumber.isValid() : false);
+		setPhoneNumber(event.target.value.trim());
+	};
+
+
+	const handlePhoneBlur = () => {
+		const phoneUtil = PhoneNumberUtil.getInstance();
+		let isE164 = false;
+		let isValid = false;
+
+		try {
+			const inputNumber = phoneUtil.parse(phoneNumber);
+			isE164 = phoneUtil.getNumberType(inputNumber) === PhoneNumberType.MOBILE;
+			isValid = phoneUtil.isValidNumber(inputNumber);
+		} catch (err) {
+			console.error(err);
+		}
+
+		setIsValid(isE164 ? isValid : false);
 	};
 
 	const validateBirthdate = (birthdate: string, ageLimit: number) => {
@@ -70,7 +95,7 @@ function Tagesschule1() {
 
 	const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setIsEmailValid(validateEmail(event.target.value));
-		setEmail(event.target.value);
+		setEmail(event.target.value.trim());
 	};
 
 	const validateEmail = (email: string) => {
@@ -92,21 +117,20 @@ function Tagesschule1() {
 
 	const handleBlurVorname = () => {
 		if (inputRefVorname.current) {
-			const capitalized = capitalizeFirstLetter(inputRefVorname.current.value);
-			inputRefVorname.current.value = capitalized;
+			const capitalized = capitalizeFirstLetter(inputRefVorname.current.value.trim());
+			inputRefVorname.current.value = capitalized
 		}
 	};
 
 	const handleBlurNachname = () => {
 		if (inputRefNachname.current) {
-			const capitalized = capitalizeFirstLetter(inputRefNachname.current.value);
+			const capitalized = capitalizeFirstLetter(inputRefNachname.current.value.trim());
 			inputRefNachname.current.value = capitalized;
 		}
 	};
 
 	useEffect(() => {
 		if (isSubmitted) {
-
 			setShowModal(true);
 		}
 	}, [isSubmitted]);
@@ -119,12 +143,23 @@ function Tagesschule1() {
 
 		setValidated(true);
 
-		if (formIsValid && !isSubmitted) {
-			setIsSubmitted(true);
-			setShowModal(true);
-		}
-	};
+		formData.append("email", email);
+		formData.append("phoneNumber", phoneNumber);
+		formData.append("birthdate", birthdate);
+		formData.append("hash", hash);
+		formData.append("vorname", inputRefVorname.current?.value || "Error");
+		formData.append("nachname", inputRefNachname.current?.value || "Error");
 
+		axios.post("https://localhost:5173/registration/tagesschule", formData).then((response) => {
+			console.log(response);
+			if (formIsValid && !isSubmitted) {
+				setIsSubmitted(true);
+				setShowModal(true);
+			}
+		}).catch(error => {
+			console.error(error);
+		});
+	};
 	// useEffect(() => {
 	//   if (isSubmitted) {
 	//     console.log(email)
@@ -160,8 +195,8 @@ function Tagesschule1() {
 										placeholder="Vorname"
 										ref={inputRefVorname}
 										onBlur={handleBlurVorname}
-										// className="pt-4"
-										// pattern="[A-Z][a-z]*"
+									// className="pt-4"
+									// pattern="[A-Z][a-z]*"
 									/>
 									<Form.Control.Feedback type="invalid" className="mx-2 mb-3">
 										Bitte geben Sie den Vornamen des Bewerbers an.
@@ -182,7 +217,7 @@ function Tagesschule1() {
 										placeholder="Nachname"
 										ref={inputRefNachname}
 										onBlur={handleBlurNachname}
-										//pattern="[A-Z][a-z]*"
+									//pattern="[A-Z][a-z]*"
 									/>
 									<Form.Control.Feedback type="invalid" className="mx-2">
 										Bitte geben Sie den Nachnamen des Bewerbers an.
@@ -208,7 +243,7 @@ function Tagesschule1() {
 									onChange={handleEmailChange}
 									isInvalid={!isEmailValid}
 									className={isEmailValid ? "valid-input" : ""}
-									//placeholder="ihre@email.hier"
+								//placeholder="ihre@email.hier"
 								/>
 								<Form.Control.Feedback
 									type={isEmailValid ? "valid" : "invalid"}
@@ -250,6 +285,7 @@ function Tagesschule1() {
 									// placeholder="+43 123 456 7890"
 									value={phoneNumber}
 									onChange={handlePhoneChange}
+									onBlur={handlePhoneBlur}
 									isInvalid={!isValid}
 								/>
 								<Form.Control.Feedback
@@ -333,7 +369,7 @@ function Tagesschule1() {
 										type="date"
 										id="inputBirthDate"
 										required
-										//pattern="\d{2}\.\d{2}\.\d{4}"
+										pattern="\d{2}\.\d{2}\.\d{4}"
 										title="Bitte geben Sie ihr Geburtsdatum ein."
 										value={birthdate}
 										onChange={handleBirthdateChange}
@@ -462,7 +498,7 @@ function Tagesschule1() {
 							className="mb-3"
 						/>
 
-						<Button variant="success" type="submit">
+						<Button onClick={generateHash} variant="success" type="submit">
 							Bestätigen
 						</Button>
 					</Form>

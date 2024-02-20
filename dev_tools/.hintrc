@@ -4,7 +4,6 @@
   ],
   "hints": {
     "axe/forms": "off",
-    "typescript-config/is-valid": "off",
     "meta-viewport": "off"
   }
 }

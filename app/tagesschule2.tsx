@@ -1,8 +1,9 @@
 //import reactLogo from './assets/react.svg'
 //<Form.Label className='ms-1'>Vorname</Form.Label>
-
-import { parsePhoneNumberFromString } from "libphonenumber-js";
-import React, { useState, useRef, useEffect } from "react";
+import axios from "axios";
+import { PhoneNumberUtil,PhoneNumberType } from "google-libphonenumber";
+import { useState, useRef, useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
 import {
 	Accordion,
 	//Accordion,
@@ -11,10 +12,32 @@ import {
 	Container,
 	FloatingLabel,
 	Form,
-	Modal,
+	// Modal,
 	ProgressBar,
 	Row,
 } from "react-bootstrap";
+
+type FormData = {
+	anrede: string;
+	titelVor: string;
+	titelNach: string;
+	weitereVornamen: string;
+	geschlecht: string;
+	geburtsort: string;
+	geburtsland: string;
+	staatsbuergerschaft: string;
+	muttersprache: string;
+	alltagssprache: string;
+	religion: string;
+	svNummer: string;
+	sozialversicherungstraeger: string;
+	strasse: string;
+	hausnummer: string;
+	plz: string;
+	ort: string;
+	wohnland: string;
+	letzteschulform: string;
+};
 
 function Tagesschule2() {
 	const [validated, setValidated] = useState(true);
@@ -28,7 +51,7 @@ function Tagesschule2() {
 	const inputRefVorname = useRef<HTMLInputElement>(null);
 	const inputRefNachname = useRef<HTMLInputElement>(null);
 	const inputRefGeburtsort = useRef<HTMLInputElement>(null);
-	const [showModal, setShowModal] = useState<boolean>(false);
+	// const [showModal, setShowModal] = useState<boolean>(false);
 	const [isSubmitted, setIsSubmitted] = useState(false);
 	const [radioState, setRadioState] = useState(false);
 	const [svNumber, setSvNumber] = useState("");
@@ -40,7 +63,27 @@ function Tagesschule2() {
 	const [geschwisterHtl, setGeschwisterHtl] = useState(false);
 	const currentDateForOption = new Date();
 	const specificDateCutoff = new Date(currentDateForOption.getFullYear(), 1, 1);
+	const { register, handleSubmit,setValue, control, formState: { errors } } = useForm<FormData>();
+	const formData = new FormData();
+	const [, setShowModal] = useState<boolean>(false);
+	const handlePhoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setPhoneNumber(event.target.value.trim());
+	};
+	const handlePhoneBlur = () => {
+		const phoneUtil = PhoneNumberUtil.getInstance();
+		let isE164 = false;
+		let isValid = false;
 
+		try {
+			const inputNumber = phoneUtil.parse(phoneNumber);
+			isE164 = phoneUtil.getNumberType(inputNumber) === PhoneNumberType.MOBILE;
+			isValid = phoneUtil.isValidNumber(inputNumber);
+		} catch (err) {
+			console.error(err);
+		}
+
+		setIsValid(isE164 ? isValid : false);
+	};
 	const handleRadioChangeGeschlecht = (
 		event: React.ChangeEvent<HTMLInputElement>,
 	) => {
@@ -77,9 +120,9 @@ function Tagesschule2() {
 	};
 
 	const parseAddress = () => {
-		const parts = adress.split(/(\d+)/);
-		const streetName = parts[0].trim();
-		const streetNumber = parts[1];
+		// const parts = adress.split(/(\d+)/);
+		// const streetName = parts[0].trim();
+		// const streetNumber = parts[1];
 		//console.log(`Street Name: ${streetName}, Street Number: ${streetNumber}`);
 	};
 
@@ -102,11 +145,11 @@ function Tagesschule2() {
 		setIsBirthdateValid(validateBirthdate(birthdateValue));
 	};
 
-	const handlePhoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const inputNumber = parsePhoneNumberFromString(event.target.value);
-		setPhoneNumber(event.target.value);
-		setIsValid(inputNumber ? inputNumber.isValid() : false);
-	};
+	// const handlePhoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+	// 	const inputNumber = parsePhoneNumberFromString(event.target.value);
+	// 	setPhoneNumber(event.target.value);
+	// 	setIsValid(inputNumber ? inputNumber.isValid() : false);
+	// };
 
 	const validateBirthdate = (birthdate: string) => {
 		const birthdateParts = birthdate.split(".");
@@ -165,7 +208,7 @@ function Tagesschule2() {
 		}
 	};
 
-	const handleSubmit = (event: React.FormEvent) => {
+	const handleSubmit2 = (event: React.FormEvent) => {
 		console.log("submitted diiiiiga, one step closer to Daniel Düsentrieb!");
 		const form = event.currentTarget as HTMLFormElement;
 		if (form.checkValidity() === false) {
@@ -183,9 +226,40 @@ function Tagesschule2() {
 
 	useEffect(() => {
 		if (isSubmitted) {
-			setShowModal(true);
+			// setShowModal(true);
 		}
 	}, [isSubmitted]);
+
+	const onSubmit = (data: FormData) => {
+		formData.append("anrede", data.anrede);
+		formData.append("titelVor", data.titelVor);
+		formData.append("titelNach", data.titelNach);
+		formData.append("weitereVornamen", data.weitereVornamen);
+		formData.append("geschlecht", data.geschlecht);
+		formData.append("geburtsort", data.geburtsort);
+		formData.append("geburtsland", data.geburtsland);
+		formData.append("staatsbuergerschaft", data.staatsbuergerschaft);
+		formData.append("muttersprache", data.muttersprache);
+		formData.append("alltagssprache", data.alltagssprache);
+		formData.append("religion", data.religion);
+		formData.append("svNummer", data.svNummer);
+		formData.append("sozialversicherungstraeger", data.sozialversicherungstraeger);
+		formData.append("strasse", data.strasse);
+		formData.append("hausnummer", data.hausnummer);
+		formData.append("plz", data.plz);
+		formData.append("ort", data.ort);
+		formData.append("wohnland", data.wohnland);
+		formData.append("letzteschulform", data.letzteschulform);
+
+		axios.post("/registration/abendschule", formData).then((response) => {
+			console.log(response);
+			setShowModal(true);
+		}).catch(error => {
+
+			console.error(error);
+		});
+
+	};
 
 	return (
 		<Container className="p-5 border" style={{ backgroundColor: "whitesmoke" }}>
@@ -203,7 +277,7 @@ function Tagesschule2() {
             Ausbildungen notwendig.
           </p> */}
 
-					<Form validated={validated} onSubmit={handleSubmit}>
+					<Form validated={validated} onSubmit={handleSubmit(onSubmit)}>
 						{/* <Row className="mb-4 mt-4 ">
               <Form.Group controlId="validationSalutation">
                 <FloatingLabel
@@ -440,9 +514,9 @@ function Tagesschule2() {
 										type="text"
 										placeholder="Weitere Vornamen"
 
-										// ref={inputRefNachname}
-										// onBlur={handleBlurNachname}
-										//pattern="[A-Z][a-z]*"
+									// ref={inputRefNachname}
+									// onBlur={handleBlurNachname}
+									//pattern="[A-Z][a-z]*"
 									/>
 									<Form.Control.Feedback type="invalid" className="mx-2">
 										Haben Sie sich auch an einer zweiten Schule beworben?
@@ -464,8 +538,8 @@ function Tagesschule2() {
 										disabled
 										ref={inputRefVorname}
 										onBlur={handleBlurVorname}
-										// className="pt-4"
-										// pattern="[A-Z][a-z]*"
+									// className="pt-4"
+									// pattern="[A-Z][a-z]*"
 									/>
 									<Form.Control.Feedback type="invalid" className="mx-2 mb-1">
 										Bitte geben Sie den Vornamen des Bewerbers an.
@@ -488,7 +562,7 @@ function Tagesschule2() {
 										disabled
 										ref={inputRefNachname}
 										onBlur={handleBlurNachname}
-										//pattern="[A-Z][a-z]*"
+									//pattern="[A-Z][a-z]*"
 									/>
 									<Form.Control.Feedback type="invalid" className="mx-2">
 										Bitte geben Sie den Nachnamen des Bewerbers an.
@@ -508,9 +582,9 @@ function Tagesschule2() {
 										type="text"
 										placeholder="Weitere Vornamen"
 
-										// ref={inputRefNachname}
-										// onBlur={handleBlurNachname}
-										//pattern="[A-Z][a-z]*"
+									// ref={inputRefNachname}
+									// onBlur={handleBlurNachname}
+									//pattern="[A-Z][a-z]*"
 									/>
 									{/* <Form.Control.Feedback type="invalid" className="mx-2">
                     Bitte geben Sie den Nachnamen des Bewerbers an.
@@ -1360,95 +1434,100 @@ function Tagesschule2() {
 									controlId="formReligion"
 									label="Religion"
 									className="pt-1"
-								>
-									{" "}
-									<Form.Select required>
-										<option value="47">
-											Alt-Alevitische Glaubensgemeinschaft in Österreich
-										</option>
-										<option value="1">altkatholisch</option>
-										<option value="2">armenisch-apostolisch</option>
-										<option value="3">armenisch-katholisch</option>
-										<option value="4">äthiopisch-katholisch</option>
-										<option value="48">
-											Bahai-Religionsgemeinschaft Österreich
-										</option>
-										<option value="5">buddhistisch</option>
-										<option value="6">bulgarisch-katholisch</option>
-										<option value="7">bulgarisch-orthodox</option>
-										<option value="8">
-											Bund der Baptistengemeinden in Österreich
-										</option>
-										<option value="9">
-											Bund evangelikaler Gemeinden in Österreich
-										</option>
-										<option value="10">byzantinisch-katholisch</option>
-										<option value="11">chaldäisch-katholisch</option>
-										<option value="49">
-											Die Christengemeinschaft in Österreich
-										</option>
-										<option value="12">Elaia Christengemeinschaft</option>
-										<option value="13">evangelisch A.B.</option>
-										<option value="14">evangelisch H.B.</option>
-										<option value="15">evangelisch-methodistisch</option>
-										<option value="16">
-											Freie Christengemeinde/Pfingstgemeinde Österreich
-										</option>
-										<option value="57">Freikirchen in Österreich</option>
-										<option value="17">freikirchlich</option>
-										<option value="18">griechisch-katholisch</option>
-										<option value="19">griechisch-orthodox</option>
-										<option value="50">
-											Hinduistische Religionsgesellschaft in Österreich
-										</option>
-										<option value="20">islamisch</option>
-										<option value="21">
-											Islamische Alevitische Glaubensgemeinschaft in Österreich
-										</option>
-										<option value="51">
-											Islamische-Schiitische Glaubensgemeinschaft in Österreich
-										</option>
-										<option value="22">israelitisch</option>
-										<option value="23">italo-albanisch</option>
-										<option value="24">Jehovas Zeugen</option>
-										<option value="52">
-											Kirche der Siebenten-Tags-Adventisten
-										</option>
-										<option value="25">
-											Kirche Jesu Christi der Heiligen der Letzten Tage
-										</option>
-										<option value="26">koptisch-katholisch</option>
-										<option value="27">koptisch-orthodox</option>
-										<option value="28">maronitisch-katholisch</option>
-										<option value="29">melkitisch-katholisch</option>
-										<option value="30">
-											Mennonitische Freikirche Österreich
-										</option>
-										<option value="31">neuapostolisch</option>
-										<option value="45">ohne Bekenntnis</option>
-										<option value="56">orthodox</option>
-										<option value="58">
-											Österreichische Sikh Glaubensgemeinschaft
-										</option>
-										<option value="53">
-											Pfingstkirche Gemeinde Gottes in Österreich
-										</option>
-										<option value="32">römisch-katholisch</option>
-										<option value="33">rumänisch-katholisch</option>
-										<option value="34">rumänisch-orthodox</option>
-										<option value="35">russisch-orthodox</option>
-										<option value="36">ruthenisch-katholisch</option>
-										<option value="37">serbisch-orthodox</option>
-										<option value="38">slowakisch-katholisch</option>
-										<option value="55">Sonstige</option>
-										<option value="39">syrisch-katholisch</option>
-										<option value="40">syrisch-orthodox</option>
-										<option value="41">syro-malabar-katholisch</option>
-										<option value="42">syro-malankar-katholisch</option>
-										<option value="43">ukrainisch-katholisch</option>
-										<option value="44">ungarisch-katholisch</option>
-										<option value="54">Vereinigungskirche in Österreich</option>
-									</Form.Select>
+								><Controller
+										name="religion"
+										control={control}
+										rules={{ required: true }}
+										render={({ field }) => (
+
+											<Form.Select {...field}>
+												<option value="47">
+													Alt-Alevitische Glaubensgemeinschaft in Österreich
+												</option>
+												<option value="1">altkatholisch</option>
+												<option value="2">armenisch-apostolisch</option>
+												<option value="3">armenisch-katholisch</option>
+												<option value="4">äthiopisch-katholisch</option>
+												<option value="48">
+													Bahai-Religionsgemeinschaft Österreich
+												</option>
+												<option value="5">buddhistisch</option>
+												<option value="6">bulgarisch-katholisch</option>
+												<option value="7">bulgarisch-orthodox</option>
+												<option value="8">
+													Bund der Baptistengemeinden in Österreich
+												</option>
+												<option value="9">
+													Bund evangelikaler Gemeinden in Österreich
+												</option>
+												<option value="10">byzantinisch-katholisch</option>
+												<option value="11">chaldäisch-katholisch</option>
+												<option value="49">
+													Die Christengemeinschaft in Österreich
+												</option>
+												<option value="12">Elaia Christengemeinschaft</option>
+												<option value="13">evangelisch A.B.</option>
+												<option value="14">evangelisch H.B.</option>
+												<option value="15">evangelisch-methodistisch</option>
+												<option value="16">
+													Freie Christengemeinde/Pfingstgemeinde Österreich
+												</option>
+												<option value="57">Freikirchen in Österreich</option>
+												<option value="17">freikirchlich</option>
+												<option value="18">griechisch-katholisch</option>
+												<option value="19">griechisch-orthodox</option>
+												<option value="50">
+													Hinduistische Religionsgesellschaft in Österreich
+												</option>
+												<option value="20">islamisch</option>
+												<option value="21">
+													Islamische Alevitische Glaubensgemeinschaft in Österreich
+												</option>
+												<option value="51">
+													Islamische-Schiitische Glaubensgemeinschaft in Österreich
+												</option>
+												<option value="22">israelitisch</option>
+												<option value="23">italo-albanisch</option>
+												<option value="24">Jehovas Zeugen</option>
+												<option value="52">
+													Kirche der Siebenten-Tags-Adventisten
+												</option>
+												<option value="25">
+													Kirche Jesu Christi der Heiligen der Letzten Tage
+												</option>
+												<option value="26">koptisch-katholisch</option>
+												<option value="27">koptisch-orthodox</option>
+												<option value="28">maronitisch-katholisch</option>
+												<option value="29">melkitisch-katholisch</option>
+												<option value="30">
+													Mennonitische Freikirche Österreich
+												</option>
+												<option value="31">neuapostolisch</option>
+												<option value="45">ohne Bekenntnis</option>
+												<option value="56">orthodox</option>
+												<option value="58">
+													Österreichische Sikh Glaubensgemeinschaft
+												</option>
+												<option value="53">
+													Pfingstkirche Gemeinde Gottes in Österreich
+												</option>
+												<option value="32">römisch-katholisch</option>
+												<option value="33">rumänisch-katholisch</option>
+												<option value="34">rumänisch-orthodox</option>
+												<option value="35">russisch-orthodox</option>
+												<option value="36">ruthenisch-katholisch</option>
+												<option value="37">serbisch-orthodox</option>
+												<option value="38">slowakisch-katholisch</option>
+												<option value="55">Sonstige</option>
+												<option value="39">syrisch-katholisch</option>
+												<option value="40">syrisch-orthodox</option>
+												<option value="41">syro-malabar-katholisch</option>
+												<option value="42">syro-malankar-katholisch</option>
+												<option value="43">ukrainisch-katholisch</option>
+												<option value="44">ungarisch-katholisch</option>
+												<option value="54">Vereinigungskirche in Österreich</option>
+											</Form.Select>
+										)} />
 								</FloatingLabel>
 							</Form.Group>
 						</Row>
@@ -1466,7 +1545,7 @@ function Tagesschule2() {
 										value={adress}
 										onChange={handleBlurAdress}
 										onBlur={parseAddress}
-										//pattern="[A-Z][a-z]*"
+									//pattern="[A-Z][a-z]*"
 									/>
 									<Form.Control.Feedback type="invalid" className="mx-2">
 										Bitte geben Sie Ihre Adresse in der Form Strasse, Hausnummer
@@ -1811,10 +1890,10 @@ function Tagesschule2() {
 										type="text"
 										pattern="^.{3,}$"
 
-										//readOnly
-										// ref={inputRefGeburtsort}
-										// onBlur={handleBlurGeburtsort}
-										//pattern="[A-Z][a-z]*"
+									//readOnly
+									// ref={inputRefGeburtsort}
+									// onBlur={handleBlurGeburtsort}
+									//pattern="[A-Z][a-z]*"
 									/>
 									<Form.Control.Feedback type="invalid" className="mx-2">
 										Bitte geben Sie die Namen ihrer Geschwister an der HTBLuVA
@@ -1888,10 +1967,10 @@ function Tagesschule2() {
 													<Form.Control
 														type="text"
 														placeholder=""
-														// ref={inputRefVorname}
-														// onBlur={handleBlurVorname}
-														// className="pt-4"
-														// pattern="[A-Z][a-z]*"
+													// ref={inputRefVorname}
+													// onBlur={handleBlurVorname}
+													// className="pt-4"
+													// pattern="[A-Z][a-z]*"
 													/>
 													<Form.Control.Feedback
 														type="invalid"
@@ -1908,10 +1987,10 @@ function Tagesschule2() {
 													<Form.Control
 														type="text"
 														placeholder=""
-														// ref={inputRefVorname}
-														// onBlur={handleBlurVorname}
-														// className="pt-4"
-														// pattern="[A-Z][a-z]*"
+													// ref={inputRefVorname}
+													// onBlur={handleBlurVorname}
+													// className="pt-4"
+													// pattern="[A-Z][a-z]*"
 													/>
 													<Form.Control.Feedback
 														type="invalid"
@@ -1933,8 +2012,8 @@ function Tagesschule2() {
 														placeholder="Vorname"
 														ref={inputRefVorname}
 														onBlur={handleBlurVorname}
-														// className="pt-4"
-														// pattern="[A-Z][a-z]*"
+													// className="pt-4"
+													// pattern="[A-Z][a-z]*"
 													/>
 													<Form.Control.Feedback
 														type="invalid"
@@ -1959,7 +2038,7 @@ function Tagesschule2() {
 														placeholder="Nachname"
 														ref={inputRefNachname}
 														onBlur={handleBlurNachname}
-														//pattern="[A-Z][a-z]*"
+													//pattern="[A-Z][a-z]*"
 													/>
 													<Form.Control.Feedback
 														type="invalid"
@@ -1985,7 +2064,7 @@ function Tagesschule2() {
 														value={adress}
 														onChange={handleBlurAdress}
 														onBlur={parseAddress}
-														//pattern="[A-Z][a-z]*"
+													//pattern="[A-Z][a-z]*"
 													/>
 													<Form.Control.Feedback
 														type="invalid"
@@ -2332,6 +2411,7 @@ function Tagesschule2() {
 													// placeholder="+43 123 456 7890"
 													value={phoneNumber}
 													onChange={handlePhoneChange}
+													onBlur={handlePhoneBlur}
 													isInvalid={!isValid}
 												/>
 												<Form.Control.Feedback
@@ -2377,7 +2457,7 @@ function Tagesschule2() {
 													onChange={handleEmailChange}
 													isInvalid={!isEmailValid}
 													className={isEmailValid ? "valid-input" : ""}
-													//placeholder="ihre@email.hier"
+												//placeholder="ihre@email.hier"
 												/>
 												<Form.Control.Feedback
 													type={isEmailValid ? "valid" : "invalid"}
@@ -2474,10 +2554,10 @@ function Tagesschule2() {
 													<Form.Control
 														type="text"
 														placeholder=""
-														// ref={inputRefVorname}
-														// onBlur={handleBlurVorname}
-														// className="pt-4"
-														// pattern="[A-Z][a-z]*"
+													// ref={inputRefVorname}
+													// onBlur={handleBlurVorname}
+													// className="pt-4"
+													// pattern="[A-Z][a-z]*"
 													/>
 													<Form.Control.Feedback
 														type="invalid"
@@ -2494,10 +2574,10 @@ function Tagesschule2() {
 													<Form.Control
 														type="text"
 														placeholder=""
-														// ref={inputRefVorname}
-														// onBlur={handleBlurVorname}
-														// className="pt-4"
-														// pattern="[A-Z][a-z]*"
+													// ref={inputRefVorname}
+													// onBlur={handleBlurVorname}
+													// className="pt-4"
+													// pattern="[A-Z][a-z]*"
 													/>
 													<Form.Control.Feedback
 														type="invalid"
@@ -2519,8 +2599,8 @@ function Tagesschule2() {
 														placeholder="Vorname"
 														ref={inputRefVorname}
 														onBlur={handleBlurVorname}
-														// className="pt-4"
-														// pattern="[A-Z][a-z]*"
+													// className="pt-4"
+													// pattern="[A-Z][a-z]*"
 													/>
 													<Form.Control.Feedback
 														type="invalid"
@@ -2545,7 +2625,7 @@ function Tagesschule2() {
 														placeholder="Nachname"
 														ref={inputRefNachname}
 														onBlur={handleBlurNachname}
-														//pattern="[A-Z][a-z]*"
+													//pattern="[A-Z][a-z]*"
 													/>
 													<Form.Control.Feedback
 														type="invalid"
@@ -2571,7 +2651,7 @@ function Tagesschule2() {
 														value={adress}
 														onChange={handleBlurAdress}
 														onBlur={parseAddress}
-														//pattern="[A-Z][a-z]*"
+													//pattern="[A-Z][a-z]*"
 													/>
 													<Form.Control.Feedback
 														type="invalid"
@@ -2963,7 +3043,7 @@ function Tagesschule2() {
 													onChange={handleEmailChange}
 													isInvalid={!isEmailValid}
 													className={isEmailValid ? "valid-input" : ""}
-													//placeholder="ihre@email.hier"
+												//placeholder="ihre@email.hier"
 												/>
 												<Form.Control.Feedback
 													type={isEmailValid ? "valid" : "invalid"}
@@ -2996,7 +3076,7 @@ function Tagesschule2() {
 							</Accordion>
 						</Form.Group>
 
-						<Button variant="success" type="submit" onClick={handleSubmit}>
+						<Button variant="success" type="submit" onClick={handleSubmit2}>
 							Bestätigen
 						</Button>
 					</Form>
