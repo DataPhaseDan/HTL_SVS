@@ -2,11 +2,14 @@
   "compilerOptions": {
     "target": "ES2020",
     "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "module": "NodeNext",
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-
     /* Bundler mode */
     "composite": true,
     "moduleResolution": "NodeNext",
@@ -16,18 +19,31 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "allowSyntheticDefaultImports": true,
-
     /* Linting */
     "strict": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
-
     /* Formatter */
     "plugins": [
-      {"name": "biomejs"}
+      {
+        "name": "biomejs"
+      }
     ]
   },
-  "include": [ "app/login.tsx", "app/main.tsx", "app/noten.tsx", "app/notfound.tsx", "app/persdaten.tsx", "app/server.ts", "app/tagesschule1.tsx", "app/tagesschule2.tsx", "app/vite-env.d.ts", "app/abendschule1.tsx", "app/abendschule2.tsx", "app/adminpanel.tsx", "app/ausbildung.tsx", "app/erziehungsberechtigte.tsx"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": [
+    "login.tsx",
+    "main.tsx",
+    "noten.tsx",
+    "notfound.tsx",
+    "persdaten.tsx",
+    "tagesschule1.tsx",
+    "tagesschule2.tsx",
+    "vite-env.d.ts",
+    "abendschule1.tsx",
+    "abendschule2.tsx",
+    "adminpanel.tsx",
+    "ausbildung.tsx",
+    "erziehungsberechtigte.tsx"
+  ],
 }

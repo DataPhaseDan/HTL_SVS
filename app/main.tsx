@@ -14,6 +14,7 @@ import Tagesschule2 from "./tagesschule2.tsx";
 import LoginPage from "./login.tsx";
 import NotFoundPage from "./notfound.tsx";
 import ReactDOM from "react-dom";
+import React from "react";
 
 // const rootElement = document.getElementById("root");
 

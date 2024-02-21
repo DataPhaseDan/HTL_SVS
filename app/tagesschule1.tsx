@@ -1,5 +1,3 @@
-//import reactLogo from './assets/react.svg'
-//<Form.Label className='ms-1'>Vorname</Form.Label>
 import { PhoneNumberUtil, PhoneNumberType } from "google-libphonenumber";
 import axios from "axios";
 import { useState, useRef, useEffect } from "react";
@@ -15,6 +13,7 @@ import {
 	ProgressBar,
 	Row,
 } from "react-bootstrap";
+import React from "react";
 
 function Tagesschule1() {
 	const [validated, setValidated] = useState(false);
