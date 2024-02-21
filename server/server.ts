@@ -2,15 +2,18 @@ import express, { Request, Response } from "express";
 import session, { Session } from "express-session";
 import nodemailer from "nodemailer";
 import { Pool, Client } from "pg";
-import path from "path";
-import fs from "fs";
-import cors from "cors";
-import https from "https";
 
-const options = {
-	key: fs.readFileSync("./cert.pem"),
-	cert: fs.readFileSync("./key.pem"),
-};
+import path from "path";
+import { fileURLToPath } from "url";
+import cors from "cors";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+
+// const options = {
+// 	key: fs.readFileSync("./cert.pem"),
+// 	cert: fs.readFileSync("./key.pem"),
+// };
 
 // type CustomSession = {
 // 	sessionHash: string; // Add your custom session properties here
@@ -26,11 +29,11 @@ app.use(
 		secret: "my secret",
 		resave: false,
 		saveUninitialized: false,
-		  cookie: {
+		cookie: {
 			maxAge: 1000 * 60 * 60, // One hour expiration (adjust as needed)
 			httpOnly: true,
 			secure: true // Consider if applicable
-		  },
+		},
 	}),
 );
 const corsOptions = {
@@ -67,11 +70,14 @@ const corsOptions = {
 		"application/xml",
 		"application/javascript",
 		"application/octet-stream",
-		
+
 	],
 };
 app.use(cors(corsOptions));
-app.use(express.static(path.join(__dirname, "dist")));
+// const __dirname = dirname(fileURLToPath(import.meta.url));
+// res.sendFile(path.join(__dirname, "../app/dist/index.html"));
+
+app.use(express.static(path.join(__dirname, "../app/dist")));
 app.use(express.json());
 
 app.use((req, res, next) => {
@@ -162,29 +168,30 @@ const transporter = nodemailer.createTransport({
 // app.post("/registration/tagesschule", handleRegistration("tagesschule"));
 // app.post("/registration/abendschule", handleRegistration("abendschule"));
 app.post(
-"/registration/abendschule",
+	"/registration/abendschule",
 	(req: Request, res: Response) => {
 		// Access the body of the request with req.body
 		console.log(req.body);
-		
+
 		// Respond with a success message
 		res.status(200).json({ message: "Registration for Abendschule received" });
 	},
-	);
-	
-	app.post("/registration/tagesschule", (req: Request, res: Response) => {
-		// Access the body of the request with req.body
-		console.log(req.body);
-		
-		// Respond with a success message
-		res.json({ message: "Registration for Tagesschule received" });
-	});
-	// All other requests not handled above will be directed to your React app
-	app.get("*", (req: Request, res: Response) => {
-		res.sendFile(path.join(__dirname, "dist", "index.html"));
-	});
-	
-	// app.listen(410, () => console.log("Server running on port 410"));
-	https
-		.createServer(options, app)
-		.listen(410, () => console.log("Server running on port 410"));
+);
+
+app.post("/registration/tagesschule", (req: Request, res: Response) => {
+	// Access the body of the request with req.body
+	console.log(req.body);
+
+	// Respond with a success message
+	res.json({ message: "Registration for Tagesschule received" });
+});
+// All other requests not handled above will be directed to your React app
+app.get("*", (req: Request, res: Response) => {
+	const __dirname = path.dirname(fileURLToPath(import.meta.url));
+	res.sendFile(path.join(__dirname, "../app/dist/index.html"));
+});
+
+app.listen(410, () => console.log("Server running on port 410"));
+// https
+// 	.createServer(options, app)
+// 	.listen(410, () => console.log("Server running on port 410"));

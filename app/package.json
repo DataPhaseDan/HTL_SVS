@@ -6,8 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview --port 443 --host",
-    "start": "ts-node server.ts"
+    "preview": "vite preview --port 443 --host"
   },
   "dependencies": {
     "@types/google-libphonenumber": "^7.4.30",
