@@ -682,7 +682,7 @@ const Abendschule1: React.FC = () => {
 							<Modal.Title>Bereits Registriert</Modal.Title>
 						</Modal.Header>
 						<Modal.Body>
-							An die angegebene E-Mailadresse <strong>{email}</strong> wurde eine Nachricht versendet um Ihre Bewerbungsprozess fortzusetzen. Sollten Sie keine E-Mail erhalten haben,
+							An die angegebene E-Mailadresse <strong>{email}</strong> wurde eine Nachricht versendet um Ihren Bewerbungsprozess fortzusetzen. Sollten Sie keine E-Mail erhalten haben,
 							prüfen Sie neben dem Posteingangsordner bitte auch ihren
 							Spam-Ordner.
 						</Modal.Body>
