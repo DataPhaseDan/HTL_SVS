@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS zsv_bewerber (
 	ID SERIAL PRIMARY KEY,
 	finalisiert SMALLINT DEFAULT 0,
-	wird_geloescht_in INTEGER DEFAULT 90,
+	-- wird_geloescht_in INTEGER DEFAULT 90,
 	DSGVO SMALLINT DEFAULT 0,
 	SCHULJAHR INTEGER DEFAULT NULL,
 	Anmelderunde SMALLINT DEFAULT 1,
@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS zsv_bewerber (
 	Phase SMALLINT DEFAULT NULL,
 	Schuelerkennzahl BIGINT DEFAULT NULL,
 	existiert SMALLINT DEFAULT 0,
-	Anmeldenummer text DEFAULT NULL,
+	Anmeldenummer text DEFAULT NULL UNIQUE,
 	Anrede VARCHAR(8) DEFAULT NULL,
 	Titelvor VARCHAR(64) DEFAULT NULL,
 	Titelnach VARCHAR(64) DEFAULT NULL,
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS zsv_bewerber (
 	SozialversicherungsGebDat VARCHAR(8) DEFAULT NULL,
 	BILDOKNummer VARCHAR(16) DEFAULT NULL,
 	Geburtsort VARCHAR(32) DEFAULT NULL,
-	GEBAURTSLAND INTEGER DEFAULT NULL,
+	GEBURTSLAND INTEGER DEFAULT NULL,
 	STAATSBUERGERSCHAFT INTEGER DEFAULT NULL,
 	ERSTSPRACHE INTEGER DEFAULT NULL,
 	ZWEITSPRACHE INTEGER DEFAULT NULL,
@@ -128,6 +128,48 @@ CREATE TABLE IF NOT EXISTS zsv_bewerber (
 	abgemeldet TIMESTAMP DEFAULT NULL,
 	geloescht SMALLINT DEFAULT 0
 );
+CREATE TABLE IF NOT EXISTS zsv_fachrichtungen_tagesschule (
+  ID INTEGER PRIMARY KEY,
+  Name VARCHAR(128) NOT NULL
+);
+INSERT INTO
+    zsv_fachrichtungen_tagesschule (ID, Name)
+VALUES (1, 'Bautechnik (Hochbau)'),
+    (2, 'Bautechnik (Tiefbau)'),
+    (
+        3, 'Biomedizin- und Gesundheitstechnik'
+    ),
+    (
+        4, 'Elektronik & technische Informatik (Smart Devices / Coding)'
+    ),
+    (
+        5, 'Elektrotechnik (Autonome Robotik)'
+    ),
+    (
+        6, 'Elektrotechnik (E-Mobilität)'
+    ),
+    (
+        11, 'Informationstechnologie (Künstliche Intelligenz & Data Science / Virtual Engineering)'
+    ),
+    (
+        13, 'Maschinenbau (Anlagentechnik mit Kunststofftechnik und Produktdesign)'
+    ),
+    (
+        14, 'Maschinenbau (Umwelt- und Verfahrenstechnik)'
+    ),
+    (
+        15, 'Maschinenbau (Robotik und Smart Engineering)'
+    );
+
+CREATE TABLE IF NOT EXISTS zsv_fachrichtungen_abendschule (
+  ID INTEGER PRIMARY KEY,
+  Name VARCHAR(128) NOT NULL
+);
+INSERT INTO zsv_fachrichtungen_abendschule (ID, Name) VALUES
+  (20, 'Abend-HTL für Berufstätige (Bautechnik)'),
+  (21, 'Abend-HTL für Berufstätige (Elektrotechnik)'),
+  (22, 'Abend-HTL für Berufstätige (Informatik)'),
+  (23, 'Abend-HTL für Berufstätige (Maschinenbau)');    
 
 
 

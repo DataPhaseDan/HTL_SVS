@@ -1,4 +1,4 @@
-import { PhoneNumberUtil, PhoneNumberType } from "google-libphonenumber";
+import { PhoneNumberUtil, PhoneNumberType, PhoneNumberFormat } from "google-libphonenumber";
 import axios from "axios";
 import { useState, useRef, useEffect } from "react";
 import { sha3_512 } from "js-sha3";
@@ -13,9 +13,15 @@ import {
 	ProgressBar,
 	Row,
 } from "react-bootstrap";
-import React from "react";
 
-function Tagesschule1() {
+const Tagesschule1: React.FC = () => {
+
+	interface Option {
+		id: number;
+		name: string;
+	}
+	const [selectedFachrichtung, setSelectedFachrichtung] = useState("");
+	const [options, setOptions] = useState<Option[]>([]);
 	const [validated, setValidated] = useState(false);
 	const [currentDate] = useState(getYear());
 	const [email, setEmail] = useState("");
@@ -32,7 +38,6 @@ function Tagesschule1() {
 	const [hash, setHash] = useState("");
 	const specificDateCutoff = new Date(currentDateForOption.getFullYear(), 1, 1);
 
-	const formData = new FormData();
 
 	const handleBirthdateChange = (
 		event: React.ChangeEvent<HTMLInputElement>,
@@ -43,30 +48,32 @@ function Tagesschule1() {
 	};
 	const generateHash = () => {
 		const combinedInput =
-			email + phoneNumber + inputRefNachname + inputRefVorname;
+			email.trim() + phoneNumber.trim() + inputRefNachname + inputRefVorname;
 		const hash = sha3_512(combinedInput).substring(0, 20); // Adjust length as needed
 		setHash(hash);
 	};
 
-	const handlePhoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setPhoneNumber(event.target.value.trim());
-	};
-
-
-	const handlePhoneBlur = () => {
+	const handlePhoneBlur = (event: React.FocusEvent<HTMLInputElement>) => {
+		const inputPhoneNumber = event.target.value.trim();
+		setPhoneNumber(inputPhoneNumber);
 		const phoneUtil = PhoneNumberUtil.getInstance();
-		let isE164 = false;
 		let isValid = false;
 
 		try {
-			const inputNumber = phoneUtil.parse(phoneNumber);
-			isE164 = phoneUtil.getNumberType(inputNumber) === PhoneNumberType.MOBILE;
-			isValid = phoneUtil.isValidNumber(inputNumber);
+			// Parse the number without specifying a country code
+			const inputNumber = phoneUtil.parse(inputPhoneNumber);
+			// Check if the number is valid and possible
+			isValid = phoneUtil.isValidNumber(inputNumber) && phoneUtil.isPossibleNumber(inputNumber);
+			// Format the number in the international format
+			const formattedNumber = phoneUtil.format(inputNumber, PhoneNumberFormat.INTERNATIONAL);
+			// Check if the number is in the correct format
+			const regex = /^\+\d{1,3} \d{1,3} \d{1,8}$/; // This pattern allows for any country code, area code, and local number
+			isValid = isValid && regex.test(formattedNumber);
 		} catch (err) {
 			console.error(err);
 		}
 
-		setIsValid(isE164 ? isValid : false);
+		setIsValid(isValid);
 	};
 
 	const validateBirthdate = (birthdate: string, ageLimit: number) => {
@@ -120,7 +127,9 @@ function Tagesschule1() {
 			inputRefVorname.current.value = capitalized
 		}
 	};
-
+	const handleSelectedFachrichtung = (event: React.ChangeEvent<HTMLSelectElement>) => {
+		setSelectedFachrichtung(event.target.value);
+	};
 	const handleBlurNachname = () => {
 		if (inputRefNachname.current) {
 			const capitalized = capitalizeFirstLetter(inputRefNachname.current.value.trim());
@@ -133,6 +142,22 @@ function Tagesschule1() {
 			setShowModal(true);
 		}
 	}, [isSubmitted]);
+
+	useEffect(() => {
+		const fetchOptions = async () => {
+			try {
+				const response = await axios.get('/options/fachrichtungen_tagesschule');
+				setOptions(response.data);
+			} catch (error) {
+				console.error('Error fetching options:', error);
+			}
+		};
+
+		fetchOptions();
+	}, []);
+
+
+
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 
@@ -141,6 +166,7 @@ function Tagesschule1() {
 			form.checkValidity() && isEmailValid && isValid && isBirthdateValid;
 
 		setValidated(true);
+		const formData = new FormData();
 
 		formData.append("email", email);
 		formData.append("phoneNumber", phoneNumber);
@@ -149,9 +175,9 @@ function Tagesschule1() {
 		formData.append("vorname", inputRefVorname.current?.value || "Error");
 		formData.append("nachname", inputRefNachname.current?.value || "Error");
 
-		axios.post("https://localhost:5173/registration/tagesschule", formData).then((response) => {
+		axios.post("https://localhost/registration/tagesschule", formData).then((response) => {
 			console.log(response);
-			if (formIsValid && !isSubmitted) {
+			if (formIsValid && !isSubmitted && response.status === 200) {
 				setIsSubmitted(true);
 				setShowModal(true);
 			}
@@ -159,6 +185,7 @@ function Tagesschule1() {
 			console.error(error);
 		});
 	};
+
 	// useEffect(() => {
 	//   if (isSubmitted) {
 	//     console.log(email)
@@ -283,7 +310,7 @@ function Tagesschule1() {
 									type="tel"
 									// placeholder="+43 123 456 7890"
 									value={phoneNumber}
-									onChange={handlePhoneChange}
+									onChange={handlePhoneBlur}
 									onBlur={handlePhoneBlur}
 									isInvalid={!isValid}
 								/>
@@ -323,39 +350,19 @@ function Tagesschule1() {
 								// className="mt-5"
 								className="pt-1"
 							>
-								<Form.Select required>
-									<option />
-									<option>Bautechnik (Hochbau)</option>
-									<option>Bautechnik (Tiefbau)</option>
-									<option>Biomedizin- und Gesundheitstechnik</option>
-									<option>
-										Elektronik & technische Informatik (Smart Devices / Coding)
-									</option>
-									<option>Elektrotechnik (Autonome Robotik)</option>
-									<option>Elektrotechnik (E-Mobilität)</option>
-									<option>
-										Informationstechnologie (Künstliche Intelligenz & Data
-										Science / Virtual Engineering)
-									</option>
-									<option>
-										Maschinenbau (Anlagentechnik mit Kunststofftechnik und
-										Produktdesign)
-									</option>
-									<option>Maschinenbau (Umwelt- und Verfahrenstechnik)</option>
-									<option>Maschinenbau (Robotik und Smart Engineering)</option>
-									{currentDateForOption < specificDateCutoff && (
-										<option>Grafik- und Kommunikationsdesign</option>
-									)}
-									{currentDateForOption < specificDateCutoff && (
-										<option>Medien (Multimedia-Interaktionsdesign)</option>
-									)}
+								<Form.Select required onChange={handleSelectedFachrichtung}>
+									<option value="" />
+									{options.map((option) => (
+										<option value={option.id}>
+											{option.name}
+										</option>
+									))}
+									<Form.Control.Feedback type="invalid" className="mx-2">
+										Ihre 1. Wahl:
+									</Form.Control.Feedback>
 								</Form.Select>
-								<Form.Control.Feedback type="invalid" className="mx-2">
-									Ihre 1. Wahl:
-								</Form.Control.Feedback>
 							</FloatingLabel>
 						</Form.Group>
-
 						<Row className="mb-5">
 							<Form.Group controlId="validationGeburtsdatum">
 								<FloatingLabel
@@ -527,6 +534,8 @@ function Tagesschule1() {
 			</Row>
 		</Container>
 	);
-}
+};
+
+
 
 export default Tagesschule1;

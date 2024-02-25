@@ -257,10 +257,10 @@ function Abendschule2() {
 		formData.append("wohnland", data.wohnland);
 		formData.append("letzteschulform", data.letzteschulform);
 
-		axios.post("/registration/abendschule", formData).then((response) => {
+		axios.post("/registration/abendschule", formData).then((response: any) => {
 			console.log(response);
 			setShowModal(true);
-		}).catch(error => {
+		}).catch((error: any) => {
 
 			console.error(error);
 		});

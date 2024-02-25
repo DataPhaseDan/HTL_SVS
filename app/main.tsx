@@ -15,6 +15,7 @@ import LoginPage from "./login.tsx";
 import NotFoundPage from "./notfound.tsx";
 import ReactDOM from "react-dom";
 import React from "react";
+import { createRoot } from "react-dom/client";
 
 // const rootElement = document.getElementById("root");
 
@@ -48,10 +49,15 @@ function App() {
 
 export default App;
 
-
 const rootElement = document.getElementById('root');
+
 if (rootElement) {
-	ReactDOM.render(<App />, rootElement);
-} else {
-	console.error('Could not find root element');
+	createRoot(rootElement).render(<App />);
 }
+
+
+// if (rootElement) {
+// 	ReactDOM.render(<App />, rootElement);
+// } else {
+// 	console.error('Could not find root element');
+// }
