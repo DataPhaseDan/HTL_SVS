@@ -1,6 +1,12 @@
-import { PhoneNumberFormat as PNF, PhoneNumber, PhoneNumberUtil, PhoneNumberType } from "google-libphonenumber";
 
-import { useEffect, useRef, useState } from "react";
+
+import React, { useCallback, useMemo, useState, useEffect, useRef } from 'react';
+import { BaseText, Text, Editor, Transforms, createEditor, marks } from 'slate';
+import { Editable, withReact, Slate } from 'slate-react';
+
+
+
+
 import {
 	Accordion,
 	Badge,
@@ -15,15 +21,27 @@ import {
 	Tab,
 	Tabs,
 } from "react-bootstrap";
+
+
+
+
+
 import Ausbildung from "./ausbildung";
 import Erziehungsberechtigte from "./erziehungsberechtigte";
 import Noten from "./noten";
 import Persdaten from "./persdaten";
+import ContactForm from "./kontakt";
+
+
 
 const Adminpanel: React.FC = () => {
 	const [validated, setValidated] = useState(true);
+// Initialize with an empty array
 	// const [currentDate] = useState(getYear());
+
+
 	
+
 	const inputRefVorname = useRef<HTMLInputElement>(null);
 	const inputRefNachname = useRef<HTMLInputElement>(null);
 	const inputRefGeburtsort = useRef<HTMLInputElement>(null);
@@ -34,7 +52,7 @@ const Adminpanel: React.FC = () => {
 	// const [radioStateGeschlecht, setRadioStateGeschlecht] = useState("");
 	const [radioStateErstwunschSchule, setRadioStateErstwunschSchule] =
 		useState("");
-	
+
 	const currentDateForOption = new Date();
 	const specificDateCutoff = new Date(currentDateForOption.getFullYear(), 1, 1);
 
@@ -51,6 +69,7 @@ const Adminpanel: React.FC = () => {
 
 
 
+
 	const validateBirthdate = (birthdate: string) => {
 		const birthdateParts = birthdate.split(".");
 		const birthdateDate = new Date(
@@ -62,6 +81,7 @@ const Adminpanel: React.FC = () => {
 		const age = Math.abs(ageDate.getUTCFullYear() - 1970);
 		return age >= 17;
 	};
+
 
 
 
@@ -127,7 +147,7 @@ const Adminpanel: React.FC = () => {
 	}, [isSubmitted]);
 
 	return (
-		<Container  className="p-3 border" style={{ backgroundColor: "SeaShell" }}>
+		<Container className="p-3 border" style={{ backgroundColor: "SeaShell" }}>
 			<Form validated={validated} onSubmit={handleSubmit}>
 				<Tabs
 					defaultActiveKey="Bewerber"
@@ -137,7 +157,7 @@ const Adminpanel: React.FC = () => {
 					justify
 				>
 					<Tab eventKey="Bewerber" title="Bewerber">
-						<Col  className="justify-content-center align-items-center">
+						<Col className="justify-content-center align-items-center">
 							<Row className="pb-5 pt-5">
 								<Form.Group controlId="validationBewerberGeloescht" as={Col}>
 									<Form.Check
@@ -644,7 +664,7 @@ const Adminpanel: React.FC = () => {
 					</Tab>
 
 					<Tab eventKey="Kontakt" title="Kontakt">
-						Tab content for Profile
+						<ContactForm />
 					</Tab>
 
 					<Tab eventKey="Organisation" title="Organisation">
@@ -993,3 +1013,4 @@ const Adminpanel: React.FC = () => {
 }
 
 export default Adminpanel;
+

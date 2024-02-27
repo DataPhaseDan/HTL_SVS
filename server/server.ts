@@ -380,7 +380,11 @@ app.post("/registration/tagesschule", handleRegistration("tagesschule"));
 app.post("/registration/abendschule", handleRegistration("abendschule"));
 
 app.get("/registration/tagesschule/session", async (req: Request, res: Response) => {
-	const sessionHash = req.query.sessionHash;
+	const sessionHash = req.query.Anmeldenummer;
+});
+
+app.get("/registration/abendschule/session", async (req: Request, res: Response) => {
+	const sessionHash = req.query.Anmeldenummer;
 });
 app.get("*", (req: Request, res: Response) => {
 	const __dirname = path.dirname(fileURLToPath(import.meta.url));

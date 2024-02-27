@@ -35,8 +35,7 @@ const Abendschule1: React.FC = () => {
 	const [isBirthdateValid, setIsBirthdateValid] = useState(false);
 	const inputRefVorname = useRef<HTMLInputElement>(null);
 	const inputRefNachname = useRef<HTMLInputElement>(null);
-	const [showModalEmail, setShowModalEmail] = useState<boolean>(false);
-	const [showModalDuplicate, setShowModalDuplicate] = useState<boolean>(false);
+
 	const [isSubmitted, setIsSubmitted] = useState(false);
 	const [options, setOptions] = useState<Option[]>([]);
 	const [showAlert, setShowAlert] = useState<boolean>(true);

@@ -5,14 +5,14 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 
 
-import Adminpanel from "./adminpanel.tsx";
-import Abendschule1 from "./abendschule1.tsx";
+import Adminpanel from "./adminpanel";
+import Abendschule1 from "./abendschule1";
 //import './index.css'
-import Abendschule2 from "./abendschule2.tsx";
-import Tagesschule1 from "./tagesschule1.tsx";
-import Tagesschule2 from "./tagesschule2.tsx";
-import LoginPage from "./login.tsx";
-import NotFoundPage from "./notfound.tsx";
+import Abendschule2 from "./abendschule2";
+import Tagesschule1 from "./tagesschule1";
+import Tagesschule2 from "./tagesschule2";
+import LoginPage from "./login";
+import NotFoundPage from "./notfound";
 import ReactDOM from "react-dom";
 import React from "react";
 import { createRoot } from "react-dom/client";

@@ -37,7 +37,8 @@ const Tagesschule1: React.FC = () => {
 	const currentDateForOption = new Date();
 	const [hash, setHash] = useState("");
 	const specificDateCutoff = new Date(currentDateForOption.getFullYear(), 1, 1);
-
+	const [showModalEmail, setShowModalEmail] = useState<boolean>(false);
+	const [showModalDuplicate, setShowModalDuplicate] = useState<boolean>(false);
 
 	const handleBirthdateChange = (
 		event: React.ChangeEvent<HTMLInputElement>,
@@ -139,9 +140,16 @@ const Tagesschule1: React.FC = () => {
 
 	useEffect(() => {
 		if (isSubmitted) {
-			setShowModal(true);
+			setShowModalEmail(true);
 		}
 	}, [isSubmitted]);
+
+	useEffect(() => {
+		if (isSubmitted) {
+			setShowModalDuplicate(true);
+		}
+	}, [isSubmitted]);
+
 
 	useEffect(() => {
 		const fetchOptions = async () => {
@@ -166,23 +174,45 @@ const Tagesschule1: React.FC = () => {
 			form.checkValidity() && isEmailValid && isValid && isBirthdateValid;
 
 		setValidated(true);
-		const formData = new FormData();
+		const now = new Date();
+		const angemeldet = `${now.getFullYear()}-${(`0${now.getMonth() + 1}`).slice(-2)}-${(`0${now.getDate()}`).slice(-2)} ${(`0${now.getHours()}`).slice(-2)}:${(`0${now.getMinutes()}`).slice(-2)}:${(`0${now.getSeconds()}`).slice(-2)}`;
 
-		formData.append("email", email);
-		formData.append("phoneNumber", phoneNumber);
-		formData.append("birthdate", birthdate);
-		formData.append("hash", hash);
-		formData.append("vorname", inputRefVorname.current?.value || "Error");
-		formData.append("nachname", inputRefNachname.current?.value || "Error");
+		const clientData = {
+			Kontaktmailadresse: email,
+			Anmeldenummer: hash,
+			Vorname: inputRefVorname.current?.value || "Error",
+			schuljahr: parseInt(currentDate.substring(2, 4)),
+			Nachname: inputRefNachname.current?.value || "Error",
+			Fachrichtung1: selectedFachrichtung,
+			Laendervorwahl1: phoneNumber.substring(0, 3),
+			Vorwahl1: phoneNumber.substring(3, 6),
+			Nummer1: phoneNumber.substring(6),
+			dsgvo: "1",
+			finalisiert: "0",
+			angemeldet: angemeldet,
+			geburtsdatum: birthdate,
+			// ... add other fields as needed
+		};
 
-		axios.post("https://localhost/registration/tagesschule", formData).then((response) => {
+		console.log(clientData);
+		axios.post("https://localhost/registration/tagesschule", clientData, {
+			headers: {
+				'Content-Type': 'application/json',
+			},
+
+		}).then((response) => {
 			console.log(response);
 			if (formIsValid && !isSubmitted && response.status === 200) {
+				// setShowAlert(true);
 				setIsSubmitted(true);
-				setShowModal(true);
+				setShowModalEmail(true);
 			}
+
 		}).catch(error => {
 			console.error(error);
+			if (error.response && error.response.status === 409) {
+				setShowModalDuplicate(true);
+			}
 		});
 	};
 
@@ -510,27 +540,46 @@ const Tagesschule1: React.FC = () => {
 					</Form>
 				</Col>
 				<Modal
-					show={showModal}
-					onHide={() => setShowModal(false)}
-					backdrop="static"
-				>
-					<Modal.Header closeButton>
-						<Modal.Title>E-Mail zur Verifizierung</Modal.Title>
-					</Modal.Header>
-					<Modal.Body>
-						Um die angegebene E-Mailadresse <strong>{email}</strong> zu
-						verifizieren, wurde eine Nachricht and diese Adresse versendet. Sie
-						können erst mit der Anmeldung fortfahren, wenn Sie den Erhalt dieser
-						Nachricht bestätigt haben. Sollten Sie keine E-Mail erhalten haben,
-						prüfen Sie neben dem Posteingangsordner bitte auch ihren
-						Spam-Ordner.
-					</Modal.Body>
-					<Modal.Footer>
-						<Button variant="success" onClick={() => setShowModal(false)}>
-							OK
-						</Button>
-					</Modal.Footer>
-				</Modal>
+						show={showModalEmail}
+						onHide={() => setShowModalEmail(false)}
+						backdrop="static"
+					>
+						<Modal.Header closeButton>
+							<Modal.Title>E-Mail zur Verifizierung</Modal.Title>
+						</Modal.Header>
+						<Modal.Body>
+							Um die angegebene E-Mailadresse <strong>{email}</strong> zu
+							verifizieren, wurde eine Nachricht and diese Adresse versendet. Sie
+							können erst mit der Anmeldung fortfahren, wenn Sie den Erhalt dieser
+							Nachricht bestätigt haben. Sollten Sie keine E-Mail erhalten haben,
+							prüfen Sie neben dem Posteingangsordner bitte auch ihren
+							Spam-Ordner.
+						</Modal.Body>
+						<Modal.Footer>
+							<Button variant="success" onClick={() => setShowModalEmail(false)}>
+								OK
+							</Button>
+						</Modal.Footer>
+					</Modal>
+					<Modal
+						show={showModalDuplicate}
+						onHide={() => setShowModalDuplicate(false)}
+						backdrop="static"
+					>
+						<Modal.Header >
+							<Modal.Title>Bereits Registriert</Modal.Title>
+						</Modal.Header>
+						<Modal.Body>
+							An die angegebene E-Mailadresse <strong>{email}</strong> wurde eine Nachricht versendet um Ihren Bewerbungsprozess fortzusetzen. Sollten Sie keine E-Mail erhalten haben,
+							prüfen Sie neben dem Posteingangsordner bitte auch ihren
+							Spam-Ordner.
+						</Modal.Body>
+						<Modal.Footer>
+							<Button variant="success" onClick={() => setShowModalDuplicate(false)}>
+								OK
+							</Button>
+						</Modal.Footer>
+					</Modal>
 			</Row>
 		</Container>
 	);
