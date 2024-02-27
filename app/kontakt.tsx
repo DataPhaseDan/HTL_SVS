@@ -1,49 +1,40 @@
-
-
 import React, { useState } from 'react';
-import { Button, Form } from 'react-bootstrap';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import { Form, Button } from 'react-bootstrap';
 
-const ContactForm: React.FC = () => {
-	const [name, setName] = useState('');
-	const [email, setEmail] = useState('');
-	const [message, setMessage] = useState('');
+const EmailForm = () => {
+  const [recipient, setRecipient] = useState('');
+  const [subject, setSubject] = useState('');
+  const [message, setMessage] = useState('');
 
-	const handleSubmit = (event: { preventDefault: () => void; }) => {
-		event.preventDefault();
-		// Here you can handle the form submission, e.g., send an email
-		console.log(`Name: ${name}, Email: ${email}, Message: ${message}`);
-	};
+  const handleSubmit = async (event:React.FormEvent ) => {
+    event.preventDefault();
+    // Here you would typically send the form data to your server
+    // and handle the email sending server-side using Nodemailer.
+    console.log({ recipient, subject, message });
+  };
 
+  return (
+    <Form onSubmit={handleSubmit}>
+      <Form.Group controlId="formRecipient">
+        <Form.Label>Recipient</Form.Label>
+        <Form.Control disabled type="email" placeholder="Enter email" value={recipient} onChange={e => setRecipient(e.target.value)} />
+      </Form.Group>
 
+      <Form.Group controlId="formSubject">
+        <Form.Label>Subject</Form.Label>
+        <Form.Control type="text" placeholder="Subject" value={subject} onChange={e => setSubject(e.target.value)} />
+      </Form.Group>
 
-	return (
-		<Form onSubmit={handleSubmit}>
-			<Form.Group controlId="formName">
-				<Form.Label>Name</Form.Label>
-				{/* biome-ignore lint/suspicious/noExplicitAny: <explanation> */}
-				<Form.Control type="text" placeholder="Enter your name" value={name} onChange={(e: { target: { value: any; }; }) => setName(e.target.value)} />
-			</Form.Group>
+      <Form.Group controlId="formMessage">
+        <Form.Label>Message</Form.Label>
+        <Form.Control as="textarea" rows={3} value={message} onChange={e => setMessage(e.target.value)} />
+      </Form.Group>
 
-			<Form.Group controlId="formEmail">
-				<Form.Label>Email address</Form.Label>
-				{/* biome-ignore lint/suspicious/noExplicitAny: <explanation> */}
-				<Form.Control type="email" placeholder="Enter email" value={email} onChange={(e: { target: { value: any; }; }) => setEmail(e.target.value)} />
-			</Form.Group>
-
-			<Form.Group controlId="formMessage">
-				{/* <Form.Label>Message</Form.Label> */}
-				{/* biome-ignore lint/suspicious/noExplicitAny: <explanation> */}
-				<ReactQuill theme="snow" value={message} onChange={(value: any) => setMessage(value)} />
-
-			</Form.Group>
-
-			<Button classname="pt-2" variant="primary" type="submit">
-				Submit
-			</Button>
-		</Form>
-	);
+      <Button className="pt2" variant="success" type="submit">
+        Nachricht senden
+      </Button>
+    </Form>
+  );
 };
 
-export default ContactForm;
+export default EmailForm;

@@ -42,6 +42,8 @@ const Abendschule1: React.FC = () => {
 	// const currentDateForOption = new Date();
 	// const specificDateCutoff = new Date(currentDateForOption.getFullYear(), 1, 1);
 	const [hash, setHash] = useState('');
+	const [showModalEmail, setShowModalEmail] = useState<boolean>(false);
+	const [showModalDuplicate, setShowModalDuplicate] = useState<boolean>(false);
 
 
 	const handleBirthdateChange = (

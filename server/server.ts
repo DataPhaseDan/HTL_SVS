@@ -111,7 +111,11 @@ const pool = new Pool({
 });
 
 const transporter = nodemailer.createTransport({
-	/* SMTP server parameters */
+	service: 'gmail',
+	auth: {
+		user: 'your-email@gmail.com',
+		pass: 'your-password'
+	}
 });
 
 app.use(express.json());
@@ -129,13 +133,13 @@ const handleRegistration =
 	
 	if (result.rows.length === 1) {
 		// A session for this user already exists, so reactivate the session
-		// const url = `https://localhost/anmeldungen/${type}/session?session=${sessionHash}`;
-		// await transporter.sendMail({
-			// 	from: "noreply@mywebsite.com",
-			// 	to: clientData.email,
-			// 	subject: "Setzen Sie Ihre Anmeldung fort",
-			// 	text: `Drücken Sie bitte auf diesen Link um Ihre Anmeldung fortzusetzen: ${url}`,
-			// });
+		const url = `https://localhost/anmeldungen/${type}/session?session=${sessionHash}`;
+		await transporter.sendMail({
+				from: "noreply@mywebsite.com",
+				to: clientData.email,
+				subject: "Setzen Sie Ihre Anmeldung fort",
+				text: `Drücken Sie bitte auf diesen Link um Ihre Anmeldung fortzusetzen: ${url}`,
+			});
 			res.status(409).json({ message: "Conflict" });
 		} else {
 			// No session for this user exists, so create a new session
@@ -335,12 +339,12 @@ const handleRegistration =
 			]);
 			const url = `https://localhost/anmeldungen/${type}/session?session=${sessionHash}`;
 
-			// await transporter.sendMail({
-			// 	from: "noreply@mywebsite.com",
-			// 	to: clientData.email,
-			// 	subject: "Setzen Sie Ihre Anmeldung fort",
-			// 	text: `Drücken Sie bitte auf diesen Link um Ihre Anmeldung fortzusetzen: ${url}`,
-			// });
+			await transporter.sendMail({
+				from: "noreply@mywebsite.com",
+				to: clientData.email,
+				subject: "Setzen Sie Ihre Anmeldung fort",
+				text: `Drücken Sie bitte auf diesen Link um Ihre Anmeldung fortzusetzen: ${url}`,
+			});
 
 			res.status(200).json({ message: "OK" });
 		}
@@ -379,11 +383,33 @@ app.get("/options/fachrichtungen_tagesschule", async (req: Request, res: Respons
 app.post("/registration/tagesschule", handleRegistration("tagesschule"));
 app.post("/registration/abendschule", handleRegistration("abendschule"));
 
-app.get("/registration/tagesschule/session", async (req: Request, res: Response) => {
+app.post('/send-email', async (req:Request, res:Response) => {
+  const { recipient, subject, message } = req.body;
+
+
+  const mailOptions = {
+    from: 'your-email@gmail.com',
+    to: recipient,
+    subject: subject,
+    text: message
+  };
+
+  transporter.sendMail(mailOptions, (error: Error | null, info: nodemailer.SentMessageInfo) => {
+    if (error) {
+      console.log(error);
+      res.status(500).send({ success: false });
+    } else {
+      console.log(`Email sent: ${info.response}`);
+      res.status(200).send({ success: true });
+    }
+  });
+});
+
+app.get("/anmeldungen/tagesschule/session", async (req: Request, res: Response) => {
 	const sessionHash = req.query.Anmeldenummer;
 });
 
-app.get("/registration/abendschule/session", async (req: Request, res: Response) => {
+app.get("/anmeldungen/abendschule/session", async (req: Request, res: Response) => {
 	const sessionHash = req.query.Anmeldenummer;
 });
 app.get("*", (req: Request, res: Response) => {

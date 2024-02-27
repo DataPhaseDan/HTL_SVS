@@ -1,8 +1,6 @@
 
 
 import React, { useCallback, useMemo, useState, useEffect, useRef } from 'react';
-import { BaseText, Text, Editor, Transforms, createEditor, marks } from 'slate';
-import { Editable, withReact, Slate } from 'slate-react';
 
 
 
@@ -30,7 +28,7 @@ import Ausbildung from "./ausbildung";
 import Erziehungsberechtigte from "./erziehungsberechtigte";
 import Noten from "./noten";
 import Persdaten from "./persdaten";
-import ContactForm from "./kontakt";
+import RichTextEditor from "./kontakt";
 
 
 
@@ -664,7 +662,7 @@ const Adminpanel: React.FC = () => {
 					</Tab>
 
 					<Tab eventKey="Kontakt" title="Kontakt">
-						<ContactForm />
+						<RichTextEditor />
 					</Tab>
 
 					<Tab eventKey="Organisation" title="Organisation">
