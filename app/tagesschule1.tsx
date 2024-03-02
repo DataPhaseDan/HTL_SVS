@@ -1,6 +1,6 @@
 import { PhoneNumberUtil, PhoneNumberType, PhoneNumberFormat } from "google-libphonenumber";
 import axios from "axios";
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { sha3_512 } from "js-sha3";
 import {
 	Accordion,
@@ -50,7 +50,7 @@ const Tagesschule1: React.FC = () => {
 	const generateHash = () => {
 		const combinedInput =
 			email.trim() + phoneNumber.trim() + inputRefNachname + inputRefVorname;
-		const hash = sha3_512(combinedInput).substring(0, 20); // Adjust length as needed
+		const hash = sha3_512(combinedInput); // Adjust length as needed
 		setHash(hash);
 	};
 
@@ -138,17 +138,17 @@ const Tagesschule1: React.FC = () => {
 		}
 	};
 
-	useEffect(() => {
-		if (isSubmitted) {
-			setShowModalEmail(true);
-		}
-	}, [isSubmitted]);
+	// useEffect(() => {
+	// 	if (isSubmitted) {
+	// 		setShowModalEmail(true);
+	// 	}
+	// }, [isSubmitted]);
 
-	useEffect(() => {
-		if (isSubmitted) {
-			setShowModalDuplicate(true);
-		}
-	}, [isSubmitted]);
+	// useEffect(() => {
+	// 	if (isSubmitted) {
+	// 		setShowModalDuplicate(true);
+	// 	}
+	// }, [isSubmitted]);
 
 
 	useEffect(() => {
@@ -187,35 +187,36 @@ const Tagesschule1: React.FC = () => {
 			Laendervorwahl1: phoneNumber.substring(0, 3),
 			Vorwahl1: phoneNumber.substring(3, 6),
 			Nummer1: phoneNumber.substring(6),
-			dsgvo: "1",
-			finalisiert: "0",
+			dsgvo: parseInt("1"),
+			finalisiert: parseInt("0"),
 			angemeldet: angemeldet,
 			geburtsdatum: birthdate,
+			Schulpflicht: parseInt("1"),
+
 			// ... add other fields as needed
 		};
 
-		console.log(clientData);
-		axios.post("https://localhost/registration/tagesschule", clientData, {
+		// console.log(clientData);
+		axios.post("https://localhost/registration/tagesschule/", clientData, {
 			headers: {
 				'Content-Type': 'application/json',
 			},
 
+
 		}).then((response) => {
 			console.log(response);
-			if (response.status !== 200) {
-				throw new Error(`Request failed with status code ${response.status}`);
-			}
-			if (formIsValid && !isSubmitted) {
+			if (formIsValid && !isSubmitted && response.status === 200) {
+				// setShowAlert(true);
 				setIsSubmitted(true);
 				setShowModalEmail(true);
 			}
-		})
-			.catch(error => {
-				console.error(error);
-				if (error.response && error.response.status === 409) {
-					setShowModalDuplicate(true);
-				}
-			});
+	
+		}).catch(error => {
+			console.error(error);
+			if (error.response && error.response.status === 409) {
+				setShowModalDuplicate(true);
+			}
+		});
 	};
 
 		// useEffect(() => {
@@ -239,7 +240,7 @@ const Tagesschule1: React.FC = () => {
 						</p>
 
 						<p className="h6" />
-						<Form noValidate validated={validated} onSubmit={handleSubmit}>
+						<Form noValidate validated={validated} onSubmit={handleSubmit} method="post">
 							<Row className="mb-4 mt-4 ">
 								<Form.Group controlId="validationVorname">
 									<FloatingLabel

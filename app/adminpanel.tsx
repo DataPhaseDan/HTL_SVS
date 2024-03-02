@@ -1,8 +1,10 @@
 
 
-import React, { useCallback, useMemo, useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
-
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+// import { useAuth } from './authcontext';
 
 
 import {
@@ -21,9 +23,13 @@ import {
 } from "react-bootstrap";
 
 
+// TODO: implement searchbar for bewerber
 
+// TODO: finalize button to set to "Done"
+// TODO: implement POST and Prefill logic
+// TODO: implement mail service for kontakt tab
 
-
+// T
 import Ausbildung from "./ausbildung";
 import Erziehungsberechtigte from "./erziehungsberechtigte";
 import Noten from "./noten";
@@ -32,14 +38,16 @@ import RichTextEditor from "./kontakt";
 
 
 
+
 const Adminpanel: React.FC = () => {
+	// const auth = useAuth();
+	// const isAuthenticated =auth ? auth?.isAuthenticated: false;
+
+	const navigate = useNavigate();
+
 	const [validated, setValidated] = useState(true);
 // Initialize with an empty array
 	// const [currentDate] = useState(getYear());
-
-
-	
-
 	const inputRefVorname = useRef<HTMLInputElement>(null);
 	const inputRefNachname = useRef<HTMLInputElement>(null);
 	const inputRefGeburtsort = useRef<HTMLInputElement>(null);
@@ -143,6 +151,28 @@ const Adminpanel: React.FC = () => {
 		if (isSubmitted) {
 		}
 	}, [isSubmitted]);
+
+	const checkAuthenticationStatus = async () => {
+		try {
+			 const response = await axios.get('/api/isAuthenticated');
+			 return response.data.isAuthenticated;
+		} catch (error) {
+			 console.error('Error checking authentication status:', error);
+			 return false;
+		}
+	 };
+
+// 	 useEffect(() => {
+//     if (!isAuthenticated) {
+//       navigate('/login');
+//     }
+//  }, [isAuthenticated, navigate]);
+
+//  if (!isAuthenticated) {
+//     return null; // Or a loading indicator
+//  }
+
+
 
 	return (
 		<Container className="p-3 border" style={{ backgroundColor: "SeaShell" }}>

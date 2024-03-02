@@ -1,4 +1,3 @@
-
 import axios from "axios";
 import { PhoneNumberFormat, PhoneNumberType, PhoneNumberUtil } from "google-libphonenumber";
 import { sha3_512 } from 'js-sha3';
@@ -12,13 +11,10 @@ import {
 	Form,
 	Modal,
 	ProgressBar,
-	Alert,
 	Row
 } from "react-bootstrap";
-import { set } from "react-hook-form";
 
 const Abendschule1: React.FC = () => {
-
 
 	interface Option {
 		id: number;
@@ -35,12 +31,9 @@ const Abendschule1: React.FC = () => {
 	const [isBirthdateValid, setIsBirthdateValid] = useState(false);
 	const inputRefVorname = useRef<HTMLInputElement>(null);
 	const inputRefNachname = useRef<HTMLInputElement>(null);
-
 	const [isSubmitted, setIsSubmitted] = useState(false);
 	const [options, setOptions] = useState<Option[]>([]);
 	const [showAlert, setShowAlert] = useState<boolean>(true);
-	// const currentDateForOption = new Date();
-	// const specificDateCutoff = new Date(currentDateForOption.getFullYear(), 1, 1);
 	const [hash, setHash] = useState('');
 	const [showModalEmail, setShowModalEmail] = useState<boolean>(false);
 	const [showModalDuplicate, setShowModalDuplicate] = useState<boolean>(false);
@@ -59,11 +52,6 @@ const Abendschule1: React.FC = () => {
 		setHash(hash);
 	};
 
-	// const handlePhoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-
-
-
-	// };
 	const handlePhoneBlur = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const inputPhoneNumber = event.target.value.trim();
 		setPhoneNumber(inputPhoneNumber);
@@ -174,22 +162,22 @@ const Abendschule1: React.FC = () => {
 	// 	}
 	// }, [showAlert]);
 
-	useEffect(() => {
-		if (isSubmitted) {
-			setShowModalEmail(true);
-		}
-	}, [isSubmitted]);
+	// useEffect(() => {
+	// 	if (isSubmitted) {
+	// 		setShowModalEmail(true);
+	// 	}
+	// }, [isSubmitted]);
 
-	useEffect(() => {
-		if (isSubmitted) {
-			setShowModalDuplicate(true);
-		}
-	}, [isSubmitted]);
+	// useEffect(() => {
+	// 	if (isSubmitted) {
+	// 		setShowModalDuplicate(true);
+	// 	}
+	// }, [isSubmitted]);
 
 	useEffect(() => {
 		const fetchOptions = async () => {
 			try {
-				const response = await axios.get('/options/fachrichtungen_abendschule');
+				const response = await axios.get('/options/fachrichtungen_abendschule/');
 				setOptions(response.data);
 			} catch (error) {
 				console.error('Error fetching options:', error);
@@ -222,15 +210,15 @@ const Abendschule1: React.FC = () => {
 			Laendervorwahl1: phoneNumber.substring(0, 3),
 			Vorwahl1: phoneNumber.substring(3, 6),
 			Nummer1: phoneNumber.substring(6),
-			dsgvo: "1",
-			finalisiert: "0",
+			dsgvo: parseInt ("1"),
+			finalisiert: parseInt("0"),
 			angemeldet: angemeldet,
 			geburtsdatum: birthdate,
 			// ... add other fields as needed
 		};
 
-		console.log(clientData);
-		axios.post("https://localhost/registration/abendschule", clientData, {
+		//console.log(clientData);
+		axios.post("https://localhost/registration/abendschule/", clientData, {
 			headers: {
 				'Content-Type': 'application/json',
 			},
@@ -466,7 +454,7 @@ const Abendschule1: React.FC = () => {
 										) : (
 											<strong>
 												Bitte geben Sie die Tel. Nr. des Bewerbers im Format +43
-												664 12345678 ein.
+												66x 12345678 ein.
 											</strong>
 										)}
 									</Form.Control.Feedback>
@@ -518,7 +506,7 @@ const Abendschule1: React.FC = () => {
 											type="date"
 											id="inputBirthDate"
 											required
-											//pattern="\d{2}\.\d{2}\.\d{4}"
+											pattern="\d{2}\.\d{2}\.\d{4}"
 											title="Bitte geben Sie ihr Geburtsdatum ein."
 											value={birthdate}
 											onChange={handleBirthdateChange}
@@ -651,7 +639,7 @@ const Abendschule1: React.FC = () => {
 							</Button>
 						</Form>
 
-					</Col>
+					
 					<Modal
 						show={showModalEmail}
 						onHide={() => setShowModalEmail(false)}
@@ -693,6 +681,7 @@ const Abendschule1: React.FC = () => {
 							</Button>
 						</Modal.Footer>
 					</Modal>
+					</Col>
 				</Row>
 			</Container>
 

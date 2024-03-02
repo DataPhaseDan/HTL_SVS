@@ -1,7 +1,14 @@
 import React from 'react';
 import { Col, Button, Row, Container, Card, Form } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
-export default function LoginPage() {
+
+const LoginPage = () => {
+  const navigate = useNavigate();
+  const handleLogin = () => {
+    navigate('/login/microsoft'); // Trigger Microsoft authentication flow
+  };
+
   return (
     <Container className="vh-100 d-flex justify-content-center align-items-center">
       <Row>
@@ -10,7 +17,7 @@ export default function LoginPage() {
             <Card.Body>
               <h2 className="fw-bold mb-2 ">HTBLuVA ZSV</h2>
               {/* <p className="mb-5"></p> */}
-              <Form>
+              {/* <Form>
                 <Form.Group className="mb-3" controlId="formBasicEmail">
                   <Form.Label className="text-center">Email Adresse</Form.Label>
                   <Form.Control type="email" placeholder="Enter email" />
@@ -21,11 +28,12 @@ export default function LoginPage() {
                   <Form.Control type="password" placeholder="Password" />
                 </Form.Group>
                 <div className="d-grid">
-                  <Button variant="primary" type="submit">
-                    Login
-                  </Button>
+                  
                 </div>
-              </Form>
+              </Form> */}
+              <Button variant="primary" onClick={handleLogin}>
+                Login
+              </Button>
               {/* <div className="mt-3">
                 <p className="mb-0 text-center">
                   Don't have an account?{" "}
@@ -41,4 +49,5 @@ export default function LoginPage() {
     </Container>
   );
 }
+export default LoginPage;
 

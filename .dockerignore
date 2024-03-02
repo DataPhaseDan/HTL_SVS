@@ -1,8 +1,6 @@
-dprint.json
-biome.json
-node_modules
-db_init
-test.js
-.vscode
+app/node_modules/
+server/node_modules/
 
-zsv.sql
+.vscode/
+
+zsv.sql/
