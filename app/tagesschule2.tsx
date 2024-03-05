@@ -41,6 +41,52 @@ type FormData = {
 	ort: string;
 	wohnland: number;
 	letzteschulform: string;
+	verhaeltnisA: number;
+	anredeA: string;
+	titelvorA: string;
+	titelnachA: string;
+	nachnameA: string;
+	vornameA: string;
+	strasseA: string;
+	hausnummerA: string;
+	postleitzahlA: string;
+	wohnortA: string;
+	wohnlandA: number;
+	laendervorwahlA1: string;
+	vorwahlA1: string;
+	nummerA1: string;
+	laendervorwahlA2: string;
+	vorwahlA2: string;
+	nummerA2: string;
+	mailadresseA: string;
+	verhaeltnisB: number;
+	anredeB: string;
+	titelvorB: string;
+	titelnachB: string;
+	nachnameB: string;
+	vornameB: string;
+	strasseB: string;
+	hausnummerB: string;
+	postleitzahlB: string;
+	wohnortB: string;
+	wohnlandB: number;
+	laendervorwahlB1: string;
+	vorwahlB1: string;
+	nummerB1: string;
+	laendervorwahlB2: string;
+	vorwahlB2: string;
+	nummerB2: string;
+	mailadresseB: string;
+	geschwisteranzahl: number;
+	geschwisteranschule: number;
+	geschwisternamen: string;
+	erstwunsch: number;
+	erstwunschschule: string;
+	zweitwunschschule: string;
+
+
+
+
 
 };
 
@@ -192,10 +238,13 @@ const Abendschule2: React.FC = () => {
 	const [OptionsReligionsbekenntnis, setOptionsReligionsbekenntnis] = useState<Option[]>([]);
 	const [OptionsWohnland, setOptionsWohnland] = useState<Option[]>([]);
 	const [OptionsSozialversicherungstraeger, setOptionsSozialversicherungstraeger] = useState<Option[]>([]);
-	const [OptionsGeschlecht, setOptionsGeschlecht] = useState<Option2[]>([]);
+	const [OptionsGeschlecht, setOptionsGeschlecht] = useState<Option[]>([]);
 	const [OptionsAnrede, setOptionsAnrede] = useState<Option2[]>([]);
+	const [OptionsTitelVor, setOptionsTitelVor] = useState<Option[]>([]);
+	const [OptionsTitelNach, setOptionsTitelNach] = useState<Option[]>([]);
 	const { register, handleSubmit, setValue, control, formState: { errors } } = useForm<FormData>();
 
+	const [anmeldenummer, setAnmeldenummer] = useState("");
 
 	const location = useLocation();
 	const searchParams = new URLSearchParams(location.search);
@@ -209,8 +258,48 @@ const Abendschule2: React.FC = () => {
 	const [email, setEmail] = useState("");
 	// const [isChecked, setIsChecked] = useState(false);
 	const [anrede, setAnrede] = useState("");
-	const [titelVor, setTitelVor] = useState("");
-	const [titelNach, setTitelNach] = useState("");
+	const [titelVorA, setTitelVorA] = useState("");
+	const [titelNachA, setTitelNachA] = useState("");
+	const [verhaeltnisA, setVerhaeltnisA] = useState("");
+	const [anredeA, setAnredeA] = useState("");
+	const [nachnameA, setNachnameA] = useState("");
+	const [vornameA, setVornameA] = useState("");
+	const [strasseA, setStrasseA] = useState("");
+	const [HausnummerA, setHausnummerA] = useState("");
+	const [PlzA, setPlzA] = useState("");
+	const [OrtA, setOrtA] = useState("");
+	const [wohnlandA, setWohnlandA] = useState("");
+	const [laendervorwahlA1, setLaendervorwahlA1] = useState("");
+	const [vorwahlA1, setVorwahlA1] = useState("");
+	const [nummerA1, setNummerA1] = useState("");
+	const [laendervorwahlA2, setLaendervorwahlA2] = useState("");
+	const [vorwahlA2, setVorwahlA2] = useState("");
+	const [nummerA2, setNummerA2] = useState("");
+	const [mailadresseA, setMailadresseA] = useState("");
+	const [verhaeltnisB, setVerhaeltnisB] = useState("");
+	const [anredeB, setAnredeB] = useState("");
+	const [titelVorB, setTitelVorB] = useState("");
+	const [titelNachB, setTitelNachB] = useState("");
+	const [nachnameB, setNachnameB] = useState("");
+	const [vornameB, setVornameB] = useState("");
+	const [strasseB, setStrasseB] = useState("");
+	const [HausnummerB, setHausnummerB] = useState("");
+	const [PlzB, setPlzB] = useState("");
+	const [OrtB, setOrtB] = useState("");
+	const [wohnlandB, setWohnlandB] = useState("");
+	const [laendervorwahlB1, setLaendervorwahlB1] = useState("");
+	const [vorwahlB1, setVorwahlB1] = useState("");
+	const [nummerB1, setNummerB1] = useState("");
+	const [laendervorwahlB2, setLaendervorwahlB2] = useState("");
+	const [vorwahlB2, setVorwahlB2] = useState("");
+	const [nummerB2, setNummerB2] = useState("");
+	const [mailadresseB, setMailadresseB] = useState("");
+	const [geschwisteranzahl, setGeschwisteranzahl] = useState("");
+	const [geschwisteranschule, setGeschwisteranschule] = useState("");
+	const [geschwisternamen, setGeschwisternamen] = useState("");
+
+
+
 	const [weitereVornamen, setWeitereVornamen] = useState("");
 	const [geschlecht, setGeschlecht] = useState("");
 	const [geburtsort, setGeburtsort] = useState("");
@@ -230,7 +319,7 @@ const Abendschule2: React.FC = () => {
 	const [validated, setValidated] = useState(true);
 	const [currentDate] = useState(getYear());
 	const [radioStateErstwunschSchule, setRadioStateErstwunschSchule] =
-	useState("");
+		useState("");
 	const [geschwisterHtl, setGeschwisterHtl] = useState(false);
 	// const [isValid, setIsValid] = useState<boolean>(false);
 	// const [isEmailValid, setIsEmailValid] = useState<boolean>(false);
@@ -244,7 +333,7 @@ const Abendschule2: React.FC = () => {
 	const currentDateForOption = new Date();
 	const specificDateCutoff = new Date(currentDateForOption.getFullYear(), 1, 1);
 	const [showModalEmail, setShowModalEmail] = useState<boolean>(false);
-	const [ShowModalSchoolReport, setShowModalSchoolReport] = useState<boolean>(false);
+	const [showModalSchoolReport, setShowModalSchoolReport] = useState<boolean>(false);
 	const [isSubmitted, setIsSubmitted] = useState(false);
 	const [showModal, setShowModal] = useState<boolean>(false);
 	// const [isSubmitted, setIsSubmitted] = useState(false);
@@ -264,7 +353,7 @@ const Abendschule2: React.FC = () => {
 			/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 		return re.test(String(email).toLowerCase());
 	};
-	
+
 	const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setIsEmailValid(validateEmail(event.target.value));
 		setEmail(event.target.value);
@@ -400,7 +489,7 @@ const Abendschule2: React.FC = () => {
 	) => {
 		setRadioStateErstwunschSchule(event.target.value);
 	};
-	
+
 	const handleGeschwisterHtl = (
 		event: React.ChangeEvent<HTMLSelectElement>,
 	) => {
@@ -494,7 +583,25 @@ const Abendschule2: React.FC = () => {
 				console.error('Error fetching options:', error);
 			}
 		};
-
+		const fetchOptionsTitelVor = async () => {
+			try {
+				const response = await axios.get('/options/titel/');
+				setOptionsTitelVor(response.data);
+			} catch (error) {
+				console.error('Error fetching options:', error);
+			}
+		};
+		const fetchOptionsTitelNach = async () => {
+			try {
+				const response = await axios.get('/options/titel/');
+				setOptionsTitelNach(response.data);
+			} catch (error) {
+				console.error('Error fetching options:', error);
+			}
+		};
+		fetchOptionsAnrede();
+		fetchOptionsTitelVor();
+		fetchOptionsTitelNach();
 		fetchOptionsGeburtsland();
 		fetchOptionsStaatsbuergerschaft();
 		fetchOptionsErstsprache();
@@ -503,18 +610,18 @@ const Abendschule2: React.FC = () => {
 		fetchOptionsWohnland();
 		fetchOptionsSozialversicherungstraeger();
 		fetchOptionsGeschlecht();
-		fetchOptionsAnrede();
 		const fetchData = async () => {
 			try {
-				const response = await axios.get(`https://localhost/anmeldungen/abendschule/sessionfill/${session}`);
+				const response = await axios.get(`https://localhost/anmeldungen/tagesschule/sessionfill/${session}`);
 				if (response.data && response.data.length > 0) {
 					const data = response.data[0];
 					// Assuming the data is an array and you want the first item
 					setAnrede(data.anrede);
-					setTitelVor(data.titelvor);
-					setTitelNach(data.titelnach);
+					setTitelVorA(data.titelvorA);
+					setTitelNachA(data.titelnachA);
 					setWeitereVornamen(data.vornamen);
 					setGeschlecht(data.geschlecht);
+					setAnmeldenummer(data.anmeldenummer);
 					setGeburtsort(data.geburtsort);
 					setGeburtsland(data.geburtsland);
 					setStaatsbuergerschaft(data.staatsbuergerschaft);
@@ -536,6 +643,8 @@ const Abendschule2: React.FC = () => {
 					setVorname(data.vorname);
 					setNachname(data.nachname);
 					setPhonenumber(`${data.laendervorwahl1}${data.vorwahl1}${data.nummer1}`);
+					setRadioState(data.sozialversicherungaut);
+
 					// setValue('vorname', data.vorname);
 
 				}
@@ -568,8 +677,8 @@ const Abendschule2: React.FC = () => {
 
 	const onSubmit = (data: FormData) => {
 		formData.append("anrede", data.anrede);
-		formData.append("titelvor", data.titelVor);
-		formData.append("titelnach", data.titelNach);
+		formData.append("titelvorA", data.titelVor);
+		formData.append("titelnachA", data.titelNach);
 		formData.append("vornamen", data.weitereVornamen);
 		formData.append("geschlecht", data.geschlecht);
 		formData.append("geburtsort", data.geburtsort);
@@ -578,7 +687,7 @@ const Abendschule2: React.FC = () => {
 		formData.append("muttersprache", data.muttersprache.toString());
 		formData.append("alltagssprache", data.alltagssprache.toString());
 		formData.append("religion", data.religion.toString());
-		formData.append("sozialversicherungaut", radioState.toString());
+		formData.append("sozialversicherungaut", Number(radioState)?.toString());
 		formData.append("sozialversicherungsnummer", data.svNummer);
 		formData.append("sozialversicherungstraeger", data.sozialversicherungstraeger.toString());
 		formData.append("strasse", data.strasse);
@@ -616,14 +725,14 @@ const Abendschule2: React.FC = () => {
 					<h2>Anmeldefortschritt</h2>
 					<ProgressBar animated now={90} label={"90%"} />
 
-					<h2 className="mt-5 mb-5">Anmeldung an der HTL für Berufstätige</h2>
+					<h2 className="mt-5 mb-5">Anmeldung an der HTBLuVA Salzburg</h2>
 					<h3 className="mb-5">Schuljahr {currentDate}</h3>
 					<p>{/* <strong>Sie können sich nur einmal anmelden!</strong> */}</p>
 
-					<p className="h6">
+					{/* <p className="h6">
 						Für die Anmeldung sind die Abschlusszeugnisse ihrer bisherigen
 						Ausbildungen notwendig.
-					</p>
+					</p> */}
 					<Form validated={validated} onSubmit={handleSubmit(onSubmit)} method="post">
 						<Row className="mb-4 mt-4 ">
 							<Form.Group controlId="validationSalutation">
@@ -637,7 +746,10 @@ const Abendschule2: React.FC = () => {
 										control={control}
 										rules={{ required: false }}
 										render={({ field }) => (
-											<Form.Select {...field}>
+											<Form.Select {...field} onChange={(e) => {
+												setAnrede(e.target.value); // Update the state with the selected value
+												field.onChange(e); // Also call the original onChange to update the form value
+											}}>
 												<option value="" />
 												{OptionsAnrede.map((option) => (
 													<option value={option.value}>
@@ -651,20 +763,29 @@ const Abendschule2: React.FC = () => {
 							</Form.Group>
 						</Row>
 						<Row className="mb-4 mt-4 ">
-							<Form.Group controlId="validationTitelVor">
+							<Form.Group controlId="validationTitelVorA">
 								<FloatingLabel
-									controlId="formTitelVor"
+									controlId="formTitelVorA"
 									label="Titel vor "
 									className="pt-1"
 								>
-									<Form.Control  {...register('titelVor', { required: false, pattern: /^\S+@\S+$/i })} isInvalid={!!errors.titelVor}
-										type="text"
-										placeholder=""
-										value={titelVor}
-									// ref={inputRefVorname}
-									// onBlur={handleBlurVorname}
-									// className="pt-4"
-									// pattern="[A-Z][a-z]*"
+									<Controller
+										name="titelvorA"
+										control={control}
+										rules={{ required: false }}
+										render={({ field }) => (
+											<Form.Select {...field} onChange={(e) => {
+												setTitelVorA(e.target.value); // Update the state with the selected value
+												field.onChange(e); // Also call the original onChange to update the form value
+											}}>
+												<option value="" />
+												{OptionsTitelVor.map((option) => (
+													<option value={option.id}>
+														{option.name}
+													</option>
+												))}
+											</Form.Select>
+										)}
 									/>
 									<Form.Control.Feedback type="invalid" className="mx-2 mb-1" />
 								</FloatingLabel>
@@ -675,14 +796,23 @@ const Abendschule2: React.FC = () => {
 									label="Titel nach "
 									className="pt-1"
 								>
-									<Form.Control  {...register('titelNach', { required: false })} isInvalid={!!errors.titelNach}
-										type="text"
-										placeholder=""
-										value={titelNach}
-										// ref={inputRefVorname}
-										// onBlur={handleBlurVorname}
-										// className="pt-4"
-										pattern="[A-Z][a-z]*"
+									<Controller
+										name="titelNach"
+										control={control}
+										rules={{ required: false }}
+										render={({ field }) => (
+											<Form.Select {...field} onChange={(e) => {
+												setTitelNachA(e.target.value); // Update the state with the selected value
+												field.onChange(e); // Also call the original onChange to update the form value
+											}}>
+												<option value="" />
+												{OptionsTitelNach.map((option) => (
+													<option value={option.id}>
+														{option.name}
+													</option>
+												))}
+											</Form.Select>
+										)}
 									/>
 									<Form.Control.Feedback type="invalid" className="mx-2 mb-1" />
 								</FloatingLabel>
@@ -775,17 +905,21 @@ const Abendschule2: React.FC = () => {
 										name="geschlecht"
 										control={control}
 										rules={{ required: false }}
-										render={({ field: { value } }) => (
-											<Form.Select >
+										render={({ field }) => (
+											<Form.Select {...field} onChange={(e) => {
+												setGeschlecht(e.target.value); // Update the state with the selected value
+												field.onChange(e); // Also call the original onChange to update the form value
+											}}>
 												<option value="" />
 												{OptionsGeschlecht.map((option) => (
-													<option value={option.value}>
+													<option value={option.id}>
 														{option.name}
 													</option>
 												))}
 											</Form.Select>
 										)}
 									/>
+
 								</FloatingLabel>
 							</Form.Group>
 						</Row>
@@ -956,7 +1090,10 @@ const Abendschule2: React.FC = () => {
 											control={control}
 											rules={{ required: false }}
 											render={({ field }) => (
-												<Form.Select {...field} >
+												<Form.Select {...field} onChange={(e) => {
+													setSozialversicherungstraeger(e.target.value); // Update the state with the selected value
+													field.onChange(e); // Also call the original onChange to update the form value
+												}}>
 													<option value="" />
 													{OptionsSozialversicherungstraeger.map((option) => (
 														<option value={option.id}>
@@ -978,11 +1115,10 @@ const Abendschule2: React.FC = () => {
 											<Form.Control
 												// required={radioState}
 												type="text"
-												{...register('svNummer', { required: false, pattern: /^\d{4}\s?(0[1-9]|[12][0-9]|3[01])(0[1-9]|1[0-5])\d{2}$/ })} isInvalid={!!errors.svNummer}
-
+												{...register('svNummer', { required: false, pattern: /^\d{4}\s(0[1-9]|[12][0-9]|3[01])(0[1-9]|1[0-2])\d{2}$/ })} isInvalid={!!errors.svNummer}
 												value={svNummer}
 												onChange={handleSvNumberChange}
-												pattern="^\d{4}\s?(0[1-9]|[12][0-9]|3[01])(0[1-9]|1[0-5])\d{2}$"
+												pattern="^\d{4}\s(0[1-9]|[12][0-9]|3[01])(0[1-9]|1[0-2])\d{2}$"
 											/>
 											<Form.Control.Feedback type="invalid" className="mx-2">
 												Bitte geben Sie Ihre SV-Nummer in der Form 1234 TTMMJJ.
@@ -1031,7 +1167,10 @@ const Abendschule2: React.FC = () => {
 										control={control}
 										rules={{ required: false }}
 										render={({ field }) => (
-											<Form.Select {...field}>
+											<Form.Select {...field} onChange={(e) => {
+												setGeburtsland(e.target.value); // Update the state with the selected value
+												field.onChange(e); // Also call the original onChange to update the form value
+											}}>
 												<option value="" />
 												{OptionsGeburtsland.map((option) => (
 													<option value={option.id}>
@@ -1057,7 +1196,10 @@ const Abendschule2: React.FC = () => {
 										control={control}
 										rules={{ required: false }}
 										render={({ field }) => (
-											<Form.Select {...field}>
+											<Form.Select {...field} onChange={(e) => {
+												setStaatsbuergerschaft(e.target.value); // Update the state with the selected value
+												field.onChange(e); // Also call the original onChange to update the form value
+											}}>
 												<option value="" />
 												{OptionsStaatsbuergerschaft.map((option) => (
 													<option value={option.id}>
@@ -1081,7 +1223,10 @@ const Abendschule2: React.FC = () => {
 										control={control}
 										rules={{ required: false }}
 										render={({ field }) => (
-											<Form.Select {...field}>
+											<Form.Select {...field} onChange={(e) => {
+												setMuttersprache(e.target.value); // Update the state with the selected value
+												field.onChange(e); // Also call the original onChange to update the form value
+											}}>
 												<option value="" />
 												{OptionsErstsprache.map((option) => (
 													<option value={option.id}>
@@ -1107,8 +1252,10 @@ const Abendschule2: React.FC = () => {
 										control={control}
 										rules={{ required: false }}
 										render={({ field }) => (
-
-											<Form.Select {...field}>
+											<Form.Select {...field} onChange={(e) => {
+												setAlltagssprache(e.target.value); // Update the state with the selected value
+												field.onChange(e); // Also call the original onChange to update the form value
+											}}>
 												<option value="" />
 												{OptionsZweitsprache.map((option) => (
 													<option value={option.id}>
@@ -1132,8 +1279,10 @@ const Abendschule2: React.FC = () => {
 										control={control}
 										rules={{ required: false }}
 										render={({ field }) => (
-
-											<Form.Select {...field} >
+											<Form.Select {...field} onChange={(e) => {
+												setReligion(e.target.value); // Update the state with the selected value
+												field.onChange(e); // Also call the original onChange to update the form value
+											}}>
 												<option value="" />
 												{OptionsReligionsbekenntnis.map((option) => (
 													<option value={option.id}>
@@ -1203,7 +1352,10 @@ const Abendschule2: React.FC = () => {
 										control={control}
 										rules={{ required: false }}
 										render={({ field }) => (
-											<Form.Select {...field}>
+											<Form.Select {...field} onChange={(e) => {
+												setWohnland(e.target.value); // Update the state with the selected value
+												field.onChange(e); // Also call the original onChange to update the form value
+											}}>
 												<option value="" />
 												{OptionsWohnland.map((option) => (
 													<option value={option.id}>
@@ -1229,7 +1381,7 @@ const Abendschule2: React.FC = () => {
 									<Form.Control
 
 										type="text"
-										value = {letzteschulform}
+										value={letzteschulform}
 										//pattern="^.{3,}$"
 										{...register('letzteschulform', { required: false })} isInvalid={!!errors.letzteschulform}
 
@@ -1400,25 +1552,24 @@ const Abendschule2: React.FC = () => {
 													label="Verhältnis"
 													className="pt-1"
 												>
-													<Form.Select required>
-														<option value="3">Vater</option>
-														<option value="4">Mutter</option>
-														<option value="5">Großvater</option>
-														<option value="6">Großmutter</option>
-														<option value="7">Onkel</option>
-														<option value="8">Tante</option>
-														<option value="9">Bruder</option>
-														<option value="10">Schwester</option>
-														<option value="11">Stiefvater</option>
-														<option value="12">Stiefmutter</option>
-														<option value="13">Erziehungsberechtigter</option>
-														<option value="14">Vormund</option>
-														<option value="15">Pflegeeltern</option>
-														<option value="16">Heim / WG</option>
-														<option value="17">Eltern</option>
-														<option value="18">Erziehungsberechtigt</option>
-														<option value="19">Ansprechperson</option>
-													</Form.Select>
+													<Controller
+														name="verhaeltnisA"
+														control={control}
+														rules={{ required: false }}
+														render={({ field }) => (
+															<Form.Select {...field} onChange={(e) => {
+																setGeschlecht(e.target.value); // Update the state with the selected value
+																field.onChange(e); // Also call the original onChange to update the form value
+															}}>
+																<option value="" />
+																{OptionsGeschlecht.map((option) => (
+																	<option value={option.id}>
+																		{option.name}
+																	</option>
+																))}
+															</Form.Select>
+														)}
+													/>
 												</FloatingLabel>
 											</Form.Group>
 										</Row>
@@ -1491,8 +1642,8 @@ const Abendschule2: React.FC = () => {
 														required
 														type="text"
 														placeholder="Vorname"
-														// ref={inputRefVorname}
-														// onBlur={handleBlurVorname}
+													// ref={inputRefVorname}
+													// onBlur={handleBlurVorname}
 													// className="pt-4"
 													// pattern="[A-Z][a-z]*"
 													/>
@@ -1517,8 +1668,8 @@ const Abendschule2: React.FC = () => {
 														required
 														type="text"
 														placeholder="Nachname"
-														// ref={inputRefNachname}
-														// onBlur={handleBlurNachname}
+													// ref={inputRefNachname}
+													// onBlur={handleBlurNachname}
 													//pattern="[A-Z][a-z]*"
 													/>
 													<Form.Control.Feedback
@@ -1891,9 +2042,9 @@ const Abendschule2: React.FC = () => {
 													type="tel"
 													// placeholder="+43 123 456 7890"
 													value={phoneNumber}
-													// onChange={handlePhoneChange}
-													// onBlur={handlePhoneBlur}
-													// isInvalid={!isValid}
+												// onChange={handlePhoneChange}
+												// onBlur={handlePhoneBlur}
+												// isInvalid={!isValid}
 												/>
 												{/* <Form.Control.Feedback
 													type={isValid ? "valid" : "invalid"}
@@ -1935,9 +2086,9 @@ const Abendschule2: React.FC = () => {
 													required
 													type="email"
 													value={email}
-													// onChange={handleEmailChange}
-													// isInvalid={!isEmailValid}
-													// className={isEmailValid ? "valid-input" : ""}
+												// onChange={handleEmailChange}
+												// isInvalid={!isEmailValid}
+												// className={isEmailValid ? "valid-input" : ""}
 												//placeholder="ihre@email.hier"
 												/>
 												{/* <Form.Control.Feedback
@@ -2078,8 +2229,8 @@ const Abendschule2: React.FC = () => {
 														required
 														type="text"
 														placeholder="Vorname"
-														// ref={inputRefVorname}
-														// onBlur={handleBlurVorname}
+													// ref={inputRefVorname}
+													// onBlur={handleBlurVorname}
 													// className="pt-4"
 													// pattern="[A-Z][a-z]*"
 													/>
@@ -2104,8 +2255,8 @@ const Abendschule2: React.FC = () => {
 														required
 														type="text"
 														placeholder="Nachname"
-														// ref={inputRefNachname}
-														// onBlur={handleBlurNachname}
+													// ref={inputRefNachname}
+													// onBlur={handleBlurNachname}
 													//pattern="[A-Z][a-z]*"
 													/>
 													<Form.Control.Feedback
@@ -2478,8 +2629,8 @@ const Abendschule2: React.FC = () => {
 													type="tel"
 													// placeholder="+43 123 456 7890"
 													value={phoneNumber}
-													// onChange={handlePhoneChange}
-													// isInvalid={!isValid}
+												// onChange={handlePhoneChange}
+												// isInvalid={!isValid}
 												/>
 												{/* <Form.Control.Feedback
 													type={isValid ? "valid" : "invalid"}

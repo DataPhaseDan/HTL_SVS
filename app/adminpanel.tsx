@@ -1,7 +1,7 @@
 
 
 import React, { useState, useEffect, useRef } from 'react';
-
+import Autocomplete from './autocomplete';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 // import { useAuth } from './authcontext';
@@ -35,6 +35,7 @@ import Erziehungsberechtigte from "./erziehungsberechtigte";
 import Noten from "./noten";
 import Persdaten from "./persdaten";
 import RichTextEditor from "./kontakt";
+import EmailForm from './kontakt';
 
 
 
@@ -44,6 +45,7 @@ const Adminpanel: React.FC = () => {
 	// const isAuthenticated =auth ? auth?.isAuthenticated: false;
 
 	const navigate = useNavigate();
+
 
 	const [validated, setValidated] = useState(true);
 // Initialize with an empty array
@@ -185,6 +187,7 @@ const Adminpanel: React.FC = () => {
 					justify
 				>
 					<Tab eventKey="Bewerber" title="Bewerber">
+						<Autocomplete />
 						<Col className="justify-content-center align-items-center">
 							<Row className="pb-5 pt-5">
 								<Form.Group controlId="validationBewerberGeloescht" as={Col}>
@@ -692,7 +695,7 @@ const Adminpanel: React.FC = () => {
 					</Tab>
 
 					<Tab eventKey="Kontakt" title="Kontakt">
-						<RichTextEditor />
+						<EmailForm/>
 					</Tab>
 
 					<Tab eventKey="Organisation" title="Organisation">

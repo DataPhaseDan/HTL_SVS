@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "module": "ESNext",
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
@@ -17,17 +21,16 @@
     /* Linting */
     "strict": true,
     "incremental": true,
-     /* Formatter */
+    /* Formatter */
     "plugins": [
       {
         "name": "biomejs"
       }
     ],
-    
-
   },
   "exclude": [
-    "node_modules"],
+    "node_modules"
+  ],
   "include": [
     "login.tsx",
     "main.tsx",
@@ -39,10 +42,10 @@
     "vite-env.d.ts",
     "abendschule1.tsx",
     "abendschule2.tsx",
-    "adminpanel.tsx",
     "ausbildung.tsx",
     "erziehungsberechtigte.tsx",
-    "kontakt.tsx"
-   
+    "autocomplete.tsx",
+    "adminpanel.tsx",
+    "kontakt.tsx",
   ],
 }

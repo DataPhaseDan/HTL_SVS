@@ -1,5 +1,5 @@
-import axios from "axios";
 import { PhoneNumberFormat, PhoneNumberType, PhoneNumberUtil } from "google-libphonenumber";
+import axios from "axios";
 import { sha3_512 } from 'js-sha3';
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -199,17 +199,19 @@ const Abendschule1: React.FC = () => {
 		// const formData = new FormData();
 		const now = new Date();
 		const angemeldet = `${now.getFullYear()}-${(`0${now.getMonth() + 1}`).slice(-2)}-${(`0${now.getDate()}`).slice(-2)} ${(`0${now.getHours()}`).slice(-2)}:${(`0${now.getMinutes()}`).slice(-2)}:${(`0${now.getSeconds()}`).slice(-2)}`;
-
+		const currentYear = currentDate.substring(0, 4);
+		const nextYear = (parseInt(currentYear) + 1).toString().substring(2, 4);
+		const schoolYear = `${currentYear}/${nextYear}`;
 		const clientData = {
-			Kontaktmailadresse: email,
-			Anmeldenummer: hash,
-			Vorname: inputRefVorname.current?.value || "Error",
-			schuljahr: parseInt(currentDate.substring(2, 4)),
-			Nachname: inputRefNachname.current?.value || "Error",
-			Fachrichtung1: selectedFachrichtung,
-			Laendervorwahl1: phoneNumber.substring(0, 3),
-			Vorwahl1: phoneNumber.substring(3, 6),
-			Nummer1: phoneNumber.substring(6),
+			kontaktmailadresse: email,
+			anmeldenummer: hash,
+			vorname: inputRefVorname.current?.value || "Error",
+			schuljahr:schoolYear,
+			nachname: inputRefNachname.current?.value || "Error",
+			fachrichtung1: selectedFachrichtung,
+			laendervorwahl1: phoneNumber.substring(0, 3),
+			vorwahl1: phoneNumber.substring(3, 6),
+			nummer1: phoneNumber.substring(6),
 			dsgvo: parseInt ("1"),
 			finalisiert: parseInt("0"),
 			angemeldet: angemeldet,
