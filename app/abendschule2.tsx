@@ -34,7 +34,7 @@ type FormData = {
 	religion: number;
 	svNummer: string;
 	sozialversicherungstraeger: number;
-	sozialversicherungaut: number;
+	SVTAUT: string;
 	strasse: string;
 	hausnummer: string;
 	plz: string;
@@ -196,7 +196,7 @@ const Abendschule2: React.FC = () => {
 	const [OptionsSozialversicherungstraeger, setOptionsSozialversicherungstraeger] = useState<Option[]>([]);
 	const [OptionsGeschlecht, setOptionsGeschlecht] = useState<Option[]>([]);
 	const [OptionsAnrede, setOptionsAnrede] = useState<Option2[]>([]);
-	const { register, handleSubmit, setValue, control, formState: { errors } } = useForm<FormData>();
+	const { register, handleSubmit, setValue, formState: { errors } } = useForm<FormData>();
 
 	const [anmeldenummer, setAnmeldenummer] = useState("");
 
@@ -222,8 +222,6 @@ const Abendschule2: React.FC = () => {
 	const [geburtsland, setGeburtsland] = useState("");
 	const [staatsbuergerschaft, setStaatsbuergerschaft] = useState("");
 	const [muttersprache, setMuttersprache] = useState("");
-
-
 	const [alltagssprache, setAlltagssprache] = useState("");
 	const [religion, setReligion] = useState("");
 	const [svNummer, setSvNummer] = useState("");
@@ -246,11 +244,11 @@ const Abendschule2: React.FC = () => {
 	const [nachname, setNachname] = useState("");
 	const [showModalEmail, setShowModalEmail] = useState<boolean>(false);
 	const [showModalSchoolReport, setShowModalSchoolReport] = useState<boolean>(false);
-	 
+
 	const [isSubmitted, setIsSubmitted] = useState(false);
 	// const [showModal, setShowModal] = useState<boolean>(false);
 	// const [isSubmitted, setIsSubmitted] = useState(false);
-	const [radioState, setRadioState] = useState(true);
+	// const [radioState, setRadioState] = useState(true);
 	const [adress, setAdress] = useState("");
 	const [plzOrt, setPlzOrt] = useState("");
 	// const [, setRadioStateGeschlecht] = useState("");
@@ -295,9 +293,9 @@ const Abendschule2: React.FC = () => {
 		// console.log(`PLZ: ${plz}, Ort: ${ort}`);
 	};
 
-	const handleRadioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setRadioState(event.target.value === "1");
-	};
+	// const handleRadioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+	// 	setRadioState(event.target.value === "1");
+	// };
 
 	const handleBlurAdress = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setAdress(event.target.value);
@@ -493,17 +491,6 @@ const Abendschule2: React.FC = () => {
 				console.error('Error fetching options:', error);
 			}
 		};
-		fetchOptionsAnrede();
-		fetchOptionsTitelVor();
-		fetchOptionsTitelNach();
-		fetchOptionsGeschlecht();
-		fetchOptionsGeburtsland();
-		fetchOptionsStaatsbuergerschaft();
-		fetchOptionsErstsprache();
-		fetchOptionsZweitsprache();
-		fetchOptionsReligionsbekenntnis();
-		fetchOptionsWohnland();
-		fetchOptionsSozialversicherungstraeger();
 		const fetchData = async () => {
 			try {
 				const response = await axios.get(`https://localhost/anmeldungen/abendschule/sessionfill/${session}`);
@@ -544,9 +531,34 @@ const Abendschule2: React.FC = () => {
 				console.error(error);
 			}
 		};
-
+		fetchOptionsAnrede();
+		fetchOptionsTitelVor();
+		fetchOptionsTitelNach();
+		fetchOptionsGeschlecht();
+		fetchOptionsGeburtsland();
+		fetchOptionsStaatsbuergerschaft();
+		fetchOptionsErstsprache();
+		fetchOptionsZweitsprache();
+		fetchOptionsReligionsbekenntnis();
+		fetchOptionsWohnland();
+		fetchOptionsSozialversicherungstraeger();
 		fetchData();
+
 	}, [session]);
+
+	const { control } = useForm({
+		defaultValues: {
+			anrede: anrede,
+			titelVor: titelVor,
+			titelNach: titelNach,
+			weitereVornamen: weitereVornamen,
+			geschlecht: geschlecht,
+			SVTAUT: radioState,
+
+
+
+		},
+	});
 
 
 
@@ -645,7 +657,8 @@ const Abendschule2: React.FC = () => {
 								>
 									<Controller
 										name="anrede"
-										
+										// defaultValue={anrede}
+
 										control={control}
 										rules={{ required: false }}
 										render={({ field }) => (
@@ -653,7 +666,6 @@ const Abendschule2: React.FC = () => {
 												setAnrede(e.target.value); // Update the state with the selected value
 												field.onChange(e); // Also call the original onChange to update the form value
 											}}>
-												<option value="" />
 												{OptionsAnrede.map((option) => (
 													<option value={option.value}>
 														{option.name}
@@ -673,6 +685,7 @@ const Abendschule2: React.FC = () => {
 									className="pt-1"
 								>
 									<Controller
+										defaultValue={titelVor}
 										name="titelVor"
 										control={control}
 										rules={{ required: false }}
@@ -698,7 +711,7 @@ const Abendschule2: React.FC = () => {
 									// onBlur={handleBlurVorname}
 									// className="pt-4"
 									// pattern="[A-Z][a-z]*" */}
-							
+
 									<Form.Control.Feedback type="invalid" className="mx-2 mb-1" />
 								</FloatingLabel>
 							</Form.Group>
@@ -708,9 +721,12 @@ const Abendschule2: React.FC = () => {
 									label="Titel nach "
 									className="pt-1"
 								>
+
+
 									<Controller
 										name="titelNach"
 										control={control}
+										defaultValue={titelNach}
 										rules={{ required: false }}
 										render={({ field }) => (
 											<Form.Select {...field} onChange={(e) => {
@@ -790,8 +806,8 @@ const Abendschule2: React.FC = () => {
 										type="text"
 										placeholder="Weitere Vornamen"
 										onChange={handleBlurWeitereVornamen}
-										value={weitereVornamen}
-
+									// value={weitereVornamen}
+									// defaultValue={weitereVornamen}
 									// ref={inputRefNachname}
 									// onBlur={handleBlurNachname}
 									//pattern="[A-Z][a-z]*"
@@ -817,6 +833,7 @@ const Abendschule2: React.FC = () => {
 										name="geschlecht"
 										control={control}
 										rules={{ required: false }}
+										defaultValue={geschlecht}
 										render={({ field }) => (
 											<Form.Select {...field} onChange={(e) => {
 												setGeschlecht(e.target.value); // Update the state with the selected value
@@ -963,25 +980,43 @@ const Abendschule2: React.FC = () => {
 									className="mt-1"
 								>
 									<Col className="mx-3 pt-5">
-										<Form.Check
-											inline
-											label="ja"
-											name="group1"
-											type="radio"
-											id={"inline-radio-1"}
-											value="1"
-											checked={radioState === true}
-											onChange={handleRadioChange}
+										<Controller
+											name="SVTAUT"
+											control={control}
+											rules={{ required: false }} // Set the validation rules as needed
+											render={({ field }) => (
+												<Form.Check
+													inline
+													label="ja"
+													type="radio"
+													id="inline-radio-1"
+													value="1"
+													checked={field.value === "1"}
+													onChange={(e) => {
+														field.onChange(e); // Update the form state
+														setValue('SVTAUT', e.target.value); // Also update the local state if needed
+													}}
+												/>
+											)}
 										/>
-										<Form.Check
-											inline
-											label="nein"
-											name="group1"
-											type="radio"
-											id="inline-radio-2"
-											value="0"
-											checked={radioState === false}
-											onChange={handleRadioChange}
+										<Controller
+											name="SVTAUT"
+											control={control}
+											rules={{ required: false }} // Set the validation rules as needed
+											render={({ field }) => (
+												<Form.Check
+													inline
+													label="nein"
+													type="radio"
+													id="inline-radio-2"
+													value="0"
+													checked={field.value === "0"}
+													onChange={(e) => {
+														field.onChange(e); // Update the form state
+														setValue('SVTAUT', e.target.value); // Also update the local state if needed
+													}}
+												/>
+											)}
 										/>
 									</Col>
 								</FloatingLabel>
@@ -1000,6 +1035,7 @@ const Abendschule2: React.FC = () => {
 											name="sozialversicherungstraeger"
 											control={control}
 											rules={{ required: false }}
+											defaultValue={Number(sozialversicherungstraeger)}
 											render={({ field }) => (
 												<Form.Select {...field} onChange={(e) => {
 													setSozialversicherungstraeger(e.target.value); // Update the state with the selected value
@@ -1027,7 +1063,7 @@ const Abendschule2: React.FC = () => {
 												// required={radioState}
 												type="text"
 												{...register('svNummer', { required: false, pattern: /^\d{4}\s(0[1-9]|[12][0-9]|3[01])(0[1-9]|1[0-2])\d{2}$/ })} isInvalid={!!errors.svNummer}
-												value={svNummer}
+												defaultValue={svNummer}
 												onChange={handleSvNumberChange}
 												pattern="^\d{4}\s(0[1-9]|[12][0-9]|3[01])(0[1-9]|1[0-2])\d{2}$"
 											/>
@@ -1049,14 +1085,14 @@ const Abendschule2: React.FC = () => {
 								>
 
 									<Form.Control
-
+										defaultValue={geburtsort}
 										type="text"
 										{...register('geburtsort', { required: false })} isInvalid={!!errors.geburtsort}
 										//readOnly
 
 
 										onChange={handleBlurGeburtsort}
-										value={geburtsort}
+									// value={geburtsort}
 
 
 									/>
@@ -1076,6 +1112,7 @@ const Abendschule2: React.FC = () => {
 									<Controller
 										name="geburtsland"
 										control={control}
+										defaultValue={Number(geburtsland)}
 										rules={{ required: false }}
 										render={({ field }) => (
 											<Form.Select {...field} onChange={(e) => {
@@ -1106,6 +1143,7 @@ const Abendschule2: React.FC = () => {
 									<Controller
 										name="staatsbuergerschaft"
 										control={control}
+										defaultValue={Number(staatsbuergerschaft)}
 										rules={{ required: false }}
 										render={({ field }) => (
 											<Form.Select {...field} onChange={(e) => {
@@ -1133,6 +1171,7 @@ const Abendschule2: React.FC = () => {
 								><Controller
 										name="muttersprache"
 										control={control}
+										defaultValue={Number(muttersprache)}
 										rules={{ required: false }}
 										render={({ field }) => (
 											<Form.Select {...field} onChange={(e) => {
@@ -1162,6 +1201,7 @@ const Abendschule2: React.FC = () => {
 									<Controller
 										name="alltagssprache"
 										control={control}
+										defaultValue={Number(alltagssprache)}
 										rules={{ required: false }}
 										render={({ field }) => (
 											<Form.Select {...field} onChange={(e) => {
@@ -1189,6 +1229,7 @@ const Abendschule2: React.FC = () => {
 								><Controller
 										name="religion"
 										control={control}
+										defaultValue={Number(religion)}
 										rules={{ required: false }}
 										render={({ field }) => (
 											<Form.Select {...field} onChange={(e) => {
@@ -1218,7 +1259,7 @@ const Abendschule2: React.FC = () => {
 
 										type="text"
 										pattern="^[^\d]+\s+\d+.*$"
-										value={adress}
+										defaultValue={`${strasse} ${Hausnummer}`}
 										onChange={handleBlurAdress}
 										onBlur={parseAddress}
 									//pattern="[A-Z][a-z]*"
@@ -1262,6 +1303,7 @@ const Abendschule2: React.FC = () => {
 
 										name="wohnland"
 										control={control}
+										defaultValue={Number(wohnland)}
 										rules={{ required: false }}
 										render={({ field }) => (
 											<Form.Select {...field} onChange={(e) => {
@@ -1293,7 +1335,8 @@ const Abendschule2: React.FC = () => {
 									<Form.Control
 
 										type="text"
-										value={letzteschulform}
+										defaultValue={letzteschulform}
+										// value={letzteschulform}
 										//pattern="^.{3,}$"
 										{...register('letzteschulform', { required: false })} isInvalid={!!errors.letzteschulform}
 
