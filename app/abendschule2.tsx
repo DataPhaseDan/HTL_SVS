@@ -1,8 +1,8 @@
 //import reactLogo from './assets/react.svg'
 //<Form.Label className='ms-1'>Vorname</Form.Label>
 // import { PhoneNumberUtil, PhoneNumberType } from "google-libphonenumber";
-import axios, { AxiosResponse } from "axios";
-import { useForm, Controller, ControllerRenderProps, set } from "react-hook-form";
+import axios from "axios";
+import { useForm, Controller, Control, ControllerRenderProps, set } from "react-hook-form";
 // import { parsePhoneNumberFromString } from "libphonenumber-js";
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -24,24 +24,26 @@ type FormData = {
 	titelVor: string;
 	titelNach: string;
 	anmeldenummer: string;
+	vorname: string;
+	nachname: string;
+	telnr: string;
+	email: string;
+	geburtsdatum: string;
 	weitereVornamen: string;
 	geschlecht: string;
 	geburtsort: string;
-	geburtsland: number;
-	staatsbuergerschaft: number;
-	muttersprache: number;
-	alltagssprache: number;
-	religion: number;
+	geburtsland: string;
+	staatsbuergerschaft: string;
+	muttersprache: string;
+	alltagssprache: string;
+	religion: string;
 	svNummer: string;
-	sozialversicherungstraeger: number;
+	sozialversicherungstraeger: string;
 	SVTAUT: string;
-	strasse: string;
-	hausnummer: string;
-	plz: string;
-	ort: string;
-	wohnland: number;
+	adresse: string;
+	plzort: string;
+	wohnland: string;
 	letzteschulform: string;
-
 };
 
 // type ZsvBewerber = {
@@ -196,8 +198,12 @@ const Abendschule2: React.FC = () => {
 	const [OptionsSozialversicherungstraeger, setOptionsSozialversicherungstraeger] = useState<Option[]>([]);
 	const [OptionsGeschlecht, setOptionsGeschlecht] = useState<Option[]>([]);
 	const [OptionsAnrede, setOptionsAnrede] = useState<Option2[]>([]);
-	const { register, handleSubmit, setValue, formState: { errors } } = useForm<FormData>();
 
+
+
+	const { register, watch, handleSubmit, control, setValue, formState: { errors } } = useForm<FormData>();
+
+	const SVTAUTValue = watch('SVTAUT');
 	const [anmeldenummer, setAnmeldenummer] = useState("");
 
 	const location = useLocation();
@@ -253,6 +259,7 @@ const Abendschule2: React.FC = () => {
 	const [plzOrt, setPlzOrt] = useState("");
 	// const [, setRadioStateGeschlecht] = useState("");
 	const formData = new FormData();
+	const [prefillData, setPrefillData] = useState<FormData | null>(null);
 
 	// const handleRadioChangeGeschlecht = (
 	// 	event: React.ChangeEvent<HTMLInputElement>,
@@ -496,36 +503,38 @@ const Abendschule2: React.FC = () => {
 				const response = await axios.get(`https://localhost/anmeldungen/abendschule/sessionfill/${session}`);
 				if (response.data && response.data.length > 0) {
 					const data = response.data[0];
+					setPrefillData(data as FormData)
+
 					// Assuming the data is an array and you want the first item
-					setAnrede(data.anrede);
-					setTitelVor(data.titelvor);
-					setTitelNach(data.titelnach);
-					setWeitereVornamen(data.vornamen);
-					setAnmeldenummer(data.anmeldenummer);
-					setGeschlecht(data.geschlecht);
-					setGeburtsort(data.geburtsort);
-					setGeburtsland(data.geburtsland);
-					setStaatsbuergerschaft(data.staatsbuergerschaft);
-					setMuttersprache(data.erstsprache);
-					setAlltagssprache(data.zweitsprache);
-					setReligion(data.religionsbekenntnis);
-					setSvNummer(data.sozialversicherungsnummer);
-					setSozialversicherungstraeger(data.sozialversicherungstraeger);
-					setStrasse(data.strasse);
-					setHausnummer(data.hausnummer);
-					setEmail(data.kontaktmailadresse);
-					setAdress(data.strasse);
-					setPlzOrt(`${data.postleitzahl}, ${data.wohnort}`);
-					setBirthdate(data.geburtsdatum.slice(0, 10));
-					setPlz(data.postleitzahl);
-					setOrt(data.wohnort);
-					setWohnland(data.wohnland);
-					setLetzteschulform(data.letzteschulform);
-					setVorname(data.vorname);
-					setNachname(data.nachname);
-					setPhonenumber(`${data.laendervorwahl1}${data.vorwahl1}${data.nummer1}`);
-					// setValue('vorname', data.vorname);
-					setRadioState(data.sozialversicherungaut);
+					// setAnrede(data.anrede);
+					// setTitelVor(data.titelvor);
+					// setTitelNach(data.titelnach);
+					// setWeitereVornamen(data.vornamen);
+					// setAnmeldenummer(data.anmeldenummer);
+					// setGeschlecht(data.geschlecht);
+					// setGeburtsort(data.geburtsort);
+					// setGeburtsland(data.geburtsland);
+					// setStaatsbuergerschaft(data.staatsbuergerschaft);
+					// setMuttersprache(data.erstsprache);
+					// setAlltagssprache(data.zweitsprache);
+					// setReligion(data.religionsbekenntnis);
+					// setSvNummer(data.sozialversicherungsnummer);
+					// setSozialversicherungstraeger(data.sozialversicherungstraeger);
+					// setStrasse(data.strasse);
+					// setHausnummer(data.hausnummer);
+					// setEmail(data.kontaktmailadresse);
+					// setAdress(data.strasse);
+					// setPlzOrt(`${data.postleitzahl}, ${data.wohnort}`);
+					// setBirthdate(data.geburtsdatum.slice(0, 10));
+					// setPlz(data.postleitzahl);
+					// setOrt(data.wohnort);
+					// setWohnland(data.wohnland);
+					// setLetzteschulform(data.letzteschulform);
+					// setVorname(data.vorname);
+					// setNachname(data.nachname);
+					// setPhonenumber(`${data.laendervorwahl1}${data.vorwahl1}${data.nummer1}`);
+					// // setValue('vorname', data.vorname);
+					// setRadioState(data.sozialversicherungaut);
 				}
 			} catch (error) {
 				console.error(error);
@@ -546,19 +555,19 @@ const Abendschule2: React.FC = () => {
 
 	}, [session]);
 
-	const { control } = useForm({
-		defaultValues: {
-			anrede: anrede,
-			titelVor: titelVor,
-			titelNach: titelNach,
-			weitereVornamen: weitereVornamen,
-			geschlecht: geschlecht,
-			SVTAUT: radioState,
+	// const { control } = useForm({
+	// 	defaultValues: {
+	// 		anrede: anrede,
+	// 		titelVor: titelVor,
+	// 		titelNach: titelNach,
+	// 		weitereVornamen: weitereVornamen,
+	// 		geschlecht: geschlecht,
+	// 		SVTAUT: radioState,
 
 
 
-		},
-	});
+	// 	},
+	// });
 
 
 
@@ -580,28 +589,28 @@ const Abendschule2: React.FC = () => {
 	// TODO: ensure that every field of the form is prefilled
 
 	const onSubmit = (data: FormData) => {
-		formData.append("anrede", anrede);
-		formData.append("titelvor", titelVor);
-		formData.append("titelnach", titelNach);
-		formData.append("vornamen", weitereVornamen);
-		formData.append("kontaktmailadresse", email);
-		formData.append("anmeldenummer", anmeldenummer);
-		formData.append("geschlecht", geschlecht);
-		formData.append("geburtsort", geburtsort);
-		formData.append("geburtsland", geburtsland);
-		formData.append("staatsbuergerschaft", staatsbuergerschaft);
-		formData.append("erstsprache", muttersprache);
-		formData.append("zweitsprache", alltagssprache);
-		formData.append("religionsbekenntnis", religion);
-		formData.append("sozialversicherungaut", Number(radioState)?.toString());
-		formData.append("sozialversicherungsnummer", svNummer);
-		formData.append("sozialversicherungstraeger", sozialversicherungstraeger);
-		formData.append("strasse", adress.split(/(\d+)/)[0]);
-		formData.append("hausnummer", adress.split(/(\d+)/)[1]);
-		formData.append("postleitzahl", Plz);
-		formData.append("wohnort", Ort);
-		formData.append("wohnland", wohnland);
-		formData.append("letzteschulform", letzteschulform);
+		formData.append("anrede", data.anrede);
+		formData.append("titelvor", data.titelVor);
+		formData.append("titelnach", data.titelNach);
+		formData.append("vornamen", data.weitereVornamen);
+		formData.append("kontaktmailadresse", data.email);
+		formData.append("anmeldenummer", data.anmeldenummer);
+		formData.append("geschlecht", data.geschlecht);
+		formData.append("geburtsort", data.geburtsort);
+		formData.append("geburtsland", data.geburtsland);
+		formData.append("staatsbuergerschaft", data.staatsbuergerschaft);
+		formData.append("erstsprache", data.muttersprache);
+		formData.append("zweitsprache", data.alltagssprache);
+		formData.append("religionsbekenntnis", data.religion);
+		formData.append("sozialversicherungaut", data.SVTAUT);
+		formData.append("sozialversicherungsnummer", data.svNummer);
+		formData.append("sozialversicherungstraeger", data.sozialversicherungstraeger);
+		formData.append("strasse", data.adresse.split(/(\d+)/)[0]);
+		formData.append("hausnummer", data.adresse.split(/(\d+)/)[1]);
+		formData.append("postleitzahl", data.plzort.split(", ")[0]);
+		formData.append("wohnort", data.plzort.split(", ")[1]);
+		formData.append("wohnland", data.wohnland);
+		formData.append("letzteschulform", data.letzteschulform);
 
 		console.log("Client_Start -----------");
 		console.log(data);
@@ -658,14 +667,12 @@ const Abendschule2: React.FC = () => {
 									<Controller
 										name="anrede"
 										// defaultValue={anrede}
-
+										defaultValue={prefillData?.anrede || ''}
 										control={control}
 										rules={{ required: false }}
 										render={({ field }) => (
-											<Form.Select {...field} onChange={(e) => {
-												setAnrede(e.target.value); // Update the state with the selected value
-												field.onChange(e); // Also call the original onChange to update the form value
-											}}>
+											<Form.Select {...field}>
+												<option value="" />
 												{OptionsAnrede.map((option) => (
 													<option value={option.value}>
 														{option.name}
@@ -685,15 +692,12 @@ const Abendschule2: React.FC = () => {
 									className="pt-1"
 								>
 									<Controller
-										defaultValue={titelVor}
+										defaultValue={prefillData?.titelVor || ''}
 										name="titelVor"
 										control={control}
 										rules={{ required: false }}
 										render={({ field }) => (
-											<Form.Select {...field} onChange={(e) => {
-												setTitelVor(e.target.value); // Update the state with the selected value
-												field.onChange(e); // Also call the original onChange to update the form value
-											}}>
+											<Form.Select {...field}>
 												<option value="" />
 												{OptionsTitelVor.map((option) => (
 													<option value={option.id}>
@@ -721,18 +725,13 @@ const Abendschule2: React.FC = () => {
 									label="Titel nach "
 									className="pt-1"
 								>
-
-
 									<Controller
 										name="titelNach"
 										control={control}
-										defaultValue={titelNach}
+										defaultValue={prefillData?.titelNach || ''}
 										rules={{ required: false }}
 										render={({ field }) => (
-											<Form.Select {...field} onChange={(e) => {
-												setTitelNach(e.target.value); // Update the state with the selected value
-												field.onChange(e); // Also call the original onChange to update the form value
-											}}>
+											<Form.Select {...field}>
 												<option value="" />
 												{OptionsTitelNach.map((option) => (
 													<option value={option.id}>
@@ -754,16 +753,18 @@ const Abendschule2: React.FC = () => {
 									label="Vorname"
 									className="pt-1"
 								>
-									<Form.Control
-
-										type="text"
-										placeholder="Vorname"
-										value={vorname}
-										disabled
-
-
-									// className="pt-4"
-									// pattern="[A-Z][a-z]*"
+									<Controller
+										name="vorname"
+										control={control}
+										defaultValue={prefillData?.vorname || ''} // Set the default value based on the fetched data
+										render={({ field }) => (
+											<Form.Control
+												type="text"
+												placeholder="Vorname"
+												{...field} // Spread the field props to the Form.Control
+												disabled // Keep the disabled attribute if needed
+											/>
+										)}
 									/>
 									<Form.Control.Feedback type="invalid" className="mx-2 mb-1">
 										Bitte geben Sie den Vornamen des Bewerbers an.
@@ -779,14 +780,18 @@ const Abendschule2: React.FC = () => {
 									label="Nachname"
 									className="pt-1"
 								>
-									<Form.Control
-
-										type="text"
-										placeholder="Nachname"
-										value={nachname}
-										disabled
-
-									//pattern="[A-Z][a-z]*"
+									<Controller
+										name="vorname"
+										control={control}
+										defaultValue={prefillData?.nachname || ''} // Set the default value based on the fetched data
+										render={({ field }) => (
+											<Form.Control
+												type="text"
+												placeholder="Vorname"
+												{...field} // Spread the field props to the Form.Control
+												disabled // Keep the disabled attribute if needed
+											/>
+										)}
 									/>
 									<Form.Control.Feedback type="invalid" className="mx-2">
 										Bitte geben Sie den Nachnamen des Bewerbers an.
@@ -802,15 +807,18 @@ const Abendschule2: React.FC = () => {
 									label="Weitere Vornamen"
 									className="pt-1"
 								>
-									<Form.Control  {...register('weitereVornamen', { required: false })} isInvalid={!!errors.weitereVornamen}
-										type="text"
-										placeholder="Weitere Vornamen"
-										onChange={handleBlurWeitereVornamen}
-									// value={weitereVornamen}
-									// defaultValue={weitereVornamen}
-									// ref={inputRefNachname}
-									// onBlur={handleBlurNachname}
-									//pattern="[A-Z][a-z]*"
+									<Controller
+										name="weitereVornamen"
+										control={control}
+										defaultValue={prefillData?.weitereVornamen || ''} // Set the default value based on the fetched data
+										render={({ field }) => (
+											<Form.Control
+												type="text"
+												placeholder="weitere Vornamen"
+												{...field} // Spread the field props to the Form.Control
+											// disabled // Keep the disabled attribute if needed
+											/>
+										)}
 									/>
 									{/* <Form.Control.Feedback type="invalid" className="mx-2">
                     Bitte geben Sie den Nachnamen des Bewerbers an.
@@ -833,12 +841,9 @@ const Abendschule2: React.FC = () => {
 										name="geschlecht"
 										control={control}
 										rules={{ required: false }}
-										defaultValue={geschlecht}
+										defaultValue={prefillData?.geschlecht || ''} // Set the default value based on the fetched data
 										render={({ field }) => (
-											<Form.Select {...field} onChange={(e) => {
-												setGeschlecht(e.target.value); // Update the state with the selected value
-												field.onChange(e); // Also call the original onChange to update the form value
-											}}>
+											<Form.Select {...field} >
 												<option value="" />
 												{OptionsGeschlecht.map((option) => (
 													<option value={option.id}>
@@ -862,15 +867,18 @@ const Abendschule2: React.FC = () => {
 								controlId="formEmail"
 								className="pt-1"
 							>
-								<Form.Control
-									disabled
-
-									type="email"
-									value={email}
-								// onChange={handleEmailChange}
-								// isInvalid={!isEmailValid}
-								// className={isEmailValid ? "valid-input" : ""}
-								//placeholder="ihre@email.hier"
+								<Controller
+									name="email"
+									control={control}
+									defaultValue={prefillData?.email || ''} // Set the default value based on the fetched data
+									render={({ field }) => (
+										<Form.Control
+											type="email"
+											placeholder="E-mail"
+											{...field} // Spread the field props to the Form.Control
+										// disabled // Keep the disabled attribute if needed
+										/>
+									)}
 								/>
 								{/* <Form.Control.Feedback
 									type={isEmailValid ? "valid" : "invalid"}
@@ -907,14 +915,18 @@ const Abendschule2: React.FC = () => {
 								controlId="formPhone"
 								className="pt-1"
 							>
-								<Form.Control
-									disabled
-
-									type="tel"
-									// placeholder="+43 123 456 7890"
-									value={phoneNumber}
-								// onChange={handlePhoneChange}
-								// isInvalid={!isValid}
+								<Controller
+									name="telnr"
+									control={control}
+									defaultValue={prefillData?.telnr || ''} // Set the default value based on the fetched data
+									render={({ field }) => (
+										<Form.Control
+											type="string"
+											placeholder="text"
+											{...field} // Spread the field props to the Form.Control
+										// disabled // Keep the disabled attribute if needed
+										/>
+									)}
 								/>
 								{/* <Form.Control.Feedback
 									type={isValid ? "valid" : "invalid"}
@@ -948,17 +960,19 @@ const Abendschule2: React.FC = () => {
 									className="pt-1 mt-3"
 								>
 									{/* <Form.Label htmlFor="inputBirthDate">Geburtsdatum</Form.Label> */}
-									<Form.Control
+									<Controller
+										name="geburtsdatum"
+										control={control}
+										defaultValue={prefillData?.geburtsdatum || ''} // Set the default value based on the fetched data
 										disabled
-										type="date"
-										id="inputBirthDate"
-										// required
-										pattern="\d{2}\.\d{2}\.\d{4}"
-										title="Bitte geben Sie ihr Geburtsdatum ein."
-										value={birthdate}
-									// onChange={handleBirthdateChange}
-									// isInvalid={!isBirthdateValid}
-									// className={isBirthdateValid ? "valid-input" : ""}
+										render={({ field }) => (
+											<Form.Control
+												type="date"
+												// placeholder="E-mail"
+												{...field} // Spread the field props to the Form.Control
+											// disabled // Keep the disabled attribute if needed
+											/>
+										)}
 									/>
 									{/* <Form.Control.Feedback
 										type={isBirthdateValid ? "valid" : "invalid"}
@@ -1022,7 +1036,7 @@ const Abendschule2: React.FC = () => {
 								</FloatingLabel>
 							</Form.Group>
 						</Row>
-						{radioState && (
+						{SVTAUTValue === '1' && (
 							<Form.Group className="mb-3 mt-5" controlId="validationSVV">
 								{
 									<FloatingLabel
@@ -1035,12 +1049,10 @@ const Abendschule2: React.FC = () => {
 											name="sozialversicherungstraeger"
 											control={control}
 											rules={{ required: false }}
-											defaultValue={Number(sozialversicherungstraeger)}
+											defaultValue={prefillData?.sozialversicherungstraeger || ''} // Set the default value based on the fetched data
+
 											render={({ field }) => (
-												<Form.Select {...field} onChange={(e) => {
-													setSozialversicherungstraeger(e.target.value); // Update the state with the selected value
-													field.onChange(e); // Also call the original onChange to update the form value
-												}}>
+												<Form.Select {...field} >
 													<option value="" />
 													{OptionsSozialversicherungstraeger.map((option) => (
 														<option value={option.id}>
@@ -1059,13 +1071,18 @@ const Abendschule2: React.FC = () => {
 											label="SV-Nummer"
 											className="pt-1"
 										>
-											<Form.Control
-												// required={radioState}
-												type="text"
-												{...register('svNummer', { required: false, pattern: /^\d{4}\s(0[1-9]|[12][0-9]|3[01])(0[1-9]|1[0-2])\d{2}$/ })} isInvalid={!!errors.svNummer}
-												defaultValue={svNummer}
-												onChange={handleSvNumberChange}
-												pattern="^\d{4}\s(0[1-9]|[12][0-9]|3[01])(0[1-9]|1[0-2])\d{2}$"
+											<Controller
+												name="svNummer"
+												control={control}
+												defaultValue={prefillData?.svNummer || ''} // Set the default value based on the fetched data
+												render={({ field }) => (
+													<Form.Control
+														type="text"
+														placeholder="SV-Nummer"
+														{...field} // Spread the field props to the Form.Control
+													// disabled // Keep the disabled attribute if needed
+													/>
+												)}
 											/>
 											<Form.Control.Feedback type="invalid" className="mx-2">
 												Bitte geben Sie Ihre SV-Nummer in der Form 1234 TTMMJJ ein.
@@ -1084,17 +1101,18 @@ const Abendschule2: React.FC = () => {
 									className="pt-1"
 								>
 
-									<Form.Control
-										defaultValue={geburtsort}
-										type="text"
-										{...register('geburtsort', { required: false })} isInvalid={!!errors.geburtsort}
-										//readOnly
-
-
-										onChange={handleBlurGeburtsort}
-									// value={geburtsort}
-
-
+									<Controller
+										name="geburtsort"
+										control={control}
+										defaultValue={prefillData?.geburtsort || ''} // Set the default value based on the fetched data
+										render={({ field }) => (
+											<Form.Control
+												type="text"
+												placeholder="Geburtsort"
+												{...field} // Spread the field props to the Form.Control
+											// disabled // Keep the disabled attribute if needed
+											/>
+										)}
 									/>
 									<Form.Control.Feedback type="invalid" className="mx-2">
 										Bitte geben Sie ihren Geburtsort an.
@@ -1112,13 +1130,10 @@ const Abendschule2: React.FC = () => {
 									<Controller
 										name="geburtsland"
 										control={control}
-										defaultValue={Number(geburtsland)}
+										defaultValue={prefillData?.geburtsland || ''} // Set the default value based on the fetched data
 										rules={{ required: false }}
 										render={({ field }) => (
-											<Form.Select {...field} onChange={(e) => {
-												setGeburtsland(e.target.value); // Update the state with the selected value
-												field.onChange(e); // Also call the original onChange to update the form value
-											}}>
+											<Form.Select {...field} >
 												<option value="" />
 												{OptionsGeburtsland.map((option) => (
 													<option value={option.id}>
@@ -1143,13 +1158,10 @@ const Abendschule2: React.FC = () => {
 									<Controller
 										name="staatsbuergerschaft"
 										control={control}
-										defaultValue={Number(staatsbuergerschaft)}
+										defaultValue={prefillData?.staatsbuergerschaft || ''} // Set the default value based on the fetched data
 										rules={{ required: false }}
 										render={({ field }) => (
-											<Form.Select {...field} onChange={(e) => {
-												setStaatsbuergerschaft(e.target.value); // Update the state with the selected value
-												field.onChange(e); // Also call the original onChange to update the form value
-											}}>
+											<Form.Select {...field} >
 												<option value="" />
 												{OptionsStaatsbuergerschaft.map((option) => (
 													<option value={option.id}>
@@ -1171,13 +1183,10 @@ const Abendschule2: React.FC = () => {
 								><Controller
 										name="muttersprache"
 										control={control}
-										defaultValue={Number(muttersprache)}
+										defaultValue={prefillData?.muttersprache || ''} // Set the default value based on the fetched data
 										rules={{ required: false }}
 										render={({ field }) => (
-											<Form.Select {...field} onChange={(e) => {
-												setMuttersprache(e.target.value); // Update the state with the selected value
-												field.onChange(e); // Also call the original onChange to update the form value
-											}}>
+											<Form.Select {...field} >
 												<option value="" />
 												{OptionsErstsprache.map((option) => (
 													<option value={option.id}>
@@ -1201,13 +1210,10 @@ const Abendschule2: React.FC = () => {
 									<Controller
 										name="alltagssprache"
 										control={control}
-										defaultValue={Number(alltagssprache)}
+										defaultValue={prefillData?.alltagssprache || ''} // Set the default value based on the fetched data
 										rules={{ required: false }}
 										render={({ field }) => (
-											<Form.Select {...field} onChange={(e) => {
-												setAlltagssprache(e.target.value); // Update the state with the selected value
-												field.onChange(e); // Also call the original onChange to update the form value
-											}}>
+											<Form.Select {...field} >
 												<option value="" />
 												{OptionsZweitsprache.map((option) => (
 													<option value={option.id}>
@@ -1229,13 +1235,10 @@ const Abendschule2: React.FC = () => {
 								><Controller
 										name="religion"
 										control={control}
-										defaultValue={Number(religion)}
+										defaultValue={prefillData?.religion || ''} // Set the default value based on the fetched data
 										rules={{ required: false }}
 										render={({ field }) => (
-											<Form.Select {...field} onChange={(e) => {
-												setReligion(e.target.value); // Update the state with the selected value
-												field.onChange(e); // Also call the original onChange to update the form value
-											}}>
+											<Form.Select {...field} >
 												<option value="" />
 												{OptionsReligionsbekenntnis.map((option) => (
 													<option value={option.id}>
@@ -1254,16 +1257,29 @@ const Abendschule2: React.FC = () => {
 									label="Strasse Hausnummer"
 									className="pt-1"
 								>
-									<Form.Control
+									<Controller
+										name="adresse"
+										control={control}
+										defaultValue={prefillData?.adresse || ''} // Set the default value based on the fetched data
+										render={({ field }) => (
+											<Form.Control
+												pattern="^[^\d]+\s+\d+.*$"
+												type="text"
+												placeholder="Straße Hausnummer"
+												{...field} // Spread the field props to the Form.Control
+											// disabled // Keep the disabled attribute if needed
+											/>
+										)}
+									/>
+									{/* <Form.Control
 
 
 										type="text"
-										pattern="^[^\d]+\s+\d+.*$"
 										defaultValue={`${strasse} ${Hausnummer}`}
 										onChange={handleBlurAdress}
 										onBlur={parseAddress}
 									//pattern="[A-Z][a-z]*"
-									/>
+									/> */}
 									<Form.Control.Feedback type="invalid" className="mx-2">
 										Bitte geben Sie Ihre Adresse in der Form Strasse Hausnummer
 										Top Stiege etc. ein.
@@ -1278,13 +1294,27 @@ const Abendschule2: React.FC = () => {
 									label="PLZ, Ort"
 									className="pt-1"
 								>
-									<Form.Control
+
+									<Controller
+										name="plzort"
+										control={control}
+										defaultValue={prefillData?.plzort || ''} // Set the default value based on the fetched data
+										render={({ field }) => (
+											<Form.Control
+												type="text"
+												placeholder="PLZ, Ort"
+												pattern="^[1-9]\d{3,5}, [^\d]{2,}$"
+												{...field} // Spread the field props to the Form.Control
+											// disabled // Keep the disabled attribute if needed
+											/>
+										)}
+									/>
+									{/* <Form.Control
 										type="text"
-										pattern="^[1-9]\d{3,5}, [^\d]{2,}$"
 										value={plzOrt}
 										onChange={handleBlurPlzOrt}
 										onBlur={parsePlzOrt}
-									/>
+									/> */}
 									<Form.Control.Feedback type="invalid" className="mx-2">
 										Bitte geben Sie Ihre PLZ und Ort in der Form PLZ, Ortsname
 										ein.
@@ -1303,13 +1333,10 @@ const Abendschule2: React.FC = () => {
 
 										name="wohnland"
 										control={control}
-										defaultValue={Number(wohnland)}
+										defaultValue={prefillData?.wohnland || ''} // Set the default value based on the fetched data
 										rules={{ required: false }}
 										render={({ field }) => (
-											<Form.Select {...field} onChange={(e) => {
-												setWohnland(e.target.value); // Update the state with the selected value
-												field.onChange(e); // Also call the original onChange to update the form value
-											}}>
+											<Form.Select {...field} >
 												<option value="" />
 												{OptionsWohnland.map((option) => (
 													<option value={option.id}>
@@ -1332,18 +1359,19 @@ const Abendschule2: React.FC = () => {
 									label="Zuletzt besuchte Schulform"
 									className="pt-1"
 								>
-									<Form.Control
-
-										type="text"
-										defaultValue={letzteschulform}
-										// value={letzteschulform}
-										//pattern="^.{3,}$"
-										{...register('letzteschulform', { required: false })} isInvalid={!!errors.letzteschulform}
-
-									//readOnly
-									// ref={inputRefGeburtsort}
-									// onBlur={handleBlurGeburtsort}
-									//pattern="[A-Z][a-z]*"
+									<Controller
+										name="letzteschulform"
+										control={control}
+										defaultValue={prefillData?.letzteschulform || ''} // Set the default value based on the fetched data
+										render={({ field }) => (
+											<Form.Control
+												type="text"
+												placeholder="Zuletzt besuchte Schulform"
+												// pattern="^[1-9]\d{3,5}, [^\d]{2,}$"
+												{...field} // Spread the field props to the Form.Control
+											// disabled // Keep the disabled attribute if needed
+											/>
+										)}
 									/>
 									<Form.Control.Feedback type="invalid" className="mx-2">
 										Bitte geben Sie ihre zuletzt besuchte Schulform an.
