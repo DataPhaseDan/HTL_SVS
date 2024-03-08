@@ -13,12 +13,7 @@ export default defineConfig({
 		// Create a clean output directory
 		outDir: "dist",
 		// Configure paths for dependencies
-		rollupOptions: {
-			input: {
-				main: path.resolve(__dirname, "index.html"),
-			},
 	
-		},
 	},
 	// Configure paths for React Router imports
 	resolve: {

@@ -1,36 +1,36 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "useDefineForClassFields": true,
+    "target": "es5",
     "lib": [
-      "ES2020",
-      "DOM",
-      "DOM.Iterable"
+      "dom",
+      "dom.iterable",
+      "esnext"
     ],
-    "module": "NodeNext",
+    "module": "ESNext",
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     /* Bundler mode */
-    "composite": true,
-    "moduleResolution": "NodeNext",
-    "allowImportingTsExtensions": true,
+    "moduleResolution": "node",
+    "downlevelIteration": true,
     "resolveJsonModule": true,
+    "esModuleInterop": true,
     "isolatedModules": true,
-    "noEmit": true,
     "jsx": "react-jsx",
+    "allowJs": true,
     "allowSyntheticDefaultImports": true,
     /* Linting */
     "strict": true,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noFallthroughCasesInSwitch": true,
+    "incremental": true,
     /* Formatter */
     "plugins": [
       {
         "name": "biomejs"
       }
-    ]
+    ],
   },
+  "exclude": [
+    "node_modules"
+  ],
   "include": [
     "login.tsx",
     "main.tsx",
@@ -42,8 +42,10 @@
     "vite-env.d.ts",
     "abendschule1.tsx",
     "abendschule2.tsx",
-    "adminpanel.tsx",
     "ausbildung.tsx",
-    "erziehungsberechtigte.tsx"
+    "erziehungsberechtigte.tsx",
+    "autocomplete.tsx",
+    "adminpanel.tsx",
+    "kontakt.tsx",
   ],
 }

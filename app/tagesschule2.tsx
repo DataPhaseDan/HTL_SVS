@@ -1,26 +1,37 @@
-//import reactLogo from './assets/react.svg'
-//<Form.Label className='ms-1'>Vorname</Form.Label>
+import { PhoneNumberFormat, PhoneNumberType, PhoneNumberUtil } from "google-libphonenumber";
 import axios from "axios";
-import { PhoneNumberUtil,PhoneNumberType } from "google-libphonenumber";
-import { useState, useRef, useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, Control, ControllerRenderProps, set } from "react-hook-form";
+import type React from "react";
+import { useState, useEffect, useRef } from "react";
+import { useLocation, useNavigate } from 'react-router-dom';
+
 import {
-	Accordion,
 	//Accordion,
 	Button,
 	Col,
 	Container,
 	FloatingLabel,
 	Form,
-	// Modal,
+	Modal,
 	ProgressBar,
 	Row,
+	Accordion
 } from "react-bootstrap";
 
 type FormData = {
 	anrede: string;
 	titelVor: string;
 	titelNach: string;
+	anmeldenummer: string;
+	kontaktmailadresse: string;
+	vorname: string;
+	nachname: string;
+	telnr: string;
+	laendervorwahl1: string;
+	vorwahl1: string;
+	nummer1: string;
+	email: string;
+	geburtsdatum: string;
 	weitereVornamen: string;
 	geschlecht: string;
 	geburtsort: string;
@@ -30,149 +41,172 @@ type FormData = {
 	alltagssprache: string;
 	religion: string;
 	svNummer: string;
+	svGebDat: string;
 	sozialversicherungstraeger: string;
+	SVTAUT: string;
 	strasse: string;
+	adresse: string;
+	plzort: string;
 	hausnummer: string;
 	plz: string;
 	ort: string;
+	plzA: string;
+	ortA: string;
+	plzB: string;
+	ortB: string;
 	wohnland: string;
 	letzteschulform: string;
+	verhaeltnisA: string;
+	anredeA: string;
+	titelvorA: string;
+	titelnachA: string;
+	nachnameA: string;
+	vornameA: string;
+	strasseA: string;
+	adresseA: string;
+	plzortA: string;
+	adresseB: string;
+	plzortB: string;
+	hausnummerA: string;
+	postleitzahlA: string;
+	wohnortA: string;
+	wohnlandA: string;
+	laendervorwahlA2: string;
+	vorwahlA2: string;
+	nummerA2: string;
+	mailadresseA: string;
+	verhaeltnisB: string;
+	anredeB: string;
+	titelvorB: string;
+	titelnachB: string;
+	nachnameB: string;
+	vornameB: string;
+	strasseB: string;
+	hausnummerB: string;
+	postleitzahlB: string;
+	wohnortB: string;
+	wohnlandB: string;
+	laendervorwahlB1: string;
+	vorwahlB1: string;
+	nummerB1: string;
+	laendervorwahlB2: string;
+	vorwahlB2: string;
+	nummerB2: string;
+	mailadresseB: string;
+	geschwisteranzahl: string;
+	geschwisteranschule: string;
+	geschwisternamen: string;
+	erstwunsch: string;
+	erstwunschschule: string;
+	zweitwunschschule: string;
 };
 
-function Tagesschule2() {
+
+const Abendschule2: React.FC = () => {
+
+	interface Option {
+		id: number;
+		name: string;
+	}
+	interface Option2 {
+		value: string;
+		name: string;
+	}
+
+	const [OptionsGeburtsland, setOptionsGeburtsland] = useState<Option[]>([]);
+	const [OptionsStaatsbuergerschaft, setOptionsStaatsbuergerschaft] = useState<Option[]>([]);
+	const [OptionsErstsprache, setOptionsErstsprache] = useState<Option[]>([]);
+	const [OptionsZweitsprache, setOptionsZweitsprache] = useState<Option[]>([]);
+	const [OptionsReligionsbekenntnis, setOptionsReligionsbekenntnis] = useState<Option[]>([]);
+	const [OptionsWohnland, setOptionsWohnland] = useState<Option[]>([]);
+	const [OptionsTitelVor, setOptionsTitelVor] = useState<Option[]>([]);
+	const [OptionsTitelNach, setOptionsTitelNach] = useState<Option[]>([]);
+	const [OptionsSozialversicherungstraeger, setOptionsSozialversicherungstraeger] = useState<Option[]>([]);
+	const [OptionsGeschlecht, setOptionsGeschlecht] = useState<Option[]>([]);
+	const [OptionsVerhaeltnis, setOptionsVerhaeltnis] = useState<Option[]>([]);
+	const [OptionsAnrede, setOptionsAnrede] = useState<Option2[]>([]);
+	// const [OptionsAnredeA, setOptionsAnredeA] = useState<Option2[]>([]);
+	const { watch, handleSubmit, control, setValue, formState: { errors } } = useForm<FormData>();
+	const [emailB, setEmailB] = useState("");
+	const [isEmailValid, setIsEmailValid] = useState<boolean>(false);
+	const SVTAUTValue = watch('SVTAUT');
+	const Erstwunsch = watch('erstwunsch');
+
+	const location = useLocation();
+	const searchParams = new URLSearchParams(location.search);
+	const session = searchParams.get("session");
+	const navigate = useNavigate();
+	if (!session) {
+		navigate("/");
+
+	}
+
+	const [email, setEmail] = useState("");
+
+
+	// const [isChecked, setIsChecked] = useState(false);
+
+
 	const [validated, setValidated] = useState(true);
 	const [currentDate] = useState(getYear());
-	const [email, setEmail] = useState("");
-	const [isEmailValid, setIsEmailValid] = useState<boolean>(false);
-	const [phoneNumber, setPhoneNumber] = useState("");
-	const [isValid, setIsValid] = useState<boolean>(false);
-	const [birthdate, setBirthdate] = useState("");
-	const [isBirthdateValid, setIsBirthdateValid] = useState(false);
-	const inputRefVorname = useRef<HTMLInputElement>(null);
-	const inputRefNachname = useRef<HTMLInputElement>(null);
-	const inputRefGeburtsort = useRef<HTMLInputElement>(null);
-	// const [showModal, setShowModal] = useState<boolean>(false);
-	const [isSubmitted, setIsSubmitted] = useState(false);
-	const [radioState, setRadioState] = useState(false);
-	const [svNumber, setSvNumber] = useState("");
-	const [adress, setAdress] = useState("");
-	const [plzOrt, setPlzOrt] = useState("");
-	const [radioStateGeschlecht, setRadioStateGeschlecht] = useState("");
-	const [radioStateErstwunschSchule, setRadioStateErstwunschSchule] =
-		useState("");
-	const [geschwisterHtl, setGeschwisterHtl] = useState(false);
+
+	// const [isValid, setIsValid] = useState<boolean>(false);
+	// const [isEmailValid, setIsEmailValid] = useState<boolean>(false);
+	// const [phoneNumber, setPhonenumber] = useState("");
+	// const [isValid, setIsValid] = useState<boolean>(false);
+	// const [birthdate, setBirthdate] = useState("");
+	// const [isEmailValid, setIsEmailValid] = useState<boolean>(false);
+	// const [isBirthdateValid, setIsBirthdateValid] = useState(false);
+	// const [vorname, setVorname] = useState("");
+	// const [nachname, setNachname] = useState("");
 	const currentDateForOption = new Date();
 	const specificDateCutoff = new Date(currentDateForOption.getFullYear(), 1, 1);
-	const { register, handleSubmit,setValue, control, formState: { errors } } = useForm<FormData>();
-	const formData = new FormData();
-	const [, setShowModal] = useState<boolean>(false);
-	const handlePhoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setPhoneNumber(event.target.value.trim());
-	};
-	const handlePhoneBlur = () => {
+	const [showModalEmail, setShowModalEmail] = useState<boolean>(false);
+	const [showModalSchoolReport, setShowModalSchoolReport] = useState<boolean>(false);
+	const [isValid, setIsValid] = useState<boolean>(false);
+	const [phoneNumber, setPhoneNumber] = useState("");
+	const [isSubmitted, setIsSubmitted] = useState(false);
+	// const [showModal, setShowModal] = useState<boolean>(false);
+	// const [isSubmitted, setIsSubmitted] = useState(false);
+	// const [radioState, setRadioState] = useState(true);
+	// const [adress, setAdress] = useState("");
+	// const [plzOrt, setPlzOrt] = useState("");
+	// const [, setRadioStateGeschlecht] = useState("");
+	const [prefillData, setPrefillData] = useState<FormData | null>(null);
+	const handlePhoneBlur = (event: React.ChangeEvent<HTMLInputElement>) => {
+		const inputPhoneNumber = event.target.value.trim();
+		setPhoneNumber(inputPhoneNumber);
 		const phoneUtil = PhoneNumberUtil.getInstance();
-		let isE164 = false;
 		let isValid = false;
 
 		try {
-			const inputNumber = phoneUtil.parse(phoneNumber);
-			isE164 = phoneUtil.getNumberType(inputNumber) === PhoneNumberType.MOBILE;
-			isValid = phoneUtil.isValidNumber(inputNumber);
+			// Parse the number without specifying a country code
+			const inputNumber = phoneUtil.parse(inputPhoneNumber);
+			// Check if the number is valid and possible
+			isValid = phoneUtil.isValidNumber(inputNumber) && phoneUtil.isPossibleNumber(inputNumber);
+			// Format the number in the international format
+			const formattedNumber = phoneUtil.format(inputNumber, PhoneNumberFormat.INTERNATIONAL);
+			// Check if the number is in the correct format
+			const regex = /^\+\d{1,3} \d{1,3} \d{1,8}$/; // This pattern allows for any country code, area code, and local number
+			isValid = isValid && regex.test(formattedNumber);
 		} catch (err) {
 			console.error(err);
 		}
 
-		setIsValid(isE164 ? isValid : false);
-	};
-	const handleRadioChangeGeschlecht = (
-		event: React.ChangeEvent<HTMLInputElement>,
-	) => {
-		setRadioStateGeschlecht(event.target.value);
-	};
-	const handleRadioErstwunschSchule = (
-		event: React.ChangeEvent<HTMLInputElement>,
-	) => {
-		setRadioStateErstwunschSchule(event.target.value);
-	};
-
-	const handleBlurPlzOrt = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setPlzOrt(event.target.value);
-	};
-
-	const handleGeschwisterHtl = (
-		event: React.ChangeEvent<HTMLSelectElement>,
-	) => {
-		setGeschwisterHtl(event.target.value > "0");
-	};
-	const parsePlzOrt = () => {
-		const parts = plzOrt.split(", ");
-		const plz = parts[0];
-		const ort = parts[1];
-		console.log(`PLZ: ${plz}, Ort: ${ort}`);
-	};
-
-	const handleRadioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setRadioState(event.target.value === "true");
-	};
-
-	const handleBlurAdress = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setAdress(event.target.value);
-	};
-
-	const parseAddress = () => {
-		// const parts = adress.split(/(\d+)/);
-		// const streetName = parts[0].trim();
-		// const streetNumber = parts[1];
-		//console.log(`Street Name: ${streetName}, Street Number: ${streetNumber}`);
-	};
-
-	const handleSvNumberChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		let value = event.target.value.replace(/\s/g, ""); // remove all spaces
-		if (value.length > 4) {
-			value = `${value.slice(0, 4)} ${value.slice(4)}`; // add a space after the 4th character
-		}
-		setSvNumber(value);
-	};
-	// const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-	//   setIsChecked(event.target.checked);
-	// };
-
-	const handleBirthdateChange = (
-		event: React.ChangeEvent<HTMLInputElement>,
-	) => {
-		const birthdateValue = event.target.value;
-		setBirthdate(birthdateValue);
-		setIsBirthdateValid(validateBirthdate(birthdateValue));
-	};
-
-	// const handlePhoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-	// 	const inputNumber = parsePhoneNumberFromString(event.target.value);
-	// 	setPhoneNumber(event.target.value);
-	// 	setIsValid(inputNumber ? inputNumber.isValid() : false);
-	// };
-
-	const validateBirthdate = (birthdate: string) => {
-		const birthdateParts = birthdate.split(".");
-		const birthdateDate = new Date(
-			`${birthdateParts[2]}-${birthdateParts[1]}-${birthdateParts[0]}`,
-		);
-		const currentDate = new Date();
-		const ageDiffMs = currentDate.getTime() - birthdateDate.getTime();
-		const ageDate = new Date(ageDiffMs);
-		const age = Math.abs(ageDate.getUTCFullYear() - 1970);
-		return age >= 17;
+		setIsValid(isValid);
 	};
 
 	const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setIsEmailValid(validateEmail(event.target.value));
-		setEmail(event.target.value);
+		setEmailB(event.target.value.trim());
 	};
-
 	const validateEmail = (email: string) => {
 		const re =
 			/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 		return re.test(String(email).toLowerCase());
 	};
+
+
 
 	function getYear() {
 		const date = new Date();
@@ -180,87 +214,273 @@ function Tagesschule2() {
 		const nextYear = year + 1;
 		return `${year}/${nextYear}`;
 	}
-
 	const capitalizeFirstLetter = (string: string) => {
 		return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 	};
-
-	const handleBlurVorname = () => {
-		if (inputRefVorname.current) {
-			const capitalized = capitalizeFirstLetter(inputRefVorname.current.value);
-			inputRefVorname.current.value = capitalized;
-		}
+	const capitalizeFirstLetterOfEachWord = (string: string) => {
+		return string.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
 	};
 
-	const handleBlurGeburtsort = () => {
-		if (inputRefGeburtsort.current) {
-			const capitalized = capitalizeFirstLetter(
-				inputRefGeburtsort.current.value,
-			);
-			inputRefGeburtsort.current.value = capitalized;
-		}
-	};
 
-	const handleBlurNachname = () => {
-		if (inputRefNachname.current) {
-			const capitalized = capitalizeFirstLetter(inputRefNachname.current.value);
-			inputRefNachname.current.value = capitalized;
-		}
-	};
 
-	const handleSubmit2 = (event: React.FormEvent) => {
-		console.log("submitted diiiiiga, one step closer to Daniel Düsentrieb!");
-		const form = event.currentTarget as HTMLFormElement;
-		if (form.checkValidity() === false) {
-			event.preventDefault();
-			event.stopPropagation();
-
-			//event.persist();
-		}
-		// setShowModal(true);
-		setIsSubmitted(true);
-		setValidated(true);
-		//event.preventDefault();
-		//event.stopPropagation();
-	};
 
 	useEffect(() => {
-		if (isSubmitted) {
-			// setShowModal(true);
-		}
-	}, [isSubmitted]);
+		const fetchOptionsGeburtsland = async () => {
+			try {
+				const response = await axios.get('/options/geburtsland/');
+				setOptionsGeburtsland(response.data);
+			} catch (error) {
+				console.error('Error fetching options:', error);
+			}
+		};
+		const fetchOptionsSozialversicherungstraeger = async () => {
+			try {
+				const response = await axios.get('/options/sozialversicherungstraeger/');
+				setOptionsSozialversicherungstraeger(response.data);
+			} catch (error) {
+				console.error('Error fetching options:', error);
+			}
+		};
+		const fetchOptionsStaatsbuergerschaft = async () => {
+			try {
+				const response = await axios.get('/options/staatsbuergerschaft/');
+				setOptionsStaatsbuergerschaft(response.data);
+			} catch (error) {
+				console.error('Error fetching options:', error);
+			}
+		};
+		const fetchOptionsErstsprache = async () => {
+			try {
+				const response = await axios.get('/options/erstsprache/');
+				setOptionsErstsprache(response.data);
+			} catch (error) {
+				console.error('Error fetching options:', error);
+			}
+		};
+		const fetchOptionsZweitsprache = async () => {
+			try {
+				const response = await axios.get('/options/zweitsprache/');
+				setOptionsZweitsprache(response.data);
+			} catch (error) {
+				console.error('Error fetching options:', error);
+			}
+		};
+		const fetchOptionsReligionsbekenntnis = async () => {
+			try {
+				const response = await axios.get('/options/religionsbekenntnis/');
+				setOptionsReligionsbekenntnis(response.data);
+			} catch (error) {
+				console.error('Error fetching options:', error);
+			}
+		};
+		const fetchOptionsWohnland = async () => {
+			try {
+				const response = await axios.get('/options/wohnland/');
+				setOptionsWohnland(response.data);
+			} catch (error) {
+				console.error('Error fetching options:', error);
+			}
+		};
+		const fetchOptionsGeschlecht = async () => {
+			try {
+				const response = await axios.get('/options/geschlecht/');
+				setOptionsGeschlecht(response.data);
+			} catch (error) {
+				console.error('Error fetching options:', error);
+			}
+		};
+		const fetchOptionsAnrede = async () => {
+			try {
+				const response = await axios.get('/options/anrede/');
+				setOptionsAnrede(response.data);
+			} catch (error) {
+				console.error('Error fetching options:', error);
+			}
+		};
+		const fetchOptionsTitelVor = async () => {
+			try {
+				const response = await axios.get('/options/titel/');
+				setOptionsTitelVor(response.data);
+			} catch (error) {
+				console.error('Error fetching options:', error);
+			}
+		};
+		const fetchOptionsTitelNach = async () => {
+			try {
+				const response = await axios.get('/options/titel/');
+				setOptionsTitelNach(response.data);
+			} catch (error) {
+				console.error('Error fetching options:', error);
+			}
+		};
+		const fetchOptionsVerhaeltnis = async () => {
+			try {
+				const response = await axios.get('/options/verhaeltnis/');
+				setOptionsVerhaeltnis(response.data);
+			} catch (error) {
+				console.error('Error fetching options:', error);
+			}
+		};
+		fetchOptionsAnrede();
+		fetchOptionsTitelVor();
+		fetchOptionsTitelNach();
+		fetchOptionsGeschlecht();
+		fetchOptionsGeburtsland();
+		fetchOptionsStaatsbuergerschaft();
+		fetchOptionsErstsprache();
+		fetchOptionsZweitsprache();
+		fetchOptionsReligionsbekenntnis();
+		fetchOptionsWohnland();
+		fetchOptionsSozialversicherungstraeger();
+		fetchOptionsVerhaeltnis();
+	}
+		, []);
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	useEffect(() => {
+		// Assuming phoneNumber is the state variable holding the phone number value
+		handlePhoneBlur({ target: { value: phoneNumber } } as React.ChangeEvent<HTMLInputElement>);
+	}, [phoneNumber]);
+
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	useEffect(() => {
+		// Assuming emailB is the state variable holding the email value
+		handleEmailChange({ target: { value: emailB } } as React.ChangeEvent<HTMLInputElement>);
+	}, [emailB]);
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	useEffect(() => {
+		const fetchData = async () => {
+			try {
+				const response = await axios.get(`https://localhost/anmeldungen/tagesschule/sessionfill/${session}`);
+				if (response.data && response.data.length > 0) {
+					const data = response.data[0];
+					setPrefillData(data as FormData)
+					setValue('anrede', data.anrede);
+					setValue('anredeA', data.anredea);
+					setValue('anredeB', data.anredeb);
+					setValue('titelvorA', data.titelvora);
+					setValue('titelnachA', data.titelnacha);
+					setValue('titelvorB', data.titelvorb);
+					setValue('titelnachB', data.titelnachb);
+					setValue('vornameA', data.vornamea);
+					setValue('nachnameA', data.nachnamea);
+					setValue('vornameB', data.vornameb);
+					setValue('nachnameB', data.nachnameb);
+					// setValue('telnrA', data.telnr);
+					setValue('mailadresseA', data.kontaktmailadresse);
+					setValue('strasseA', data.strassea);
+					setValue('hausnummerA', data.hausnummera);
+					setValue('adresseA', `${data.strassea} ${data.hausnummera}`);
+					setValue('plzortA', `${data.postleitzahla}, ${data.wohnorta}`);
+					setValue('plzA', data.postleitzahla);
+					setValue('ortA', data.wohnorta);
+					setValue('wohnlandA', data.wohnlanda);
+					setValue('mailadresseB', data.mailadresseb);
+					setValue('strasseB', data.strasseb);
+					setValue('hausnummerB', data.hausnummerb);
+					setValue('adresseB', `${data.strasseb} ${data.hausnummerb}`);
+					setValue('plzortB', `${data.postleitzahlb}, ${data.wohnortb}`);
+					setValue('plzB', data.postleitzahlb);
+					setValue('ortB', data.wohnortb);
+					setValue('wohnlandB', data.wohnlanda);
+					setValue('geschlecht', data.geschlecht);
+					setValue('vorname', data.vorname);
+					setValue('nachname', data.nachname);
+					setValue('telnr', `${data.laendervorwahl1}${data.vorwahl1}${data.nummer1}`);
+					setValue('email', data.kontaktmailadresse);
+					setValue('geburtsdatum', data.geburtsdatum.substring(0, 10));
+					setValue('weitereVornamen', data.vornamen);
+					setValue('geburtsort', data.geburtsort);
+					setValue('geburtsland', data.geburtsland);
+					setValue('staatsbuergerschaft', data.staatsbuergerschaft);
+					setValue('muttersprache', data.erstsprache);
+					setValue('alltagssprache', data.zweitsprache);
+					setValue('religion', data.religionsbekenntnis);
+					setValue('svGebDat', data.sozialversicherungsGebDat);
+					setValue('svNummer', `${data.sozialversicherungsnummer} ${data.sozialversicherungsgebdat}`);
+					setValue("SVTAUT", data.sozialversicherungaut.toString());
+					setValue('sozialversicherungstraeger', data.sozialversicherungstraeger);
+					setValue('strasse', data.strasse);
+					setValue('hausnummer', data.hausnummer);
+					setValue('adresse', `${data.strasse} ${data.hausnummer}`);
+					setValue('plzort', `${data.postleitzahl}, ${data.wohnort}`);
+					setValue('plz', data.postleitzahl);
+					setValue('ort', data.wohnort);
+					setValue('wohnland', data.wohnland);
+					setValue('letzteschulform', data.letzteschulform);
+					setValue('zweitwunschschule', data.zweitwunschschule);
+					setValue('erstwunsch', data.erstwunsch);
+					setValue('geschwisteranzahl', data.geschwisteranzahl);
+					setValue('geschwisteranschule', data.geschwisteranschule);
+					setValue('geschwisternamen', data.geschwisternamen);
+					setValue('verhaeltnisA', data.verhaeltnisa);
+					setValue('anredeA', data.anredea);
+					setValue('verhaeltnisB', data.verhaeltnisb);
+					setValue('anredeB', data.anredeb);
+					setValue('titelvorB', data.titelvorb);
+					setValue('titelnachB', data.titelnachb);
+					setPhoneNumber(`${data.laendervorwahlb1}${data.vorwahlb1}${data.nummerb1}`);
+					setEmailB(data.mailadresseb);
+				}
+			} catch (error) {
+				console.error(error);
+			}
+		};
+
+		fetchData();
+
+	}, [session]);
+
+
+	// const fetchSessionData = async (sessionHash: string): Promise<ZsvBewerber[]> => {
+	// 	try {
+	// 		const response = await fetch(`https://localhost/anmeldungen/abendschule/session/${sessionHash}`);
+
+	// 		if (!response.ok) {
+	// 			throw new Error(`Error fetching data: ${response.statusText}`);
+	// 		}
+
+	// 		const data: ZsvBewerber[] = await response.json();
+	// 		return data;
+	// 	} catch (error) {
+	// 		console.error(error);
+	// 		throw error; // Re-throw the error to handle it in your component
+	// 	}
+	// };
+
 
 	const onSubmit = (data: FormData) => {
-		formData.append("anrede", data.anrede);
-		formData.append("titelVor", data.titelVor);
-		formData.append("titelNach", data.titelNach);
-		formData.append("weitereVornamen", data.weitereVornamen);
-		formData.append("geschlecht", data.geschlecht);
-		formData.append("geburtsort", data.geburtsort);
-		formData.append("geburtsland", data.geburtsland);
-		formData.append("staatsbuergerschaft", data.staatsbuergerschaft);
-		formData.append("muttersprache", data.muttersprache);
-		formData.append("alltagssprache", data.alltagssprache);
-		formData.append("religion", data.religion);
-		formData.append("svNummer", data.svNummer);
-		formData.append("sozialversicherungstraeger", data.sozialversicherungstraeger);
-		formData.append("strasse", data.strasse);
-		formData.append("hausnummer", data.hausnummer);
-		formData.append("plz", data.plz);
-		formData.append("ort", data.ort);
-		formData.append("wohnland", data.wohnland);
-		formData.append("letzteschulform", data.letzteschulform);
+		data.anmeldenummer = prefillData?.anmeldenummer || '';
+		data.laendervorwahlB1 = phoneNumber.substring(0, 3);
+		data.vorwahlB1 = phoneNumber.substring(3, 6);
+		data.nummerB1 = phoneNumber.substring(6);
+		data.mailadresseB = emailB;
 
-		axios.post("/registration/abendschule", formData).then((response) => {
+		console.log("Client_Start -----------");
+		console.log(data);
+		console.log("Client_End -----------");
+
+		axios.post("https://localhost/registration/tagesschule/session/", data, {
+			headers: {
+				'Content-Type': 'application/json',
+			},
+
+		}).then((response) => {
 			console.log(response);
-			setShowModal(true);
+			if (!isSubmitted && response.status === 202) {
+				// setShowAlert(true);
+				setIsSubmitted(true);
+				setShowModalEmail(true);
+			}
+
 		}).catch(error => {
-
 			console.error(error);
+			if (error.response && error.response.status === 410) {
+				setIsSubmitted(true);
+				setShowModalSchoolReport(true);
+			}
 		});
-
 	};
-
 	return (
 		<Container className="p-5 border" style={{ backgroundColor: "whitesmoke" }}>
 			<Row className="justify-content-center">
@@ -273,257 +493,89 @@ function Tagesschule2() {
 					<p>{/* <strong>Sie können sich nur einmal anmelden!</strong> */}</p>
 
 					{/* <p className="h6">
-            Für die Anmeldung sind die Abschlusszeugnisse ihrer bisherigen
-            Ausbildungen notwendig.
-          </p> */}
-
-					<Form validated={validated} onSubmit={handleSubmit(onSubmit)}>
-						{/* <Row className="mb-4 mt-4 ">
-              <Form.Group controlId="validationSalutation">
-                <FloatingLabel
-                  controlId="formSalutation"
-                  label="Anrede"
-                  className="pt-1"
-                >
-                  <Form.Select required>
-                    <option></option>
-                    <option value="1">Frau</option>
-                    <option value="2">Herr</option>
-                    <option value="3">Divers</option>
-
-                  </Form.Select>
-                </FloatingLabel>
-              </Form.Group>
-            </Row> */}
-						{/* <Row className="mb-4 mt-4 ">
-              <Form.Group controlId="validationTitelVor">
-                <FloatingLabel
-                  controlId="formTitelVor"
-                  label="Titel vor "
-                  className="pt-1"
-                >
-                  <Form.Control
-
-                    type="text"
-                    placeholder=""
-                  // ref={inputRefVorname}
-                  // onBlur={handleBlurVorname}
-                  // className="pt-4"
-                  // pattern="[A-Z][a-z]*"
-                  />
-                  <Form.Control.Feedback type="invalid" className="mx-2 mb-1">
-
-                  </Form.Control.Feedback>
-                </FloatingLabel>
-              </Form.Group>
-              <Form.Group controlId="validationTitelNach">
-                <FloatingLabel
-                  controlId="formTitelNach"
-                  label="Titel nach "
-                  className="pt-1"
-                >
-                  <Form.Control
-
-                    type="text"
-                    placeholder=""
-                  // ref={inputRefVorname}
-                  // onBlur={handleBlurVorname}
-                  // className="pt-4"
-                  // pattern="[A-Z][a-z]*"
-                  />
-                  <Form.Control.Feedback type="invalid" className="mx-2 mb-1">
-
-                  </Form.Control.Feedback>
-                </FloatingLabel>
-              </Form.Group>
-
-            </Row> */}
-						<Form.Group
-							className="mb-3 mt-5"
-							controlId="validationFachrichtung"
-							aria-required
-							aria-readonly
-						>
-							<FloatingLabel
-								controlId="formSelectFachrichtung"
-								label="Fachrichtung"
-								// className="mt-5"
-								className="pt-1"
-							>
-								<Form.Select disabled required>
-									<option />
-									<option>Bautechnik (Hochbau)</option>
-									<option>Bautechnik (Tiefbau)</option>
-									<option>Biomedizin- und Gesundheitstechnik</option>
-									<option>
-										Elektronik & technische Informatik (Smart Devices / Coding)
-									</option>
-									<option>Elektrotechnik (Autonome Robotik)</option>
-									<option>Elektrotechnik (E-Mobilität)</option>
-									<option>
-										Informationstechnologie (Künstliche Intelligenz & Data
-										Science / Virtual Engineering)
-									</option>
-									<option>
-										Maschinenbau (Anlagentechnik mit Kunststofftechnik und
-										Produktdesign)
-									</option>
-									<option>Maschinenbau (Umwelt- und Verfahrenstechnik)</option>
-									<option>Maschinenbau (Robotik und Smart Engineering)</option>
-									{currentDateForOption < specificDateCutoff && (
-										<option>Grafik- und Kommunikationsdesign</option>
-									)}
-									{currentDateForOption < specificDateCutoff && (
-										<option>Medien (Multimedia-Interaktionsdesign)</option>
-									)}
-								</Form.Select>
-
-								<Form.Control.Feedback type="invalid" className="mx-2">
-									Ihre 1. Wahl:
-								</Form.Control.Feedback>
-							</FloatingLabel>
-						</Form.Group>
-
-						<Form.Group
-							className="mb-3 mt-5"
-							controlId="validationFachrichtung"
-							aria-required
-						>
-							<FloatingLabel
-								controlId="formSelectFachrichtung"
-								label="Fachrichtung"
-								// className="mt-5"
-								className="pt-1"
-							>
-								<Form.Select required>
-									<option />
-									<option>Bautechnik (Hochbau)</option>
-									<option>Bautechnik (Tiefbau)</option>
-									<option>Biomedizin- und Gesundheitstechnik</option>
-									<option>
-										Elektronik & technische Informatik (Smart Devices / Coding)
-									</option>
-									<option>Elektrotechnik (Autonome Robotik)</option>
-									<option>Elektrotechnik (E-Mobilität)</option>
-									<option>
-										Informationstechnologie (Künstliche Intelligenz & Data
-										Science / Virtual Engineering)
-									</option>
-									<option>
-										Maschinenbau (Anlagentechnik mit Kunststofftechnik und
-										Produktdesign)
-									</option>
-									<option>Maschinenbau (Umwelt- und Verfahrenstechnik)</option>
-									<option>Maschinenbau (Robotik und Smart Engineering)</option>
-									{currentDateForOption < specificDateCutoff && (
-										<option>Grafik- und Kommunikationsdesign</option>
-									)}
-									{currentDateForOption < specificDateCutoff && (
-										<option>Medien (Multimedia-Interaktionsdesign)</option>
-									)}
-								</Form.Select>
-								<Form.Control.Feedback type="invalid" className="mx-2">
-									Ihre 2. Wahl:
-								</Form.Control.Feedback>
-							</FloatingLabel>
-						</Form.Group>
-						<Form.Group
-							className="mb-3 mt-5"
-							controlId="validationFachrichtung"
-							aria-required
-						>
-							<FloatingLabel
-								controlId="formSelectFachrichtung"
-								label="Fachrichtung"
-								// className="mt-5"
-								className="pt-1"
-							>
-								<Form.Select required>
-									<option />
-									<option>Bautechnik (Hochbau)</option>
-									<option>Bautechnik (Tiefbau)</option>
-									<option>Biomedizin- und Gesundheitstechnik</option>
-									<option>
-										Elektronik & technische Informatik (Smart Devices / Coding)
-									</option>
-									<option>Elektrotechnik (Autonome Robotik)</option>
-									<option>Elektrotechnik (E-Mobilität)</option>
-									<option>
-										Informationstechnologie (Künstliche Intelligenz & Data
-										Science / Virtual Engineering)
-									</option>
-									<option>
-										Maschinenbau (Anlagentechnik mit Kunststofftechnik und
-										Produktdesign)
-									</option>
-									<option>Maschinenbau (Umwelt- und Verfahrenstechnik)</option>
-									<option>Maschinenbau (Robotik und Smart Engineering)</option>
-									{currentDateForOption < specificDateCutoff && (
-										<option>Grafik- und Kommunikationsdesign</option>
-									)}
-									{currentDateForOption < specificDateCutoff && (
-										<option>Medien (Multimedia-Interaktionsdesign)</option>
-									)}
-								</Form.Select>
-								<Form.Control.Feedback type="invalid" className="mx-2">
-									Ihre 3. Wahl:
-								</Form.Control.Feedback>
-							</FloatingLabel>
-						</Form.Group>
-						<Row>
-							<Form.Group controlId="validationErstwunschSchule">
-								<FloatingLabel
-									controlId="formErstwunschSchule"
-									label="Erstwunschschule"
-									className="mt-1 "
-								>
-									<Col className="mx-3 pt-5">
-										<Form.Check
-											inline
-											label="Ja"
-											name="groupErstwunschSchule"
-											type="radio"
-											id={"inline-radio-3"}
-											value="Ja"
-											checked={radioStateErstwunschSchule === "Ja"}
-											onChange={handleRadioErstwunschSchule}
-										/>
-										<Form.Check
-											inline
-											label="Nein"
-											name="groupErstwunschSchule"
-											type="radio"
-											id={"inline-radio-4"}
-											value="Nein"
-											checked={radioStateErstwunschSchule === "Nein"}
-											onChange={handleRadioErstwunschSchule}
-										/>
-									</Col>
-								</FloatingLabel>
-							</Form.Group>
-						</Row>
+						Für die Anmeldung sind die Abschlusszeugnisse ihrer bisherigen
+						Ausbildungen notwendig.
+					</p> */}
+					<Form validated={validated} onSubmit={handleSubmit(onSubmit)} method="post">
 						<Row className="mb-4 mt-4 ">
-							<Form.Group controlId="validationZweitwunschSchule">
+							<Form.Group controlId="validationSalutation">
 								<FloatingLabel
-									controlId="formZweitwunschSchule"
-									label="Zweitwunschschule"
+									controlId="formSalutation"
+									label="Anrede"
 									className="pt-1"
 								>
-									<Form.Control
-										required={radioStateErstwunschSchule === "Nein"}
-										type="text"
-										placeholder="Weitere Vornamen"
-
-									// ref={inputRefNachname}
-									// onBlur={handleBlurNachname}
-									//pattern="[A-Z][a-z]*"
+									<Controller
+										name="anrede"
+										defaultValue={prefillData?.anrede || ''}
+										control={control}
+										rules={{ required: false }}
+										render={({ field }) => (
+											<Form.Select {...field}>
+												<option value="" />
+												{OptionsAnrede.map((option) => (
+													<option value={option.value}>
+														{option.name}
+													</option>
+												))}
+											</Form.Select>
+										)}
 									/>
-									<Form.Control.Feedback type="invalid" className="mx-2">
-										Haben Sie sich auch an einer zweiten Schule beworben?
-									</Form.Control.Feedback>
 								</FloatingLabel>
 							</Form.Group>
 						</Row>
+						{/* <Row className="mb-4 mt-4 ">
+							<Form.Group controlId="validationTitelVorA">
+								<FloatingLabel
+									controlId="formTitelVorA"
+									label="Titel vor "
+									className="pt-1"
+								>
+									<Controller
+										name="titelvorA"
+										defaultValue={prefillData?.titelvorA || ''}
+										control={control}
+										rules={{ required: false }}
+										render={({ field }) => (
+											<Form.Select {...field}>
+												<option value="" />
+												{OptionsTitelVor.map((option) => (
+													<option value={option.id}>
+														{option.name}
+													</option>
+												))}
+											</Form.Select>
+										)}
+									/>
+									<Form.Control.Feedback type="invalid" className="mx-2 mb-1" />
+								</FloatingLabel>
+							</Form.Group>
+							<Form.Group controlId="validationTitelNach">
+								<FloatingLabel
+									controlId="formTitelNach"
+									label="Titel nach "
+									className="pt-1"
+								>
+									<Controller
+										name="titelNach"
+										control={control}
+										defaultValue={prefillData?.titelnachA || ''}
+										rules={{ required: false }}
+										render={({ field }) => (
+											<Form.Select {...field}>
+												<option value="" />
+												{OptionsTitelNach.map((option) => (
+													<option value={option.id}>
+														{option.name}
+													</option>
+												))}
+											</Form.Select>
+										)}
+									/>
+									<Form.Control.Feedback type="invalid" className="mx-2 mb-1" />
+								</FloatingLabel>
+							</Form.Group>
+						</Row> */}
+
 						<Row className="mb-4 mt-4 ">
 							<Form.Group controlId="validationVorname">
 								<FloatingLabel
@@ -531,15 +583,18 @@ function Tagesschule2() {
 									label="Vorname"
 									className="pt-1"
 								>
-									<Form.Control
-										required
-										type="text"
-										placeholder="Vorname"
-										disabled
-										ref={inputRefVorname}
-										onBlur={handleBlurVorname}
-									// className="pt-4"
-									// pattern="[A-Z][a-z]*"
+									<Controller
+										name="vorname"
+										defaultValue={prefillData?.vorname} // Set the default value based on the fetched data
+										control={control}
+										render={({ field }) => (
+											<Form.Control
+												type="text"
+												disabled // Keep the disabled attribute if needed
+												placeholder="Vorname"
+												{...field} // Spread the field props to the Form.Control
+											/>
+										)}
 									/>
 									<Form.Control.Feedback type="invalid" className="mx-2 mb-1">
 										Bitte geben Sie den Vornamen des Bewerbers an.
@@ -555,14 +610,18 @@ function Tagesschule2() {
 									label="Nachname"
 									className="pt-1"
 								>
-									<Form.Control
-										required
-										type="text"
-										placeholder="Nachname"
-										disabled
-										ref={inputRefNachname}
-										onBlur={handleBlurNachname}
-									//pattern="[A-Z][a-z]*"
+									<Controller
+										name="nachname"
+										control={control}
+										defaultValue={prefillData?.nachname} // Set the default value based on the fetched data
+										render={({ field }) => (
+											<Form.Control
+												type="text"
+												placeholder="Nachname"
+												{...field} // Spread the field props to the Form.Control
+												disabled // Keep the disabled attribute if needed
+											/>
+										)}
 									/>
 									<Form.Control.Feedback type="invalid" className="mx-2">
 										Bitte geben Sie den Nachnamen des Bewerbers an.
@@ -578,13 +637,18 @@ function Tagesschule2() {
 									label="Weitere Vornamen"
 									className="pt-1"
 								>
-									<Form.Control
-										type="text"
-										placeholder="Weitere Vornamen"
-
-									// ref={inputRefNachname}
-									// onBlur={handleBlurNachname}
-									//pattern="[A-Z][a-z]*"
+									<Controller
+										name="weitereVornamen"
+										control={control}
+										defaultValue={prefillData?.weitereVornamen || ''} // Set the default value based on the fetched data
+										render={({ field }) => (
+											<Form.Control
+												type="text"
+												placeholder="weitere Vornamen"
+												{...field} // Spread the field props to the Form.Control
+											// disabled // Keep the disabled attribute if needed
+											/>
+										)}
 									/>
 									{/* <Form.Control.Feedback type="invalid" className="mx-2">
                     Bitte geben Sie den Nachnamen des Bewerbers an.
@@ -595,39 +659,83 @@ function Tagesschule2() {
 							</Form.Group>
 						</Row>
 
-						<Row>
-							<Form.Group controlId="validationGeschlecht">
+
+						<Row className="mb-4 mt-4 ">
+							<Form.Group >
 								<FloatingLabel
 									controlId="formGeschlecht"
 									label="Biologisches Geschlecht"
-									className="mt-1 "
+									className="pt-1"
 								>
-									<Col className="mx-3 pt-5">
-										<Form.Check
-											inline
-											label="Männlich"
-											name="groupGeschlecht"
-											type="radio"
-											id={"inline-radio-2"}
-											value="Männlich"
-											checked={radioStateGeschlecht === "Männlich"}
-											onChange={handleRadioChangeGeschlecht}
-										/>
-										<Form.Check
-											inline
-											label="Weiblich"
-											name="groupGeschlecht"
-											type="radio"
-											id={"inline-radio-3"}
-											value="Weiblich"
-											checked={radioStateGeschlecht === "Weiblich"}
-											onChange={handleRadioChangeGeschlecht}
-										/>
-									</Col>
+									<Controller
+										name="geschlecht"
+										control={control}
+										rules={{ required: false }}
+										defaultValue={prefillData?.geschlecht || ''}
+										render={({ field }) => (
+											<Form.Select {...field} >
+												<option value="" />
+												{OptionsGeschlecht.map((option) => (
+													<option value={option.id}>
+														{option.name}
+													</option>
+												))}
+											</Form.Select>
+										)}
+									/>
 								</FloatingLabel>
 							</Form.Group>
 						</Row>
 
+						<Form.Group
+							as={Col}
+							className="mt-3 mb-3"
+							controlId="validationEmail"
+						>
+							<FloatingLabel
+								label="E-mail"
+								controlId="formEmail"
+								className="pt-1"
+							>
+								<Controller
+									name="email"
+									control={control}
+									defaultValue={prefillData?.kontaktmailadresse} // Set the default value based on the fetched data
+									render={({ field }) => (
+										<Form.Control
+											type="email"
+											disabled
+											placeholder="E-mail"
+											{...field} // Spread the field props to the Form.Control
+										// disabled // Keep the disabled attribute if needed
+										/>
+									)}
+								/>
+								{/* <Form.Control.Feedback
+									type={isEmailValid ? "valid" : "invalid"}
+									className="mx-2"
+								>
+									{isEmailValid ? (
+										""
+									) : (
+										<strong>
+											Bitte geben Sie die E-mail des Bewerbers an.
+										</strong>
+									)}
+								</Form.Control.Feedback> */}
+								<Container className="mt-2">
+									<Form.Text id="emailHelpBlock" muted>
+										Über diese E-Mail Adresse müssen Sie im Verlauf des
+										Aufnahmeprozesses erreichbar sein. An diese E-Mail Adresse
+										werden Bestätigungen und Terminverständigungen geschickt.
+										Eine Änderung ist unbedingt bekannt zu geben.
+										Die E-Mail
+										Adresse muss von einem Erziehungsberechtigten abgerufen
+										werden.
+									</Form.Text>
+								</Container>
+							</FloatingLabel>
+						</Form.Group>
 						<Form.Group
 							as={Col}
 							className="mt-5 mb-3"
@@ -638,16 +746,21 @@ function Tagesschule2() {
 								controlId="formPhone"
 								className="pt-1"
 							>
-								<Form.Control
-									required
-									disabled
-									type="tel"
-									// placeholder="+43 123 456 7890"
-									value={phoneNumber}
-									onChange={handlePhoneChange}
-									isInvalid={!isValid}
+								<Controller
+									name="telnr"
+									control={control}
+									defaultValue={prefillData?.telnr} // Set the default value based on the fetched data
+									render={({ field }) => (
+										<Form.Control
+											type="string"
+											disabled
+											placeholder="text"
+											{...field} // Spread the field props to the Form.Control
+										// disabled // Keep the disabled attribute if needed
+										/>
+									)}
 								/>
-								<Form.Control.Feedback
+								{/* <Form.Control.Feedback
 									type={isValid ? "valid" : "invalid"}
 									className="mx-2"
 								>
@@ -659,7 +772,7 @@ function Tagesschule2() {
 											664 12345678 ein.
 										</strong>
 									)}
-								</Form.Control.Feedback>
+								</Form.Control.Feedback> */}
 								<Container className="mt-2">
 									<Form.Text id="telHelpBlock" muted>
 										Über diese Tel. Nr. müssen Sie im Verlauf des
@@ -679,25 +792,27 @@ function Tagesschule2() {
 									className="pt-1 mt-3"
 								>
 									{/* <Form.Label htmlFor="inputBirthDate">Geburtsdatum</Form.Label> */}
-									<Form.Control
+									<Controller
+										name="geburtsdatum"
+										control={control}
+										defaultValue={prefillData?.geburtsdatum} // Set the default value based on the fetched data
 										disabled
-										type="date"
-										id="inputBirthDate"
-										// required
-										pattern="\d{2}\.\d{2}\.\d{4}"
-										title="Bitte geben Sie ihr Geburtsdatum ein."
-										value={birthdate}
-										onChange={handleBirthdateChange}
-										isInvalid={!isBirthdateValid}
-										className={isBirthdateValid ? "valid-input" : ""}
+										render={({ field }) => (
+											<Form.Control
+												type="text"
+												// placeholder="E-mail"
+												{...field} // Spread the field props to the Form.Control
+											// disabled // Keep the disabled attribute if needed
+											/>
+										)}
 									/>
-									<Form.Control.Feedback
+									{/* <Form.Control.Feedback
 										type={isBirthdateValid ? "valid" : "invalid"}
 										className="mx-2"
 									>
 										Bitte wählen Sie das Geburtsdatum des Bewerbers, sie müssen
 										mindestens 17 Jahre alt sein .
-									</Form.Control.Feedback>
+									</Form.Control.Feedback> */}
 								</FloatingLabel>
 							</Form.Group>
 						</Row>
@@ -711,31 +826,51 @@ function Tagesschule2() {
 									className="mt-1"
 								>
 									<Col className="mx-3 pt-5">
-										<Form.Check
-											inline
-											label="ja"
-											name="group1"
-											type="radio"
-											id={"inline-radio-1"}
-											value="true"
-											checked={radioState === true}
-											onChange={handleRadioChange}
+										<Controller
+											name="SVTAUT"
+											defaultValue={prefillData?.SVTAUT || ''}
+											control={control}
+											rules={{ required: false }} // Set the validation rules as needed
+											render={({ field }) => (
+												<Form.Check
+													inline
+													label="ja"
+													type="radio"
+													id="inline-radio-1"
+													value="1"
+													checked={field.value === "1"}
+													onChange={(e) => {
+														field.onChange(e); // Update the form state
+														setValue('SVTAUT', e.target.value); // Also update the local state if needed
+													}}
+												/>
+											)}
 										/>
-										<Form.Check
-											inline
-											label="nein"
-											name="group1"
-											type="radio"
-											id={"inline-radio-1"}
-											value="false"
-											checked={radioState === false}
-											onChange={handleRadioChange}
+										<Controller
+											name="SVTAUT"
+											control={control}
+											defaultValue={prefillData?.SVTAUT || ''}
+											rules={{ required: false }} // Set the validation rules as needed
+											render={({ field }) => (
+												<Form.Check
+													inline
+													label="nein"
+													type="radio"
+													id="inline-radio-2"
+													value="0"
+													checked={field.value === "0"}
+													onChange={(e) => {
+														field.onChange(e); // Update the form state
+														setValue('SVTAUT', e.target.value); // Also update the local state if needed
+													}}
+												/>
+											)}
 										/>
 									</Col>
 								</FloatingLabel>
 							</Form.Group>
 						</Row>
-						{radioState && (
+						{SVTAUTValue === '1' && (
 							<Form.Group className="mb-3 mt-5" controlId="validationSVV">
 								{
 									<FloatingLabel
@@ -744,28 +879,22 @@ function Tagesschule2() {
 										// className="mt-5"
 										className="pt-1 "
 									>
-										<Form.Select required={radioState}>
-											<option />
-											<option value="4">
-												Allgemeine Unfallsversicherungsanstalt (AUVA)
-											</option>
-											<option value="6">
-												Krankenfürsorgeanstalten für öffentlich Bedienstete
-											</option>
-											<option value="1">
-												Österreichische Gesundheitskasse (ÖGK)
-											</option>
-											<option value="5">
-												Pensionsversicherungsanstalt (PVA)
-											</option>
-											<option value="2">
-												Sozialversicherungsanstalt der Selbständigen (SVS)
-											</option>
-											<option value="3">
-												Versicherungsanstalt öffentlich Bediensteter,
-												Eisenbahnen und Bergbau (BVAEB)
-											</option>
-										</Form.Select>
+										<Controller
+											name="sozialversicherungstraeger"
+											control={control}
+											rules={{ required: false }}
+											defaultValue={prefillData?.sozialversicherungstraeger || ''} // Set the default value based on the fetched data
+											render={({ field }) => (
+												<Form.Select {...field} >
+													<option value="" />
+													{OptionsSozialversicherungstraeger.map((option) => (
+														<option value={option.id}>
+															{option.name}
+														</option>
+													))}
+												</Form.Select>
+											)}
+										/>
 										<Form.Control.Feedback type="invalid" className="mx-2">
 											Bitte geben Sie den Sozialversicherungsträger an.
 										</Form.Control.Feedback>
@@ -775,15 +904,21 @@ function Tagesschule2() {
 											label="SV-Nummer"
 											className="pt-1"
 										>
-											<Form.Control
-												required={radioState}
-												type="text"
-												pattern="^\d{4}(0[1-9]|[12][0-9]|3[01])(0[1-9]|1[0-2])\d{2}$"
-												value={svNumber}
-												onChange={handleSvNumberChange}
+											<Controller
+												name="svNummer"
+												control={control}
+												defaultValue={prefillData?.svNummer || ''} // Set the default value based on the fetched data
+												render={({ field }) => (
+													<Form.Control
+														type="text"
+														placeholder="SV-Nummer"
+														{...field} // Spread the field props to the Form.Control
+													// disabled // Keep the disabled attribute if needed
+													/>
+												)}
 											/>
 											<Form.Control.Feedback type="invalid" className="mx-2">
-												Bitte geben Sie Ihre SV-Nummer in der Form 1234 TTMMJJ.
+												Bitte geben Sie Ihre SV-Nummer in der Form 1234 TTMMJJ ein.
 											</Form.Control.Feedback>
 										</FloatingLabel>
 									</FloatingLabel>
@@ -798,13 +933,19 @@ function Tagesschule2() {
 									label="Geburtsort"
 									className="pt-1"
 								>
-									<Form.Control
-										required
-										type="text"
-										//readOnly
-										ref={inputRefGeburtsort}
-										onBlur={handleBlurGeburtsort}
-										pattern="^.{2,}$"
+
+									<Controller
+										name="geburtsort"
+										control={control}
+										defaultValue={prefillData?.geburtsort || ''} // Set the default value based on the fetched data
+										render={({ field }) => (
+											<Form.Control
+												type="text"
+												placeholder="Geburtsort"
+												{...field} // Spread the field props to the Form.Control
+											// disabled // Keep the disabled attribute if needed
+											/>
+										)}
 									/>
 									<Form.Control.Feedback type="invalid" className="mx-2">
 										Bitte geben Sie ihren Geburtsort an.
@@ -819,234 +960,23 @@ function Tagesschule2() {
 									label="Geburtsland"
 									className="pt-1"
 								>
-									<Form.Select required>
-										<option />
-										<option value="Afghanistan">Afghanistan</option>
-										<option value="Albania">Albania</option>
-										<option value="Algeria">Algeria</option>
-										<option value="Andorra">Andorra</option>
-										<option value="Angola">Angola</option>
-										<option value="Antigua and Barbuda">
-											Antigua and Barbuda
-										</option>
-										<option value="Argentina">Argentina</option>
-										<option value="Armenia">Armenia</option>
-										<option value="Australia">Australia</option>
-										<option value="Austria">Austria</option>
-										<option value="Azerbaijan">Azerbaijan</option>
-										<option value="Bahamas">Bahamas</option>
-										<option value="Bahrain">Bahrain</option>
-										<option value="Bangladesh">Bangladesh</option>
-										<option value="Barbados">Barbados</option>
-										<option value="Belarus">Belarus</option>
-										<option value="Belgium">Belgium</option>
-										<option value="Belize">Belize</option>
-										<option value="Benin">Benin</option>
-										<option value="Bhutan">Bhutan</option>
-										<option value="Bolivia">Bolivia</option>
-										<option value="Bosnia and Herzegovina">
-											Bosnia and Herzegovina
-										</option>
-										<option value="Botswana">Botswana</option>
-										<option value="Brazil">Brazil</option>
-										<option value="Brunei">Brunei</option>
-										<option value="Bulgaria">Bulgaria</option>
-										<option value="Burkina Faso">Burkina Faso</option>
-										<option value="Burundi">Burundi</option>
-										<option value="Côte d'Ivoire">Côte d'Ivoire</option>
-										<option value="Cabo Verde">Cabo Verde</option>
-										<option value="Cambodia">Cambodia</option>
-										<option value="Cameroon">Cameroon</option>
-										<option value="Canada">Canada</option>
-										<option value="Central African Republic">
-											Central African Republic
-										</option>
-										<option value="Chad">Chad</option>
-										<option value="Chile">Chile</option>
-										<option value="China">China</option>
-										<option value="Colombia">Colombia</option>
-										<option value="Comoros">Comoros</option>
-										<option value="Congo (Congo-Brazzaville)">
-											Congo (Congo-Brazzaville)
-										</option>
-										<option value="Costa Rica">Costa Rica</option>
-										<option value="Croatia">Croatia</option>
-										<option value="Cuba">Cuba</option>
-										<option value="Cyprus">Cyprus</option>
-										<option value="Czechia (Czech Republic)">
-											Czechia (Czech Republic)
-										</option>
-										<option value="Democratic Republic of the Congo">
-											Democratic Republic of the Congo
-										</option>
-										<option value="Denmark">Denmark</option>
-										<option value="Djibouti">Djibouti</option>
-										<option value="Dominica">Dominica</option>
-										<option value="Dominican Republic">
-											Dominican Republic
-										</option>
-										<option value="Ecuador">Ecuador</option>
-										<option value="Egypt">Egypt</option>
-										<option value="El Salvador">El Salvador</option>
-										<option value="Equatorial Guinea">Equatorial Guinea</option>
-										<option value="Eritrea">Eritrea</option>
-										<option value="Estonia">Estonia</option>
-										<option value="Eswatini">Eswatini</option>
-										<option value="Ethiopia">Ethiopia</option>
-										<option value="Fiji">Fiji</option>
-										<option value="Finland">Finland</option>
-										<option value="France">France</option>
-										<option value="Gabon">Gabon</option>
-										<option value="Gambia">Gambia</option>
-										<option value="Georgia">Georgia</option>
-										<option value="Germany">Germany</option>
-										<option value="Ghana">Ghana</option>
-										<option value="Greece">Greece</option>
-										<option value="Grenada">Grenada</option>
-										<option value="Guatemala">Guatemala</option>
-										<option value="Guinea">Guinea</option>
-										<option value="Guinea-Bissau">Guinea-Bissau</option>
-										<option value="Guyana">Guyana</option>
-										<option value="Haiti">Haiti</option>
-										<option value="Holy See">Holy See</option>
-										<option value="Honduras">Honduras</option>
-										<option value="Hungary">Hungary</option>
-										<option value="Iceland">Iceland</option>
-										<option value="India">India</option>
-										<option value="Indonesia">Indonesia</option>
-										<option value="Iran">Iran</option>
-										<option value="Iraq">Iraq</option>
-										<option value="Ireland">Ireland</option>
-										<option value="Israel">Israel</option>
-										<option value="Italy">Italy</option>
-										<option value="Jamaica">Jamaica</option>
-										<option value="Japan">Japan</option>
-										<option value="Jordan">Jordan</option>
-										<option value="Kazakhstan">Kazakhstan</option>
-										<option value="Kenya">Kenya</option>
-										<option value="Kiribati">Kiribati</option>
-										<option value="Kuwait">Kuwait</option>
-										<option value="Kyrgyzstan">Kyrgyzstan</option>
-										<option value="Laos">Laos</option>
-										<option value="Latvia">Latvia</option>
-										<option value="Lebanon">Lebanon</option>
-										<option value="Lesotho">Lesotho</option>
-										<option value="Liberia">Liberia</option>
-										<option value="Libya">Libya</option>
-										<option value="Liechtenstein">Liechtenstein</option>
-										<option value="Lithuania">Lithuania</option>
-										<option value="Luxembourg">Luxembourg</option>
-										<option value="Madagascar">Madagascar</option>
-										<option value="Malawi">Malawi</option>
-										<option value="Malaysia">Malaysia</option>
-										<option value="Maldives">Maldives</option>
-										<option value="Mali">Mali</option>
-										<option value="Malta">Malta</option>
-										<option value="Marshall Islands">Marshall Islands</option>
-										<option value="Mauritania">Mauritania</option>
-										<option value="Mauritius">Mauritius</option>
-										<option value="Mexico">Mexico</option>
-										<option value="Micronesia">Micronesia</option>
-										<option value="Moldova">Moldova</option>
-										<option value="Monaco">Monaco</option>
-										<option value="Mongolia">Mongolia</option>
-										<option value="Montenegro">Montenegro</option>
-										<option value="Morocco">Morocco</option>
-										<option value="Mozambique">Mozambique</option>
-										<option value="Myanmar (formerly Burma)">
-											Myanmar (formerly Burma)
-										</option>
-										<option value="Namibia">Namibia</option>
-										<option value="Nauru">Nauru</option>
-										<option value="Nepal">Nepal</option>
-										<option value="Netherlands">Netherlands</option>
-										<option value="New Zealand">New Zealand</option>
-										<option value="Nicaragua">Nicaragua</option>
-										<option value="Niger">Niger</option>
-										<option value="Nigeria">Nigeria</option>
-										<option value="North Korea">North Korea</option>
-										<option value="North Macedonia (formerly Macedonia)">
-											North Macedonia (formerly Macedonia)
-										</option>
-										<option value="Norway">Norway</option>
-										<option value="Oman">Oman</option>
-										<option value="Pakistan">Pakistan</option>
-										<option value="Palau">Palau</option>
-										<option value="Palestine State">Palestine State</option>
-										<option value="Panama">Panama</option>
-										<option value="Papua New Guinea">Papua New Guinea</option>
-										<option value="Paraguay">Paraguay</option>
-										<option value="Peru">Peru</option>
-										<option value="Philippines">Philippines</option>
-										<option value="Poland">Poland</option>
-										<option value="Portugal">Portugal</option>
-										<option value="Qatar">Qatar</option>
-										<option value="Romania">Romania</option>
-										<option value="Russia">Russia</option>
-										<option value="Rwanda">Rwanda</option>
-										<option value="Saint Kitts and Nevis">
-											Saint Kitts and Nevis
-										</option>
-										<option value="Saint Lucia">Saint Lucia</option>
-										<option value="Saint Vincent and the Grenadines">
-											Saint Vincent and the Grenadines
-										</option>
-										<option value="Samoa">Samoa</option>
-										<option value="San Marino">San Marino</option>
-										<option value="Sao Tome and Principe">
-											Sao Tome and Principe
-										</option>
-										<option value="Saudi Arabia">Saudi Arabia</option>
-										<option value="Senegal">Senegal</option>
-										<option value="Serbia">Serbia</option>
-										<option value="Seychelles">Seychelles</option>
-										<option value="Sierra Leone">Sierra Leone</option>
-										<option value="Singapore">Singapore</option>
-										<option value="Slovakia">Slovakia</option>
-										<option value="Slovenia">Slovenia</option>
-										<option value="Solomon Islands">Solomon Islands</option>
-										<option value="Somalia">Somalia</option>
-										<option value="South Africa">South Africa</option>
-										<option value="South Korea">South Korea</option>
-										<option value="South Sudan">South Sudan</option>
-										<option value="Spain">Spain</option>
-										<option value="Sri Lanka">Sri Lanka</option>
-										<option value="Sudan">Sudan</option>
-										<option value="Suriname">Suriname</option>
-										<option value="Sweden">Sweden</option>
-										<option value="Switzerland">Switzerland</option>
-										<option value="Syria">Syria</option>
-										<option value="Tajikistan">Tajikistan</option>
-										<option value="Tanzania">Tanzania</option>
-										<option value="Thailand">Thailand</option>
-										<option value="Timor-Leste">Timor-Leste</option>
-										<option value="Togo">Togo</option>
-										<option value="Tonga">Tonga</option>
-										<option value="Trinidad and Tobago">
-											Trinidad and Tobago
-										</option>
-										<option value="Tunisia">Tunisia</option>
-										<option value="Turkey">Turkey</option>
-										<option value="Turkmenistan">Turkmenistan</option>
-										<option value="Tuvalu">Tuvalu</option>
-										<option value="Uganda">Uganda</option>
-										<option value="Ukraine">Ukraine</option>
-										<option value="United Arab Emirates">
-											United Arab Emirates
-										</option>
-										<option value="United Kingdom">United Kingdom</option>
-										<option value="United States of America">
-											United States of America
-										</option>
-										<option value="Uruguay">Uruguay</option>
-										<option value="Uzbekistan">Uzbekistan</option>
-										<option value="Vanuatu">Vanuatu</option>
-										<option value="Venezuela">Venezuela</option>
-										<option value="Vietnam">Vietnam</option>
-										<option value="Yemen">Yemen</option>
-										<option value="Zambia">Zambia</option>
-										<option value="Zimbabwe">Zimbabwe</option>
-									</Form.Select>
+									<Controller
+										name="geburtsland"
+										control={control}
+										defaultValue={prefillData?.geburtsland || ''}
+										rules={{ required: false }}
+										render={({ field }) => (
+											<Form.Select {...field} >
+												<option value="" />
+												{OptionsGeburtsland.map((option) => (
+													<option value={option.id}>
+														{option.name}
+													</option>
+												))}
+											</Form.Select>
+										)}
+									/>
+
 								</FloatingLabel>
 							</Form.Group>
 						</Row>
@@ -1056,235 +986,24 @@ function Tagesschule2() {
 									controlId="formStaatsbuergerschaft"
 									label="Staatsbürgerschaft"
 									className="pt-1"
+									typeof="number"
 								>
-									<Form.Select required>
-										<option />
-										<option value="Afghanistan">Afghanistan</option>
-										<option value="Albania">Albania</option>
-										<option value="Algeria">Algeria</option>
-										<option value="Andorra">Andorra</option>
-										<option value="Angola">Angola</option>
-										<option value="Antigua and Barbuda">
-											Antigua and Barbuda
-										</option>
-										<option value="Argentina">Argentina</option>
-										<option value="Armenia">Armenia</option>
-										<option value="Australia">Australia</option>
-										<option value="Austria">Austria</option>
-										<option value="Azerbaijan">Azerbaijan</option>
-										<option value="Bahamas">Bahamas</option>
-										<option value="Bahrain">Bahrain</option>
-										<option value="Bangladesh">Bangladesh</option>
-										<option value="Barbados">Barbados</option>
-										<option value="Belarus">Belarus</option>
-										<option value="Belgium">Belgium</option>
-										<option value="Belize">Belize</option>
-										<option value="Benin">Benin</option>
-										<option value="Bhutan">Bhutan</option>
-										<option value="Bolivia">Bolivia</option>
-										<option value="Bosnia and Herzegovina">
-											Bosnia and Herzegovina
-										</option>
-										<option value="Botswana">Botswana</option>
-										<option value="Brazil">Brazil</option>
-										<option value="Brunei">Brunei</option>
-										<option value="Bulgaria">Bulgaria</option>
-										<option value="Burkina Faso">Burkina Faso</option>
-										<option value="Burundi">Burundi</option>
-										<option value="Côte d'Ivoire">Côte d'Ivoire</option>
-										<option value="Cabo Verde">Cabo Verde</option>
-										<option value="Cambodia">Cambodia</option>
-										<option value="Cameroon">Cameroon</option>
-										<option value="Canada">Canada</option>
-										<option value="Central African Republic">
-											Central African Republic
-										</option>
-										<option value="Chad">Chad</option>
-										<option value="Chile">Chile</option>
-										<option value="China">China</option>
-										<option value="Colombia">Colombia</option>
-										<option value="Comoros">Comoros</option>
-										<option value="Congo (Congo-Brazzaville)">
-											Congo (Congo-Brazzaville)
-										</option>
-										<option value="Costa Rica">Costa Rica</option>
-										<option value="Croatia">Croatia</option>
-										<option value="Cuba">Cuba</option>
-										<option value="Cyprus">Cyprus</option>
-										<option value="Czechia (Czech Republic)">
-											Czechia (Czech Republic)
-										</option>
-										<option value="Democratic Republic of the Congo">
-											Democratic Republic of the Congo
-										</option>
-										<option value="Denmark">Denmark</option>
-										<option value="Djibouti">Djibouti</option>
-										<option value="Dominica">Dominica</option>
-										<option value="Dominican Republic">
-											Dominican Republic
-										</option>
-										<option value="Ecuador">Ecuador</option>
-										<option value="Egypt">Egypt</option>
-										<option value="El Salvador">El Salvador</option>
-										<option value="Equatorial Guinea">Equatorial Guinea</option>
-										<option value="Eritrea">Eritrea</option>
-										<option value="Estonia">Estonia</option>
-										<option value="Eswatini">Eswatini</option>
-										<option value="Ethiopia">Ethiopia</option>
-										<option value="Fiji">Fiji</option>
-										<option value="Finland">Finland</option>
-										<option value="France">France</option>
-										<option value="Gabon">Gabon</option>
-										<option value="Gambia">Gambia</option>
-										<option value="Georgia">Georgia</option>
-										<option value="Germany">Germany</option>
-										<option value="Ghana">Ghana</option>
-										<option value="Greece">Greece</option>
-										<option value="Grenada">Grenada</option>
-										<option value="Guatemala">Guatemala</option>
-										<option value="Guinea">Guinea</option>
-										<option value="Guinea-Bissau">Guinea-Bissau</option>
-										<option value="Guyana">Guyana</option>
-										<option value="Haiti">Haiti</option>
-										<option value="Holy See">Holy See</option>
-										<option value="Honduras">Honduras</option>
-										<option value="Hungary">Hungary</option>
-										<option value="Iceland">Iceland</option>
-										<option value="India">India</option>
-										<option value="Indonesia">Indonesia</option>
-										<option value="Iran">Iran</option>
-										<option value="Iraq">Iraq</option>
-										<option value="Ireland">Ireland</option>
-										<option value="Israel">Israel</option>
-										<option value="Italy">Italy</option>
-										<option value="Jamaica">Jamaica</option>
-										<option value="Japan">Japan</option>
-										<option value="Jordan">Jordan</option>
-										<option value="Kazakhstan">Kazakhstan</option>
-										<option value="Kenya">Kenya</option>
-										<option value="Kiribati">Kiribati</option>
-										<option value="Kuwait">Kuwait</option>
-										<option value="Kyrgyzstan">Kyrgyzstan</option>
-										<option value="Laos">Laos</option>
-										<option value="Latvia">Latvia</option>
-										<option value="Lebanon">Lebanon</option>
-										<option value="Lesotho">Lesotho</option>
-										<option value="Liberia">Liberia</option>
-										<option value="Libya">Libya</option>
-										<option value="Liechtenstein">Liechtenstein</option>
-										<option value="Lithuania">Lithuania</option>
-										<option value="Luxembourg">Luxembourg</option>
-										<option value="Madagascar">Madagascar</option>
-										<option value="Malawi">Malawi</option>
-										<option value="Malaysia">Malaysia</option>
-										<option value="Maldives">Maldives</option>
-										<option value="Mali">Mali</option>
-										<option value="Malta">Malta</option>
-										<option value="Marshall Islands">Marshall Islands</option>
-										<option value="Mauritania">Mauritania</option>
-										<option value="Mauritius">Mauritius</option>
-										<option value="Mexico">Mexico</option>
-										<option value="Micronesia">Micronesia</option>
-										<option value="Moldova">Moldova</option>
-										<option value="Monaco">Monaco</option>
-										<option value="Mongolia">Mongolia</option>
-										<option value="Montenegro">Montenegro</option>
-										<option value="Morocco">Morocco</option>
-										<option value="Mozambique">Mozambique</option>
-										<option value="Myanmar (formerly Burma)">
-											Myanmar (formerly Burma)
-										</option>
-										<option value="Namibia">Namibia</option>
-										<option value="Nauru">Nauru</option>
-										<option value="Nepal">Nepal</option>
-										<option value="Netherlands">Netherlands</option>
-										<option value="New Zealand">New Zealand</option>
-										<option value="Nicaragua">Nicaragua</option>
-										<option value="Niger">Niger</option>
-										<option value="Nigeria">Nigeria</option>
-										<option value="North Korea">North Korea</option>
-										<option value="North Macedonia (formerly Macedonia)">
-											North Macedonia (formerly Macedonia)
-										</option>
-										<option value="Norway">Norway</option>
-										<option value="Oman">Oman</option>
-										<option value="Pakistan">Pakistan</option>
-										<option value="Palau">Palau</option>
-										<option value="Palestine State">Palestine State</option>
-										<option value="Panama">Panama</option>
-										<option value="Papua New Guinea">Papua New Guinea</option>
-										<option value="Paraguay">Paraguay</option>
-										<option value="Peru">Peru</option>
-										<option value="Philippines">Philippines</option>
-										<option value="Poland">Poland</option>
-										<option value="Portugal">Portugal</option>
-										<option value="Qatar">Qatar</option>
-										<option value="Romania">Romania</option>
-										<option value="Russia">Russia</option>
-										<option value="Rwanda">Rwanda</option>
-										<option value="Saint Kitts and Nevis">
-											Saint Kitts and Nevis
-										</option>
-										<option value="Saint Lucia">Saint Lucia</option>
-										<option value="Saint Vincent and the Grenadines">
-											Saint Vincent and the Grenadines
-										</option>
-										<option value="Samoa">Samoa</option>
-										<option value="San Marino">San Marino</option>
-										<option value="Sao Tome and Principe">
-											Sao Tome and Principe
-										</option>
-										<option value="Saudi Arabia">Saudi Arabia</option>
-										<option value="Senegal">Senegal</option>
-										<option value="Serbia">Serbia</option>
-										<option value="Seychelles">Seychelles</option>
-										<option value="Sierra Leone">Sierra Leone</option>
-										<option value="Singapore">Singapore</option>
-										<option value="Slovakia">Slovakia</option>
-										<option value="Slovenia">Slovenia</option>
-										<option value="Solomon Islands">Solomon Islands</option>
-										<option value="Somalia">Somalia</option>
-										<option value="South Africa">South Africa</option>
-										<option value="South Korea">South Korea</option>
-										<option value="South Sudan">South Sudan</option>
-										<option value="Spain">Spain</option>
-										<option value="Sri Lanka">Sri Lanka</option>
-										<option value="Sudan">Sudan</option>
-										<option value="Suriname">Suriname</option>
-										<option value="Sweden">Sweden</option>
-										<option value="Switzerland">Switzerland</option>
-										<option value="Syria">Syria</option>
-										<option value="Tajikistan">Tajikistan</option>
-										<option value="Tanzania">Tanzania</option>
-										<option value="Thailand">Thailand</option>
-										<option value="Timor-Leste">Timor-Leste</option>
-										<option value="Togo">Togo</option>
-										<option value="Tonga">Tonga</option>
-										<option value="Trinidad and Tobago">
-											Trinidad and Tobago
-										</option>
-										<option value="Tunisia">Tunisia</option>
-										<option value="Turkey">Turkey</option>
-										<option value="Turkmenistan">Turkmenistan</option>
-										<option value="Tuvalu">Tuvalu</option>
-										<option value="Uganda">Uganda</option>
-										<option value="Ukraine">Ukraine</option>
-										<option value="United Arab Emirates">
-											United Arab Emirates
-										</option>
-										<option value="United Kingdom">United Kingdom</option>
-										<option value="United States of America">
-											United States of America
-										</option>
-										<option value="Uruguay">Uruguay</option>
-										<option value="Uzbekistan">Uzbekistan</option>
-										<option value="Vanuatu">Vanuatu</option>
-										<option value="Venezuela">Venezuela</option>
-										<option value="Vietnam">Vietnam</option>
-										<option value="Yemen">Yemen</option>
-										<option value="Zambia">Zambia</option>
-										<option value="Zimbabwe">Zimbabwe</option>
-									</Form.Select>
+									<Controller
+										name="staatsbuergerschaft"
+										control={control}
+										defaultValue={prefillData?.staatsbuergerschaft || ''} // Set the default value based on the fetched data
+										rules={{ required: false }}
+										render={({ field }) => (
+											<Form.Select {...field} >
+												<option value="" />
+												{OptionsStaatsbuergerschaft.map((option) => (
+													<option value={option.id}>
+														{option.name}
+													</option>
+												))}
+											</Form.Select>
+										)}
+									/>
 								</FloatingLabel>
 							</Form.Group>
 						</Row>
@@ -1294,67 +1013,23 @@ function Tagesschule2() {
 									controlId="formMuttersprache"
 									label="Muttersprache"
 									className="pt-1"
-								>
-									<Form.Select required>
-										<option value="47">Afrikaans</option>
-										<option value="1">Albanisch</option>
-										<option value="55">Amerikanische Sprachen</option>
-										<option value="52">Amharisch</option>
-										<option value="2">Arabisch</option>
-										<option value="3">Aramäisch</option>
-										<option value="4">Armenisch</option>
-										<option value="5">Bengalisch</option>
-										<option value="6">BKS (Bosnisch/Kroatisch/Serbisch)</option>
-										<option value="7">Bosnisch</option>
-										<option value="8">Bulgarisch</option>
-										<option value="9">
-											Chinesisch (ohne nähere Differenzierung)
-										</option>
-										<option value="10">Dari</option>
-										<option value="11">Deutsch</option>
-										<option value="12">Englisch</option>
-										<option value="13">Estnisch</option>
-										<option value="14">Finnisch</option>
-										<option value="15">Französisch</option>
-										<option value="49">Georgisch</option>
-										<option value="54">Griechisch</option>
-										<option value="16">Hindi</option>
-										<option value="17">Indonesisch</option>
-										<option value="18">Italienisch</option>
-										<option value="19">Koreanisch</option>
-										<option value="20">Kroatisch</option>
-										<option value="21">Kurdisch</option>
-										<option value="56">Litauisch</option>
-										<option value="22">Makedonisch</option>
-										<option value="51">Mongolisch</option>
-										<option value="23">Niederländisch/Flämisch</option>
-										<option value="24">Österreichische Gebärdensprache</option>
-										<option value="25">Pashto</option>
-										<option value="26">Persisch (Farsi)</option>
-										<option value="27">Polnisch</option>
-										<option value="48">Portugisisch</option>
-										<option value="28">Punjabi</option>
-										<option value="29">Rumänisch</option>
-										<option value="30">Russisch</option>
-										<option value="50">Schwedisch</option>
-										<option value="31">Serbisch</option>
-										<option value="32">Serbokroatisch</option>
-										<option value="33">Slowakisch</option>
-										<option value="34">Slowenisch</option>
-										<option value="35">Sonstige afrikanische Sprachen</option>
-										<option value="36">Sonstige Sprache(n)</option>
-										<option value="37">Spanisch</option>
-										<option value="38">Tagalog</option>
-										<option value="53">Thailändisch</option>
-										<option value="39">Tschechisch</option>
-										<option value="40">Tschetschenisch</option>
-										<option value="41">Türkisch</option>
-										<option value="42">Ukrainisch</option>
-										<option value="43">Ungarisch</option>
-										<option value="44">Urdu</option>
-										<option value="45">Vietnamesisch</option>
-										<option value="46">Yoruba</option>
-									</Form.Select>
+								><Controller
+										name="muttersprache"
+										control={control}
+										defaultValue={prefillData?.muttersprache || ''} // Set the default value based on the fetched data
+										rules={{ required: false }}
+										render={({ field }) => (
+											<Form.Select {...field} >
+												<option value="" />
+												{OptionsErstsprache.map((option) => (
+													<option value={option.id}>
+														{option.name}
+													</option>
+												))}
+											</Form.Select>
+										)}
+									/>
+
 								</FloatingLabel>
 							</Form.Group>
 						</Row>
@@ -1365,66 +1040,22 @@ function Tagesschule2() {
 									label="Alltagssprache"
 									className="pt-1"
 								>
-									<Form.Select required>
-										<option value="47">Afrikaans</option>
-										<option value="1">Albanisch</option>
-										<option value="55">Amerikanische Sprachen</option>
-										<option value="52">Amharisch</option>
-										<option value="2">Arabisch</option>
-										<option value="3">Aramäisch</option>
-										<option value="4">Armenisch</option>
-										<option value="5">Bengalisch</option>
-										<option value="6">BKS (Bosnisch/Kroatisch/Serbisch)</option>
-										<option value="7">Bosnisch</option>
-										<option value="8">Bulgarisch</option>
-										<option value="9">
-											Chinesisch (ohne nähere Differenzierung)
-										</option>
-										<option value="10">Dari</option>
-										<option value="11">Deutsch</option>
-										<option value="12">Englisch</option>
-										<option value="13">Estnisch</option>
-										<option value="14">Finnisch</option>
-										<option value="15">Französisch</option>
-										<option value="49">Georgisch</option>
-										<option value="54">Griechisch</option>
-										<option value="16">Hindi</option>
-										<option value="17">Indonesisch</option>
-										<option value="18">Italienisch</option>
-										<option value="19">Koreanisch</option>
-										<option value="20">Kroatisch</option>
-										<option value="21">Kurdisch</option>
-										<option value="56">Litauisch</option>
-										<option value="22">Makedonisch</option>
-										<option value="51">Mongolisch</option>
-										<option value="23">Niederländisch/Flämisch</option>
-										<option value="24">Österreichische Gebärdensprache</option>
-										<option value="25">Pashto</option>
-										<option value="26">Persisch (Farsi)</option>
-										<option value="27">Polnisch</option>
-										<option value="48">Portugisisch</option>
-										<option value="28">Punjabi</option>
-										<option value="29">Rumänisch</option>
-										<option value="30">Russisch</option>
-										<option value="50">Schwedisch</option>
-										<option value="31">Serbisch</option>
-										<option value="32">Serbokroatisch</option>
-										<option value="33">Slowakisch</option>
-										<option value="34">Slowenisch</option>
-										<option value="35">Sonstige afrikanische Sprachen</option>
-										<option value="36">Sonstige Sprache(n)</option>
-										<option value="37">Spanisch</option>
-										<option value="38">Tagalog</option>
-										<option value="53">Thailändisch</option>
-										<option value="39">Tschechisch</option>
-										<option value="40">Tschetschenisch</option>
-										<option value="41">Türkisch</option>
-										<option value="42">Ukrainisch</option>
-										<option value="43">Ungarisch</option>
-										<option value="44">Urdu</option>
-										<option value="45">Vietnamesisch</option>
-										<option value="46">Yoruba</option>
-									</Form.Select>
+									<Controller
+										name="alltagssprache"
+										control={control}
+										defaultValue={prefillData?.alltagssprache || ''} // Set the default value based on the fetched data
+										rules={{ required: false }}
+										render={({ field }) => (
+											<Form.Select {...field} >
+												<option value="" />
+												{OptionsZweitsprache.map((option) => (
+													<option value={option.id}>
+														{option.name}
+													</option>
+												))}
+											</Form.Select>
+										)}
+									/>
 								</FloatingLabel>
 							</Form.Group>
 						</Row>
@@ -1437,95 +1068,16 @@ function Tagesschule2() {
 								><Controller
 										name="religion"
 										control={control}
-										rules={{ required: true }}
+										defaultValue={prefillData?.religion || ''}
+										rules={{ required: false }}
 										render={({ field }) => (
-
-											<Form.Select {...field}>
-												<option value="47">
-													Alt-Alevitische Glaubensgemeinschaft in Österreich
-												</option>
-												<option value="1">altkatholisch</option>
-												<option value="2">armenisch-apostolisch</option>
-												<option value="3">armenisch-katholisch</option>
-												<option value="4">äthiopisch-katholisch</option>
-												<option value="48">
-													Bahai-Religionsgemeinschaft Österreich
-												</option>
-												<option value="5">buddhistisch</option>
-												<option value="6">bulgarisch-katholisch</option>
-												<option value="7">bulgarisch-orthodox</option>
-												<option value="8">
-													Bund der Baptistengemeinden in Österreich
-												</option>
-												<option value="9">
-													Bund evangelikaler Gemeinden in Österreich
-												</option>
-												<option value="10">byzantinisch-katholisch</option>
-												<option value="11">chaldäisch-katholisch</option>
-												<option value="49">
-													Die Christengemeinschaft in Österreich
-												</option>
-												<option value="12">Elaia Christengemeinschaft</option>
-												<option value="13">evangelisch A.B.</option>
-												<option value="14">evangelisch H.B.</option>
-												<option value="15">evangelisch-methodistisch</option>
-												<option value="16">
-													Freie Christengemeinde/Pfingstgemeinde Österreich
-												</option>
-												<option value="57">Freikirchen in Österreich</option>
-												<option value="17">freikirchlich</option>
-												<option value="18">griechisch-katholisch</option>
-												<option value="19">griechisch-orthodox</option>
-												<option value="50">
-													Hinduistische Religionsgesellschaft in Österreich
-												</option>
-												<option value="20">islamisch</option>
-												<option value="21">
-													Islamische Alevitische Glaubensgemeinschaft in Österreich
-												</option>
-												<option value="51">
-													Islamische-Schiitische Glaubensgemeinschaft in Österreich
-												</option>
-												<option value="22">israelitisch</option>
-												<option value="23">italo-albanisch</option>
-												<option value="24">Jehovas Zeugen</option>
-												<option value="52">
-													Kirche der Siebenten-Tags-Adventisten
-												</option>
-												<option value="25">
-													Kirche Jesu Christi der Heiligen der Letzten Tage
-												</option>
-												<option value="26">koptisch-katholisch</option>
-												<option value="27">koptisch-orthodox</option>
-												<option value="28">maronitisch-katholisch</option>
-												<option value="29">melkitisch-katholisch</option>
-												<option value="30">
-													Mennonitische Freikirche Österreich
-												</option>
-												<option value="31">neuapostolisch</option>
-												<option value="45">ohne Bekenntnis</option>
-												<option value="56">orthodox</option>
-												<option value="58">
-													Österreichische Sikh Glaubensgemeinschaft
-												</option>
-												<option value="53">
-													Pfingstkirche Gemeinde Gottes in Österreich
-												</option>
-												<option value="32">römisch-katholisch</option>
-												<option value="33">rumänisch-katholisch</option>
-												<option value="34">rumänisch-orthodox</option>
-												<option value="35">russisch-orthodox</option>
-												<option value="36">ruthenisch-katholisch</option>
-												<option value="37">serbisch-orthodox</option>
-												<option value="38">slowakisch-katholisch</option>
-												<option value="55">Sonstige</option>
-												<option value="39">syrisch-katholisch</option>
-												<option value="40">syrisch-orthodox</option>
-												<option value="41">syro-malabar-katholisch</option>
-												<option value="42">syro-malankar-katholisch</option>
-												<option value="43">ukrainisch-katholisch</option>
-												<option value="44">ungarisch-katholisch</option>
-												<option value="54">Vereinigungskirche in Österreich</option>
+											<Form.Select {...field} >
+												<option value="" />
+												{OptionsReligionsbekenntnis.map((option) => (
+													<option value={option.id}>
+														{option.name}
+													</option>
+												))}
 											</Form.Select>
 										)} />
 								</FloatingLabel>
@@ -1535,20 +1087,25 @@ function Tagesschule2() {
 							<Form.Group controlId="validationAdresse">
 								<FloatingLabel
 									controlId="formAdresse"
-									label="Strasse, Hausnummer"
+									label="Strasse Hausnummer"
 									className="pt-1"
 								>
-									<Form.Control
-										required
-										type="text"
-										pattern="^[^\d]+\s+\d+.*$"
-										value={adress}
-										onChange={handleBlurAdress}
-										onBlur={parseAddress}
-									//pattern="[A-Z][a-z]*"
+									<Controller
+										name="adresse"
+										control={control}
+										defaultValue={prefillData?.adresse || ''} // Set the default value based on the fetched data
+										render={({ field }) => (
+											<Form.Control
+												pattern="^[^\d]+\s+\d+.*$"
+												type="text"
+												placeholder="Straße Hausnummer"
+												{...field} // Spread the field props to the Form.Control
+											// disabled // Keep the disabled attribute if needed
+											/>
+										)}
 									/>
 									<Form.Control.Feedback type="invalid" className="mx-2">
-										Bitte geben Sie Ihre Adresse in der Form Strasse, Hausnummer
+										Bitte geben Sie Ihre Adresse in der Form Strasse Hausnummer
 										Top Stiege etc. ein.
 									</Form.Control.Feedback>
 								</FloatingLabel>
@@ -1561,13 +1118,19 @@ function Tagesschule2() {
 									label="PLZ, Ort"
 									className="pt-1"
 								>
-									<Form.Control
-										required
-										type="text"
-										pattern="^[1-9]\d{3}, [^\d]{2,}$"
-										value={plzOrt}
-										onChange={handleBlurPlzOrt}
-										onBlur={parsePlzOrt}
+									<Controller
+										name="plzort"
+										control={control}
+										defaultValue={prefillData?.plzort || ''} // Set the default value based on the fetched data
+										render={({ field }) => (
+											<Form.Control
+												type="text"
+												placeholder="PLZ, Ort"
+												pattern="^[1-9]\d{3,5}, [^\d]{2,}$"
+												{...field} // Spread the field props to the Form.Control
+											// disabled // Keep the disabled attribute if needed
+											/>
+										)}
 									/>
 									<Form.Control.Feedback type="invalid" className="mx-2">
 										Bitte geben Sie Ihre PLZ und Ort in der Form PLZ, Ortsname
@@ -1583,236 +1146,131 @@ function Tagesschule2() {
 									label="Wohnland"
 									className="pt-1"
 								>
-									<Form.Select required>
-										<option />
-										<option value="Afghanistan">Afghanistan</option>
-										<option value="Albania">Albania</option>
-										<option value="Algeria">Algeria</option>
-										<option value="Andorra">Andorra</option>
-										<option value="Angola">Angola</option>
-										<option value="Antigua and Barbuda">
-											Antigua and Barbuda
-										</option>
-										<option value="Argentina">Argentina</option>
-										<option value="Armenia">Armenia</option>
-										<option value="Australia">Australia</option>
-										<option value="Austria">Austria</option>
-										<option value="Azerbaijan">Azerbaijan</option>
-										<option value="Bahamas">Bahamas</option>
-										<option value="Bahrain">Bahrain</option>
-										<option value="Bangladesh">Bangladesh</option>
-										<option value="Barbados">Barbados</option>
-										<option value="Belarus">Belarus</option>
-										<option value="Belgium">Belgium</option>
-										<option value="Belize">Belize</option>
-										<option value="Benin">Benin</option>
-										<option value="Bhutan">Bhutan</option>
-										<option value="Bolivia">Bolivia</option>
-										<option value="Bosnia and Herzegovina">
-											Bosnia and Herzegovina
-										</option>
-										<option value="Botswana">Botswana</option>
-										<option value="Brazil">Brazil</option>
-										<option value="Brunei">Brunei</option>
-										<option value="Bulgaria">Bulgaria</option>
-										<option value="Burkina Faso">Burkina Faso</option>
-										<option value="Burundi">Burundi</option>
-										<option value="Côte d'Ivoire">Côte d'Ivoire</option>
-										<option value="Cabo Verde">Cabo Verde</option>
-										<option value="Cambodia">Cambodia</option>
-										<option value="Cameroon">Cameroon</option>
-										<option value="Canada">Canada</option>
-										<option value="Central African Republic">
-											Central African Republic
-										</option>
-										<option value="Chad">Chad</option>
-										<option value="Chile">Chile</option>
-										<option value="China">China</option>
-										<option value="Colombia">Colombia</option>
-										<option value="Comoros">Comoros</option>
-										<option value="Congo (Congo-Brazzaville)">
-											Congo (Congo-Brazzaville)
-										</option>
-										<option value="Costa Rica">Costa Rica</option>
-										<option value="Croatia">Croatia</option>
-										<option value="Cuba">Cuba</option>
-										<option value="Cyprus">Cyprus</option>
-										<option value="Czechia (Czech Republic)">
-											Czechia (Czech Republic)
-										</option>
-										<option value="Democratic Republic of the Congo">
-											Democratic Republic of the Congo
-										</option>
-										<option value="Denmark">Denmark</option>
-										<option value="Djibouti">Djibouti</option>
-										<option value="Dominica">Dominica</option>
-										<option value="Dominican Republic">
-											Dominican Republic
-										</option>
-										<option value="Ecuador">Ecuador</option>
-										<option value="Egypt">Egypt</option>
-										<option value="El Salvador">El Salvador</option>
-										<option value="Equatorial Guinea">Equatorial Guinea</option>
-										<option value="Eritrea">Eritrea</option>
-										<option value="Estonia">Estonia</option>
-										<option value="Eswatini">Eswatini</option>
-										<option value="Ethiopia">Ethiopia</option>
-										<option value="Fiji">Fiji</option>
-										<option value="Finland">Finland</option>
-										<option value="France">France</option>
-										<option value="Gabon">Gabon</option>
-										<option value="Gambia">Gambia</option>
-										<option value="Georgia">Georgia</option>
-										<option value="Germany">Germany</option>
-										<option value="Ghana">Ghana</option>
-										<option value="Greece">Greece</option>
-										<option value="Grenada">Grenada</option>
-										<option value="Guatemala">Guatemala</option>
-										<option value="Guinea">Guinea</option>
-										<option value="Guinea-Bissau">Guinea-Bissau</option>
-										<option value="Guyana">Guyana</option>
-										<option value="Haiti">Haiti</option>
-										<option value="Holy See">Holy See</option>
-										<option value="Honduras">Honduras</option>
-										<option value="Hungary">Hungary</option>
-										<option value="Iceland">Iceland</option>
-										<option value="India">India</option>
-										<option value="Indonesia">Indonesia</option>
-										<option value="Iran">Iran</option>
-										<option value="Iraq">Iraq</option>
-										<option value="Ireland">Ireland</option>
-										<option value="Israel">Israel</option>
-										<option value="Italy">Italy</option>
-										<option value="Jamaica">Jamaica</option>
-										<option value="Japan">Japan</option>
-										<option value="Jordan">Jordan</option>
-										<option value="Kazakhstan">Kazakhstan</option>
-										<option value="Kenya">Kenya</option>
-										<option value="Kiribati">Kiribati</option>
-										<option value="Kuwait">Kuwait</option>
-										<option value="Kyrgyzstan">Kyrgyzstan</option>
-										<option value="Laos">Laos</option>
-										<option value="Latvia">Latvia</option>
-										<option value="Lebanon">Lebanon</option>
-										<option value="Lesotho">Lesotho</option>
-										<option value="Liberia">Liberia</option>
-										<option value="Libya">Libya</option>
-										<option value="Liechtenstein">Liechtenstein</option>
-										<option value="Lithuania">Lithuania</option>
-										<option value="Luxembourg">Luxembourg</option>
-										<option value="Madagascar">Madagascar</option>
-										<option value="Malawi">Malawi</option>
-										<option value="Malaysia">Malaysia</option>
-										<option value="Maldives">Maldives</option>
-										<option value="Mali">Mali</option>
-										<option value="Malta">Malta</option>
-										<option value="Marshall Islands">Marshall Islands</option>
-										<option value="Mauritania">Mauritania</option>
-										<option value="Mauritius">Mauritius</option>
-										<option value="Mexico">Mexico</option>
-										<option value="Micronesia">Micronesia</option>
-										<option value="Moldova">Moldova</option>
-										<option value="Monaco">Monaco</option>
-										<option value="Mongolia">Mongolia</option>
-										<option value="Montenegro">Montenegro</option>
-										<option value="Morocco">Morocco</option>
-										<option value="Mozambique">Mozambique</option>
-										<option value="Myanmar (formerly Burma)">
-											Myanmar (formerly Burma)
-										</option>
-										<option value="Namibia">Namibia</option>
-										<option value="Nauru">Nauru</option>
-										<option value="Nepal">Nepal</option>
-										<option value="Netherlands">Netherlands</option>
-										<option value="New Zealand">New Zealand</option>
-										<option value="Nicaragua">Nicaragua</option>
-										<option value="Niger">Niger</option>
-										<option value="Nigeria">Nigeria</option>
-										<option value="North Korea">North Korea</option>
-										<option value="North Macedonia (formerly Macedonia)">
-											North Macedonia (formerly Macedonia)
-										</option>
-										<option value="Norway">Norway</option>
-										<option value="Oman">Oman</option>
-										<option value="Pakistan">Pakistan</option>
-										<option value="Palau">Palau</option>
-										<option value="Palestine State">Palestine State</option>
-										<option value="Panama">Panama</option>
-										<option value="Papua New Guinea">Papua New Guinea</option>
-										<option value="Paraguay">Paraguay</option>
-										<option value="Peru">Peru</option>
-										<option value="Philippines">Philippines</option>
-										<option value="Poland">Poland</option>
-										<option value="Portugal">Portugal</option>
-										<option value="Qatar">Qatar</option>
-										<option value="Romania">Romania</option>
-										<option value="Russia">Russia</option>
-										<option value="Rwanda">Rwanda</option>
-										<option value="Saint Kitts and Nevis">
-											Saint Kitts and Nevis
-										</option>
-										<option value="Saint Lucia">Saint Lucia</option>
-										<option value="Saint Vincent and the Grenadines">
-											Saint Vincent and the Grenadines
-										</option>
-										<option value="Samoa">Samoa</option>
-										<option value="San Marino">San Marino</option>
-										<option value="Sao Tome and Principe">
-											Sao Tome and Principe
-										</option>
-										<option value="Saudi Arabia">Saudi Arabia</option>
-										<option value="Senegal">Senegal</option>
-										<option value="Serbia">Serbia</option>
-										<option value="Seychelles">Seychelles</option>
-										<option value="Sierra Leone">Sierra Leone</option>
-										<option value="Singapore">Singapore</option>
-										<option value="Slovakia">Slovakia</option>
-										<option value="Slovenia">Slovenia</option>
-										<option value="Solomon Islands">Solomon Islands</option>
-										<option value="Somalia">Somalia</option>
-										<option value="South Africa">South Africa</option>
-										<option value="South Korea">South Korea</option>
-										<option value="South Sudan">South Sudan</option>
-										<option value="Spain">Spain</option>
-										<option value="Sri Lanka">Sri Lanka</option>
-										<option value="Sudan">Sudan</option>
-										<option value="Suriname">Suriname</option>
-										<option value="Sweden">Sweden</option>
-										<option value="Switzerland">Switzerland</option>
-										<option value="Syria">Syria</option>
-										<option value="Tajikistan">Tajikistan</option>
-										<option value="Tanzania">Tanzania</option>
-										<option value="Thailand">Thailand</option>
-										<option value="Timor-Leste">Timor-Leste</option>
-										<option value="Togo">Togo</option>
-										<option value="Tonga">Tonga</option>
-										<option value="Trinidad and Tobago">
-											Trinidad and Tobago
-										</option>
-										<option value="Tunisia">Tunisia</option>
-										<option value="Turkey">Turkey</option>
-										<option value="Turkmenistan">Turkmenistan</option>
-										<option value="Tuvalu">Tuvalu</option>
-										<option value="Uganda">Uganda</option>
-										<option value="Ukraine">Ukraine</option>
-										<option value="United Arab Emirates">
-											United Arab Emirates
-										</option>
-										<option value="United Kingdom">United Kingdom</option>
-										<option value="United States of America">
-											United States of America
-										</option>
-										<option value="Uruguay">Uruguay</option>
-										<option value="Uzbekistan">Uzbekistan</option>
-										<option value="Vanuatu">Vanuatu</option>
-										<option value="Venezuela">Venezuela</option>
-										<option value="Vietnam">Vietnam</option>
-										<option value="Yemen">Yemen</option>
-										<option value="Zambia">Zambia</option>
-										<option value="Zimbabwe">Zimbabwe</option>
-									</Form.Select>
+									<Controller
+
+										name="wohnland"
+										control={control}
+										defaultValue={prefillData?.wohnland || ''}
+										rules={{ required: false }}
+										render={({ field }) => (
+											<Form.Select {...field} >
+												<option value="" />
+												{OptionsWohnland.map((option) => (
+													<option value={option.id}>
+														{option.name}
+													</option>
+												))}
+											</Form.Select>
+										)}
+									/>
 									<Form.Control.Feedback type="invalid" className="mx-2">
 										Bitte geben Sie ihr Wohnland an.
+									</Form.Control.Feedback>
+								</FloatingLabel>
+							</Form.Group>
+						</Row>
+						<Row className="mb-3 mt-4 ">
+							<Form.Group controlId="validationLetzteSchulform">
+								<FloatingLabel
+									controlId="formLetzteSchulform"
+									label="Zuletzt besuchte Schulform"
+									className="pt-1"
+								>
+									<Controller
+										name="letzteschulform"
+										control={control}
+										defaultValue={prefillData?.letzteschulform || ''} // Set the default value based on the fetched data
+										render={({ field }) => (
+											<Form.Control
+												type="text"
+												placeholder="Zuletzt besuchte Schulform"
+												// pattern="^[1-9]\d{3,5}, [^\d]{2,}$"
+												{...field} // Spread the field props to the Form.Control
+											// disabled // Keep the disabled attribute if needed
+											/>
+										)}
+									/>
+									<Form.Control.Feedback type="invalid" className="mx-2">
+										Bitte geben Sie ihre zuletzt besuchte Schulform an.
+									</Form.Control.Feedback>
+								</FloatingLabel>
+							</Form.Group>
+						</Row>
+						<Row className="mb-3 mt-4 ">
+							<Form.Group controlId="validationErstwunschSchule">
+								<FloatingLabel
+									controlId="formErstwunschSchule"
+									label="Erstwunschschule"
+									className="mt-1 "
+								>
+									<Col className="mx-3 pt-5">
+										<Controller
+											name="erstwunsch"
+											defaultValue={prefillData?.erstwunsch}
+											control={control}
+											rules={{ required: false }} // Set the validation rules as needed
+											render={({ field }) => (
+												<Form.Check
+													inline
+													label="ja"
+													type="radio"
+													id="inline-radio-1"
+													value="1"
+													checked={field.value === "1"}
+													onChange={(e) => {
+														field.onChange(e); // Update the form state
+														setValue('erstwunsch', e.target.value); // Also update the local state if needed
+													}}
+												/>
+											)}
+										/>
+										<Controller
+											name="erstwunsch"
+											defaultValue={prefillData?.erstwunsch}
+											control={control}
+											rules={{ required: false }} // Set the validation rules as needed
+											render={({ field }) => (
+												<Form.Check
+													inline
+													label="nein"
+													type="radio"
+													id="inline-radio-2"
+													value="0"
+													checked={field.value === "0"}
+													onChange={(e) => {
+														field.onChange(e); // Update the form state
+														setValue('erstwunsch', e.target.value); // Also update the local state if needed
+													}}
+												/>
+											)}
+										/>
+									</Col>
+								</FloatingLabel>
+							</Form.Group>
+						</Row>
+						<Row className="mb-4 mt-4 ">
+							<Form.Group controlId="validationZweitwunschSchule">
+								<FloatingLabel
+									controlId="formZweitwunschSchule"
+									label="Zweitwunschschule"
+									className="pt-1"
+								>
+									<Controller
+										name="zweitwunschschule"
+										control={control}
+										defaultValue={prefillData?.zweitwunschschule || ''} // Set the default value based on the fetched data
+										render={({ field }) => (
+											<Form.Control
+												required={Erstwunsch === '0'}
+												type="text"
+												placeholder="Zweitwunschschule"
+												{...field} // Spread the field props to the Form.Control
+											// disabled // Keep the disabled attribute if needed
+											/>
+										)}
+									/>
+									<Form.Control.Feedback type="invalid" className="mx-2">
+										Haben Sie sich auch an einer zweiten Schule beworben?
 									</Form.Control.Feedback>
 								</FloatingLabel>
 							</Form.Group>
@@ -1824,20 +1282,27 @@ function Tagesschule2() {
 									label="Anzahl der Geschwister"
 									className="pt-1"
 								>
-									<Form.Select required>
-										<option />
-										<option value="0">0</option>
-										<option value="1">1</option>
-										<option value="2">2</option>
-										<option value="3">3</option>
-										<option value="4">4</option>
-										<option value="5">5</option>
-										<option value="6">6</option>
-										<option value="7">7</option>
-										<option value="8">8</option>
-										<option value="9">9</option>
-										<option value="10">10</option>
-									</Form.Select>
+									<Controller
+										name="geschwisteranzahl"
+										control={control}
+										defaultValue={prefillData?.geschwisteranzahl || ''} // Set the default value based on the fetched data
+										render={({ field }) => (
+											<Form.Select {...field}  >
+												<option value="" />
+												<option value="0">0</option>
+												<option value="1">1</option>
+												<option value="2">2</option>
+												<option value="3">3</option>
+												<option value="4">4</option>
+												<option value="5">5</option>
+												<option value="6">6</option>
+												<option value="7">7</option>
+												<option value="8">8</option>
+												<option value="9">9</option>
+												<option value="10">10</option>
+											</Form.Select>
+										)}
+									/>
 									<Form.Control.Feedback type="invalid" className="mx-2">
 										Bitte geben Sie die Anzahl ihrer Geschwister an.
 									</Form.Control.Feedback>
@@ -1851,25 +1316,31 @@ function Tagesschule2() {
 									label="Anzahl der Geschwister an der HTBLuVA Salzburg"
 									className="pt-1"
 								>
-									<Form.Select
-										onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
-											handleGeschwisterHtl(event)
-										}
-										required
-									>
-										<option />
-										<option value="0">0</option>
-										<option value="1">1</option>
-										<option value="2">2</option>
-										<option value="3">3</option>
-										<option value="4">4</option>
-										<option value="5">5</option>
-										<option value="6">6</option>
-										<option value="7">7</option>
-										<option value="8">8</option>
-										<option value="9">9</option>
-										<option value="10">10</option>
-									</Form.Select>
+
+									<Controller
+										name="geschwisteranschule"
+										control={control}
+										defaultValue={prefillData?.geschwisteranschule || ''} // Set the default value based on the fetched data
+										rules={{ required: false }}
+										render={({ field }) => (
+											<Form.Select {...field} >
+												<option value="" />
+												<option value="0">0</option>
+												<option value="1">1</option>
+												<option value="2">2</option>
+												<option value="3">3</option>
+												<option value="4">4</option>
+												<option value="5">5</option>
+												<option value="6">6</option>
+												<option value="7">7</option>
+												<option value="8">8</option>
+												<option value="9">9</option>
+												<option value="10">10</option>
+											</Form.Select>
+										)}
+									/>
+
+
 									<Form.Control.Feedback type="invalid" className="mx-2">
 										Bitte geben Sie die Anzahl ihrer Geschwister an.
 									</Form.Control.Feedback>
@@ -1885,15 +1356,18 @@ function Tagesschule2() {
                   HTBLuVA Salzburg"
 									className="pt-1 "
 								>
-									<Form.Control
-										required={geschwisterHtl}
-										type="text"
-										pattern="^.{3,}$"
-
-									//readOnly
-									// ref={inputRefGeburtsort}
-									// onBlur={handleBlurGeburtsort}
-									//pattern="[A-Z][a-z]*"
+									<Controller
+										name="geschwisternamen"
+										control={control}
+										defaultValue={prefillData?.geschwisternamen || ''} // Set the default value based on the fetched data
+										render={({ field }) => (
+											<Form.Control
+												type="text"
+												placeholder="Geschwisternamen"
+												{...field} // Spread the field props to the Form.Control
+											// disabled // Keep the disabled attribute if needed
+											/>
+										)}
 									/>
 									<Form.Control.Feedback type="invalid" className="mx-2">
 										Bitte geben Sie die Namen ihrer Geschwister an der HTBLuVA
@@ -1919,25 +1393,22 @@ function Tagesschule2() {
 													label="Verhältnis"
 													className="pt-1"
 												>
-													<Form.Select required>
-														<option value="3">Vater</option>
-														<option value="4">Mutter</option>
-														<option value="5">Großvater</option>
-														<option value="6">Großmutter</option>
-														<option value="7">Onkel</option>
-														<option value="8">Tante</option>
-														<option value="9">Bruder</option>
-														<option value="10">Schwester</option>
-														<option value="11">Stiefvater</option>
-														<option value="12">Stiefmutter</option>
-														<option value="13">Erziehungsberechtigter</option>
-														<option value="14">Vormund</option>
-														<option value="15">Pflegeeltern</option>
-														<option value="16">Heim / WG</option>
-														<option value="17">Eltern</option>
-														<option value="18">Erziehungsberechtigt</option>
-														<option value="19">Ansprechperson</option>
-													</Form.Select>
+													<Controller
+														name="verhaeltnisA"
+														control={control}
+														rules={{ required: false }}
+														defaultValue={prefillData?.verhaeltnisA || ''} // Set the default value based on the fetched data
+														render={({ field }) => (
+															<Form.Select {...field} >
+																<option value="" />
+																{OptionsVerhaeltnis.map((option) => (
+																	<option value={option.id}>
+																		{option.name}
+																	</option>
+																))}
+															</Form.Select>
+														)}
+													/>
 												</FloatingLabel>
 											</Form.Group>
 										</Row>
@@ -1948,12 +1419,22 @@ function Tagesschule2() {
 													label="Anrede"
 													className="pt-1"
 												>
-													<Form.Select required>
-														<option />
-														<option value="1">Frau</option>
-														<option value="2">Herr</option>
-														<option value="3">Divers</option>
-													</Form.Select>
+													<Controller
+														name="anredeA"
+														defaultValue={prefillData?.anredeA || ''}
+														control={control}
+														rules={{ required: false }}
+														render={({ field }) => (
+															<Form.Select {...field}>
+																<option value="" />
+																{OptionsAnrede.map((option) => (
+																	<option value={option.value}>
+																		{option.name}
+																	</option>
+																))}
+															</Form.Select>
+														)}
+													/>
 												</FloatingLabel>
 											</Form.Group>
 										</Row>
@@ -1964,17 +1445,21 @@ function Tagesschule2() {
 													label="Titel vor "
 													className="pt-1"
 												>
-													<Form.Control
-														type="text"
-														placeholder=""
-													// ref={inputRefVorname}
-													// onBlur={handleBlurVorname}
-													// className="pt-4"
-													// pattern="[A-Z][a-z]*"
-													/>
-													<Form.Control.Feedback
-														type="invalid"
-														className="mx-2 mb-1"
+													<Controller
+														name="titelvorA"
+														defaultValue={prefillData?.titelvorA || ''}
+														control={control}
+														rules={{ required: false }}
+														render={({ field }) => (
+															<Form.Select {...field}>
+																<option value="" />
+																{OptionsTitelVor.map((option) => (
+																	<option value={option.id}>
+																		{option.name}
+																	</option>
+																))}
+															</Form.Select>
+														)}
 													/>
 												</FloatingLabel>
 											</Form.Group>
@@ -1984,13 +1469,21 @@ function Tagesschule2() {
 													label="Titel nach "
 													className="pt-1"
 												>
-													<Form.Control
-														type="text"
-														placeholder=""
-													// ref={inputRefVorname}
-													// onBlur={handleBlurVorname}
-													// className="pt-4"
-													// pattern="[A-Z][a-z]*"
+													<Controller
+														name="titelnachA"
+														defaultValue={prefillData?.titelnachA || ''}
+														control={control}
+														rules={{ required: false }}
+														render={({ field }) => (
+															<Form.Select {...field}>
+																<option value="" />
+																{OptionsTitelNach.map((option) => (
+																	<option value={option.id}>
+																		{option.name}
+																	</option>
+																))}
+															</Form.Select>
+														)}
 													/>
 													<Form.Control.Feedback
 														type="invalid"
@@ -2006,14 +1499,18 @@ function Tagesschule2() {
 													label="Vorname"
 													className="pt-1"
 												>
-													<Form.Control
-														required
-														type="text"
-														placeholder="Vorname"
-														ref={inputRefVorname}
-														onBlur={handleBlurVorname}
-													// className="pt-4"
-													// pattern="[A-Z][a-z]*"
+													<Controller
+														name="vornameA"
+														defaultValue={prefillData?.vornameA} // Set the default value based on the fetched data
+														control={control}
+														render={({ field }) => (
+															<Form.Control
+																type="text"
+																// Keep the disabled attribute if needed
+																placeholder="Vorname"
+																{...field} // Spread the field props to the Form.Control
+															/>
+														)}
 													/>
 													<Form.Control.Feedback
 														type="invalid"
@@ -2032,13 +1529,18 @@ function Tagesschule2() {
 													label="Nachname"
 													className="pt-1"
 												>
-													<Form.Control
-														required
-														type="text"
-														placeholder="Nachname"
-														ref={inputRefNachname}
-														onBlur={handleBlurNachname}
-													//pattern="[A-Z][a-z]*"
+													<Controller
+														name="nachnameA"
+														control={control}
+														defaultValue={prefillData?.nachnameA} // Set the default value based on the fetched data
+														render={({ field }) => (
+															<Form.Control
+																type="text"
+																placeholder="Nachname"
+																{...field} // Spread the field props to the Form.Control
+															// Keep the disabled attribute if needed
+															/>
+														)}
 													/>
 													<Form.Control.Feedback
 														type="invalid"
@@ -2057,14 +1559,19 @@ function Tagesschule2() {
 													label="Strasse, Hausnummer"
 													className="pt-1"
 												>
-													<Form.Control
-														required
-														type="text"
-														pattern="^[^\d]+\s+\d+.*$"
-														value={adress}
-														onChange={handleBlurAdress}
-														onBlur={parseAddress}
-													//pattern="[A-Z][a-z]*"
+													<Controller
+														name="adresseA"
+														control={control}
+														defaultValue={prefillData?.adresseA || ''} // Set the default value based on the fetched data
+														render={({ field }) => (
+															<Form.Control
+																pattern="^[^\d]+\s+\d+.*$"
+																type="text"
+																placeholder="Straße Hausnummer"
+																{...field} // Spread the field props to the Form.Control
+															// disabled // Keep the disabled attribute if needed
+															/>
+														)}
 													/>
 													<Form.Control.Feedback
 														type="invalid"
@@ -2080,13 +1587,19 @@ function Tagesschule2() {
 																label="PLZ, Ort"
 																className="pt-1"
 															>
-																<Form.Control
-																	required
-																	type="text"
-																	pattern="^[1-9]\d{3}, [^\d]{2,}$"
-																	value={plzOrt}
-																	onChange={handleBlurPlzOrt}
-																	onBlur={parsePlzOrt}
+																<Controller
+																	name="plzortA"
+																	control={control}
+																	defaultValue={prefillData?.plzortA || ''} // Set the default value based on the fetched data
+																	render={({ field }) => (
+																		<Form.Control
+																			type="text"
+																			placeholder="PLZ, Ort"
+																			pattern="^[1-9]\d{3,5}, [^\d]{2,}$"
+																			{...field} // Spread the field props to the Form.Control
+																		// disabled // Keep the disabled attribute if needed
+																		/>
+																	)}
 																/>
 																<Form.Control.Feedback
 																	type="invalid"
@@ -2105,284 +1618,376 @@ function Tagesschule2() {
 																label="Wohnland"
 																className="pt-1"
 															>
-																<Form.Select required>
-																	<option />
-																	<option value="Afghanistan">
-																		Afghanistan
+																<Controller
+
+																	name="wohnlandA"
+																	control={control}
+																	defaultValue={prefillData?.wohnlandA || ''} // Set the default value based on the fetched data
+																	rules={{ required: false }}
+																	render={({ field }) => (
+																		<Form.Select {...field} >
+																			<option value="" />
+																			{OptionsWohnland.map((option) => (
+																				<option value={option.id}>
+																					{option.name}
+																				</option>
+																			))}
+																		</Form.Select>
+																	)}
+																/>
+
+
+																<Form.Control.Feedback
+																	type="invalid"
+																	className="mx-2"
+																>
+																	Bitte geben Sie ihr Wohnland an.
+																</Form.Control.Feedback>
+															</FloatingLabel>
+														</Form.Group>
+													</Row>
+												</FloatingLabel>
+											</Form.Group>
+										</Row>
+										<Form.Group
+											as={Col}
+											className=" mb-3"
+											controlId="validationPhone"
+										>
+											<FloatingLabel
+												label="Tel. Nr."
+												controlId="formPhone"
+												className="pt-1"
+											>
+												<Controller
+													name="telnr"
+													control={control}
+													defaultValue={prefillData?.telnr} // Set the default value based on the fetched data
+													render={({ field }) => (
+														<Form.Control
+															type="string"
+															disabled
+															placeholder="text"
+															{...field} // Spread the field props to the Form.Control
+														// disabled // Keep the disabled attribute if needed
+														/>
+													)}
+												/>
+
+												<Container className="mt-2">
+													<Form.Text id="telHelpBlock" muted>
+														Über diese Tel. Nr. müssen Sie im Verlauf des
+														Aufnahmeprozesses erreichbar sein sowie bei Anfragen
+														von Lehr- sowie Administrativen-Personen.
+														{/* Die E-Mail
+                    Adresse muss von einem Erziehungsberechtigten abgerufen
+                    werden. */}
+													</Form.Text>
+												</Container>
+											</FloatingLabel>
+										</Form.Group>
+										<Form.Group
+											as={Col}
+											className="mt-3 mb-3"
+											controlId="validationEmail"
+										>
+											<FloatingLabel
+												label="E-mail"
+												controlId="formEmail"
+												className="pt-1"
+											>
+												<Controller
+													name="email"
+													control={control}
+													defaultValue={prefillData?.kontaktmailadresse} // Set the default value based on the fetched data
+													render={({ field }) => (
+														<Form.Control
+															type="email"
+															disabled
+															placeholder="E-mail"
+															{...field} // Spread the field props to the Form.Control
+														// disabled // Keep the disabled attribute if needed
+														/>
+													)}
+												/>
+												<Container className="mt-2">
+													<Form.Text id="emailHelpBlock" muted>
+														Über diese E-Mail Adresse müssen Sie im Verlauf des
+														Aufnahmeprozesses erreichbar sein. An diese E-Mail
+														Adresse werden Bestätigungen und
+														Terminverständigungen geschickt. Eine Änderung ist
+														unbedingt bekannt zu geben.
+														Die E-Mail
+														Adresse muss von einem Erziehungsberechtigten abgerufen
+														werden.
+													</Form.Text>
+												</Container>
+											</FloatingLabel>
+										</Form.Group>
+									</Accordion.Body>
+								</Accordion.Item>
+							</Accordion>
+						</Form.Group>
+						<Form.Group
+							className="mb-3"
+							id="formGridZweiterErziehungsberechtigter"
+						>
+							<Accordion>
+								<Accordion.Item eventKey="0">
+									<Accordion.Header className="text-break">
+										2. Erziehungsberechtigter
+									</Accordion.Header>
+									<Accordion.Body className="text-wrap">
+										<Row className="mb-4">
+											<Form.Group >
+												<FloatingLabel
+													label="Verhältnis"
+													className="pt-1"
+												>
+													<Controller
+														name="verhaeltnisB"
+														control={control}
+														rules={{ required: false }}
+														defaultValue={prefillData?.verhaeltnisB || ''} // Set the default value based on the fetched data
+														render={({ field }) => (
+															<Form.Select {...field} >
+																<option value="" />
+																{OptionsVerhaeltnis.map((option) => (
+																	<option value={option.id}>
+																		{option.name}
 																	</option>
-																	<option value="Albania">Albania</option>
-																	<option value="Algeria">Algeria</option>
-																	<option value="Andorra">Andorra</option>
-																	<option value="Angola">Angola</option>
-																	<option value="Antigua and Barbuda">
-																		Antigua and Barbuda
+																))}
+															</Form.Select>
+														)}
+													/>
+												</FloatingLabel>
+											</Form.Group>
+										</Row>
+										<Row className="mb-4 mt-4 ">
+											<Form.Group controlId="validationSalutation">
+												<FloatingLabel
+													controlId="formSalutation"
+													label="Anrede"
+													className="pt-1"
+												>
+													<Controller
+														name="anredeB"
+														defaultValue={prefillData?.anredeB || ''}
+														control={control}
+														rules={{ required: false }}
+														render={({ field }) => (
+															<Form.Select {...field}>
+																<option value="" />
+																{OptionsAnrede.map((option) => (
+																	<option value={option.value}>
+																		{option.name}
 																	</option>
-																	<option value="Argentina">Argentina</option>
-																	<option value="Armenia">Armenia</option>
-																	<option value="Australia">Australia</option>
-																	<option value="Austria">Austria</option>
-																	<option value="Azerbaijan">Azerbaijan</option>
-																	<option value="Bahamas">Bahamas</option>
-																	<option value="Bahrain">Bahrain</option>
-																	<option value="Bangladesh">Bangladesh</option>
-																	<option value="Barbados">Barbados</option>
-																	<option value="Belarus">Belarus</option>
-																	<option value="Belgium">Belgium</option>
-																	<option value="Belize">Belize</option>
-																	<option value="Benin">Benin</option>
-																	<option value="Bhutan">Bhutan</option>
-																	<option value="Bolivia">Bolivia</option>
-																	<option value="Bosnia and Herzegovina">
-																		Bosnia and Herzegovina
+																))}
+															</Form.Select>
+														)}
+													/>
+												</FloatingLabel>
+											</Form.Group>
+										</Row>
+										<Row className="mb-4 mt-4 ">
+											<Form.Group controlId="validationTitelVor">
+												<FloatingLabel
+													controlId="formTitelVor"
+													label="Titel vor "
+													className="pt-1"
+												>
+													<Controller
+														name="titelvorB"
+														defaultValue={prefillData?.titelvorB || ''}
+														control={control}
+														rules={{ required: false }}
+														render={({ field }) => (
+															<Form.Select {...field}>
+																<option value="" />
+																{OptionsTitelVor.map((option) => (
+																	<option value={option.id}>
+																		{option.name}
 																	</option>
-																	<option value="Botswana">Botswana</option>
-																	<option value="Brazil">Brazil</option>
-																	<option value="Brunei">Brunei</option>
-																	<option value="Bulgaria">Bulgaria</option>
-																	<option value="Burkina Faso">
-																		Burkina Faso
+																))}
+															</Form.Select>
+														)}
+													/>
+												</FloatingLabel>
+											</Form.Group>
+											<Form.Group controlId="validationTitelNach">
+												<FloatingLabel
+													controlId="formTitelNach"
+													label="Titel nach "
+													className="pt-1"
+												>
+													<Controller
+														name="titelnachB"
+														defaultValue={prefillData?.titelnachB || ''}
+														control={control}
+														rules={{ required: false }}
+														render={({ field }) => (
+															<Form.Select {...field}>
+																<option value="" />
+																{OptionsTitelNach.map((option) => (
+																	<option value={option.id}>
+																		{option.name}
 																	</option>
-																	<option value="Burundi">Burundi</option>
-																	<option value="Côte d'Ivoire">
-																		Côte d'Ivoire
-																	</option>
-																	<option value="Cabo Verde">Cabo Verde</option>
-																	<option value="Cambodia">Cambodia</option>
-																	<option value="Cameroon">Cameroon</option>
-																	<option value="Canada">Canada</option>
-																	<option value="Central African Republic">
-																		Central African Republic
-																	</option>
-																	<option value="Chad">Chad</option>
-																	<option value="Chile">Chile</option>
-																	<option value="China">China</option>
-																	<option value="Colombia">Colombia</option>
-																	<option value="Comoros">Comoros</option>
-																	<option value="Congo (Congo-Brazzaville)">
-																		Congo (Congo-Brazzaville)
-																	</option>
-																	<option value="Costa Rica">Costa Rica</option>
-																	<option value="Croatia">Croatia</option>
-																	<option value="Cuba">Cuba</option>
-																	<option value="Cyprus">Cyprus</option>
-																	<option value="Czechia (Czech Republic)">
-																		Czechia (Czech Republic)
-																	</option>
-																	<option value="Democratic Republic of the Congo">
-																		Democratic Republic of the Congo
-																	</option>
-																	<option value="Denmark">Denmark</option>
-																	<option value="Djibouti">Djibouti</option>
-																	<option value="Dominica">Dominica</option>
-																	<option value="Dominican Republic">
-																		Dominican Republic
-																	</option>
-																	<option value="Ecuador">Ecuador</option>
-																	<option value="Egypt">Egypt</option>
-																	<option value="El Salvador">
-																		El Salvador
-																	</option>
-																	<option value="Equatorial Guinea">
-																		Equatorial Guinea
-																	</option>
-																	<option value="Eritrea">Eritrea</option>
-																	<option value="Estonia">Estonia</option>
-																	<option value="Eswatini">Eswatini</option>
-																	<option value="Ethiopia">Ethiopia</option>
-																	<option value="Fiji">Fiji</option>
-																	<option value="Finland">Finland</option>
-																	<option value="France">France</option>
-																	<option value="Gabon">Gabon</option>
-																	<option value="Gambia">Gambia</option>
-																	<option value="Georgia">Georgia</option>
-																	<option value="Germany">Germany</option>
-																	<option value="Ghana">Ghana</option>
-																	<option value="Greece">Greece</option>
-																	<option value="Grenada">Grenada</option>
-																	<option value="Guatemala">Guatemala</option>
-																	<option value="Guinea">Guinea</option>
-																	<option value="Guinea-Bissau">
-																		Guinea-Bissau
-																	</option>
-																	<option value="Guyana">Guyana</option>
-																	<option value="Haiti">Haiti</option>
-																	<option value="Holy See">Holy See</option>
-																	<option value="Honduras">Honduras</option>
-																	<option value="Hungary">Hungary</option>
-																	<option value="Iceland">Iceland</option>
-																	<option value="India">India</option>
-																	<option value="Indonesia">Indonesia</option>
-																	<option value="Iran">Iran</option>
-																	<option value="Iraq">Iraq</option>
-																	<option value="Ireland">Ireland</option>
-																	<option value="Israel">Israel</option>
-																	<option value="Italy">Italy</option>
-																	<option value="Jamaica">Jamaica</option>
-																	<option value="Japan">Japan</option>
-																	<option value="Jordan">Jordan</option>
-																	<option value="Kazakhstan">Kazakhstan</option>
-																	<option value="Kenya">Kenya</option>
-																	<option value="Kiribati">Kiribati</option>
-																	<option value="Kuwait">Kuwait</option>
-																	<option value="Kyrgyzstan">Kyrgyzstan</option>
-																	<option value="Laos">Laos</option>
-																	<option value="Latvia">Latvia</option>
-																	<option value="Lebanon">Lebanon</option>
-																	<option value="Lesotho">Lesotho</option>
-																	<option value="Liberia">Liberia</option>
-																	<option value="Libya">Libya</option>
-																	<option value="Liechtenstein">
-																		Liechtenstein
-																	</option>
-																	<option value="Lithuania">Lithuania</option>
-																	<option value="Luxembourg">Luxembourg</option>
-																	<option value="Madagascar">Madagascar</option>
-																	<option value="Malawi">Malawi</option>
-																	<option value="Malaysia">Malaysia</option>
-																	<option value="Maldives">Maldives</option>
-																	<option value="Mali">Mali</option>
-																	<option value="Malta">Malta</option>
-																	<option value="Marshall Islands">
-																		Marshall Islands
-																	</option>
-																	<option value="Mauritania">Mauritania</option>
-																	<option value="Mauritius">Mauritius</option>
-																	<option value="Mexico">Mexico</option>
-																	<option value="Micronesia">Micronesia</option>
-																	<option value="Moldova">Moldova</option>
-																	<option value="Monaco">Monaco</option>
-																	<option value="Mongolia">Mongolia</option>
-																	<option value="Montenegro">Montenegro</option>
-																	<option value="Morocco">Morocco</option>
-																	<option value="Mozambique">Mozambique</option>
-																	<option value="Myanmar (formerly Burma)">
-																		Myanmar (formerly Burma)
-																	</option>
-																	<option value="Namibia">Namibia</option>
-																	<option value="Nauru">Nauru</option>
-																	<option value="Nepal">Nepal</option>
-																	<option value="Netherlands">
-																		Netherlands
-																	</option>
-																	<option value="New Zealand">
-																		New Zealand
-																	</option>
-																	<option value="Nicaragua">Nicaragua</option>
-																	<option value="Niger">Niger</option>
-																	<option value="Nigeria">Nigeria</option>
-																	<option value="North Korea">
-																		North Korea
-																	</option>
-																	<option value="North Macedonia (formerly Macedonia)">
-																		North Macedonia (formerly Macedonia)
-																	</option>
-																	<option value="Norway">Norway</option>
-																	<option value="Oman">Oman</option>
-																	<option value="Pakistan">Pakistan</option>
-																	<option value="Palau">Palau</option>
-																	<option value="Palestine State">
-																		Palestine State
-																	</option>
-																	<option value="Panama">Panama</option>
-																	<option value="Papua New Guinea">
-																		Papua New Guinea
-																	</option>
-																	<option value="Paraguay">Paraguay</option>
-																	<option value="Peru">Peru</option>
-																	<option value="Philippines">
-																		Philippines
-																	</option>
-																	<option value="Poland">Poland</option>
-																	<option value="Portugal">Portugal</option>
-																	<option value="Qatar">Qatar</option>
-																	<option value="Romania">Romania</option>
-																	<option value="Russia">Russia</option>
-																	<option value="Rwanda">Rwanda</option>
-																	<option value="Saint Kitts and Nevis">
-																		Saint Kitts and Nevis
-																	</option>
-																	<option value="Saint Lucia">
-																		Saint Lucia
-																	</option>
-																	<option value="Saint Vincent and the Grenadines">
-																		Saint Vincent and the Grenadines
-																	</option>
-																	<option value="Samoa">Samoa</option>
-																	<option value="San Marino">San Marino</option>
-																	<option value="Sao Tome and Principe">
-																		Sao Tome and Principe
-																	</option>
-																	<option value="Saudi Arabia">
-																		Saudi Arabia
-																	</option>
-																	<option value="Senegal">Senegal</option>
-																	<option value="Serbia">Serbia</option>
-																	<option value="Seychelles">Seychelles</option>
-																	<option value="Sierra Leone">
-																		Sierra Leone
-																	</option>
-																	<option value="Singapore">Singapore</option>
-																	<option value="Slovakia">Slovakia</option>
-																	<option value="Slovenia">Slovenia</option>
-																	<option value="Solomon Islands">
-																		Solomon Islands
-																	</option>
-																	<option value="Somalia">Somalia</option>
-																	<option value="South Africa">
-																		South Africa
-																	</option>
-																	<option value="South Korea">
-																		South Korea
-																	</option>
-																	<option value="South Sudan">
-																		South Sudan
-																	</option>
-																	<option value="Spain">Spain</option>
-																	<option value="Sri Lanka">Sri Lanka</option>
-																	<option value="Sudan">Sudan</option>
-																	<option value="Suriname">Suriname</option>
-																	<option value="Sweden">Sweden</option>
-																	<option value="Switzerland">
-																		Switzerland
-																	</option>
-																	<option value="Syria">Syria</option>
-																	<option value="Tajikistan">Tajikistan</option>
-																	<option value="Tanzania">Tanzania</option>
-																	<option value="Thailand">Thailand</option>
-																	<option value="Timor-Leste">
-																		Timor-Leste
-																	</option>
-																	<option value="Togo">Togo</option>
-																	<option value="Tonga">Tonga</option>
-																	<option value="Trinidad and Tobago">
-																		Trinidad and Tobago
-																	</option>
-																	<option value="Tunisia">Tunisia</option>
-																	<option value="Turkey">Turkey</option>
-																	<option value="Turkmenistan">
-																		Turkmenistan
-																	</option>
-																	<option value="Tuvalu">Tuvalu</option>
-																	<option value="Uganda">Uganda</option>
-																	<option value="Ukraine">Ukraine</option>
-																	<option value="United Arab Emirates">
-																		United Arab Emirates
-																	</option>
-																	<option value="United Kingdom">
-																		United Kingdom
-																	</option>
-																	<option value="United States of America">
-																		United States of America
-																	</option>
-																	<option value="Uruguay">Uruguay</option>
-																	<option value="Uzbekistan">Uzbekistan</option>
-																	<option value="Vanuatu">Vanuatu</option>
-																	<option value="Venezuela">Venezuela</option>
-																	<option value="Vietnam">Vietnam</option>
-																	<option value="Yemen">Yemen</option>
-																	<option value="Zambia">Zambia</option>
-																	<option value="Zimbabwe">Zimbabwe</option>
-																</Form.Select>
+																))}
+															</Form.Select>
+														)}
+													/>
+													<Form.Control.Feedback
+														type="invalid"
+														className="mx-2 mb-1"
+													/>
+												</FloatingLabel>
+											</Form.Group>
+										</Row>
+										<Row className="mb-4 mt-4 ">
+											<Form.Group controlId="validationVorname">
+												<FloatingLabel
+													controlId="formVorname"
+													label="Vorname"
+													className="pt-1"
+												>
+													<Controller
+														name="vornameB"
+														defaultValue={prefillData?.vornameB || ''} // Set the default value based on the fetched data
+														control={control}
+														render={({ field }) => (
+															<Form.Control
+																type="text"
+																// Keep the disabled attribute if needed
+																placeholder="Vorname"
+																{...field} // Spread the field props to the Form.Control
+															/>
+														)}
+													/>
+													<Form.Control.Feedback
+														type="invalid"
+														className="mx-2 "
+													>
+														Bitte geben Sie den Vornamen des
+														Erziehungsberechtigten an.
+													</Form.Control.Feedback>
+												</FloatingLabel>
+											</Form.Group>
+										</Row>
+										<Row className="mb-3 mt-4 ">
+											<Form.Group controlId="validationNachname">
+												<FloatingLabel
+													controlId="formNachname"
+													label="Nachname"
+													className="pt-1"
+												>
+													<Controller
+														name="nachnameB"
+														control={control}
+														defaultValue={prefillData?.nachnameB || ''} // Set the default value based on the fetched data
+														render={({ field }) => (
+															<Form.Control
+																type="text"
+																placeholder="Nachname"
+																{...field} // Spread the field props to the Form.Control
+															// Keep the disabled attribute if needed
+															/>
+														)}
+													/>
+													<Form.Control.Feedback
+														type="invalid"
+														className="mx-2"
+													>
+														Bitte geben Sie den Nachnamen des
+														Erziehungsberechtigten an.
+													</Form.Control.Feedback>
+												</FloatingLabel>
+											</Form.Group>
+										</Row>
+										<Row className="mb-5 mt-4 ">
+											<Form.Group controlId="validationAdresse">
+												<FloatingLabel
+													controlId="formAdresse"
+													label="Strasse, Hausnummer"
+													className="pt-1"
+												>
+													<Controller
+														name="adresseB"
+														control={control}
+														defaultValue={prefillData?.adresseB || ''} // Set the default value based on the fetched data
+														render={({ field }) => (
+															<Form.Control
+																pattern="^[^\d]+\s+\d+.*$"
+																type="text"
+																placeholder="Straße Hausnummer"
+																{...field} // Spread the field props to the Form.Control
+															// disabled // Keep the disabled attribute if needed
+															/>
+														)}
+													/>
+													<Form.Control.Feedback
+														type="invalid"
+														className="mx-2"
+													>
+														Bitte geben Sie Ihre Adresse in der Form Strasse,
+														Hausnummer Top Stiege etc. ein.
+													</Form.Control.Feedback>
+													<Row className="mb-3 mt-4 ">
+														<Form.Group controlId="validationPlzOrt">
+															<FloatingLabel
+																controlId="formPlzOrt"
+																label="PLZ, Ort"
+																className="pt-1"
+															>
+																<Controller
+																	name="plzortB"
+																	control={control}
+																	defaultValue={prefillData?.plzortB || ''} // Set the default value based on the fetched data
+																	render={({ field }) => (
+																		<Form.Control
+																			type="text"
+																			placeholder="PLZ, Ort"
+																			pattern="^[1-9]\d{3,5}, [^\d]{2,}$"
+																			{...field} // Spread the field props to the Form.Control
+																		// disabled // Keep the disabled attribute if needed
+																		/>
+																	)}
+																/>
+																<Form.Control.Feedback
+																	type="invalid"
+																	className="mx-2"
+																>
+																	Bitte geben Sie Ihre PLZ und Ort in der Form
+																	PLZ, Ortsname ein.
+																</Form.Control.Feedback>
+															</FloatingLabel>
+														</Form.Group>
+													</Row>
+													<Row>
+														<Form.Group controlId="validationWohnland">
+															<FloatingLabel
+																controlId="formWohnland"
+																label="Wohnland"
+																className="pt-1"
+															>
+																<Controller
+
+																	name="wohnlandB"
+																	control={control}
+																	defaultValue={prefillData?.wohnlandB || ''} // Set the default value based on the fetched data
+																	rules={{ required: false }}
+																	render={({ field }) => (
+																		<Form.Select {...field} >
+																			<option value="" />
+																			{OptionsWohnland.map((option) => (
+																				<option value={option.id}>
+																					{option.name}
+																				</option>
+																			))}
+																		</Form.Select>
+																	)}
+																/>
+
+
 																<Form.Control.Feedback
 																	type="invalid"
 																	className="mx-2"
@@ -2408,11 +2013,12 @@ function Tagesschule2() {
 												<Form.Control
 													required
 													type="tel"
-													// placeholder="+43 123 456 7890"
+													//placeholder="+43 123 456 7890"
 													value={phoneNumber}
-													onChange={handlePhoneChange}
-													onBlur={handlePhoneBlur}
+													onChange={handlePhoneBlur}
+													//onBlur={handlePhoneBlur}
 													isInvalid={!isValid}
+												//pattern="^\+\d{1,3} \d{1,3} \d{1,8}$"
 												/>
 												<Form.Control.Feedback
 													type={isValid ? "valid" : "invalid"}
@@ -2422,21 +2028,11 @@ function Tagesschule2() {
 														""
 													) : (
 														<strong>
-															Bitte geben Sie die Tel. Nr. des Bewerbers im
-															Format +43 664 12345678 ein.
+															Bitte geben Sie die Tel. Nr. des 2.Erziehungsberechtigten im Format +43
+															66x 12345678 ein.
 														</strong>
 													)}
 												</Form.Control.Feedback>
-												<Container className="mt-2">
-													<Form.Text id="telHelpBlock" muted>
-														Über diese Tel. Nr. müssen Sie im Verlauf des
-														Aufnahmeprozesses erreichbar sein sowie bei Anfragen
-														von Lehr- sowie Administrativen-Personen.
-														{/* Die E-Mail
-                    Adresse muss von einem Erziehungsberechtigten abgerufen
-                    werden. */}
-													</Form.Text>
-												</Container>
 											</FloatingLabel>
 										</Form.Group>
 										<Form.Group
@@ -2450,10 +2046,9 @@ function Tagesschule2() {
 												className="pt-1"
 											>
 												<Form.Control
-													disabled
 													required
 													type="email"
-													value={email}
+													value={emailB}
 													onChange={handleEmailChange}
 													isInvalid={!isEmailValid}
 													className={isEmailValid ? "valid-input" : ""}
@@ -2489,617 +2084,76 @@ function Tagesschule2() {
 								</Accordion.Item>
 							</Accordion>
 						</Form.Group>
-						<Form.Group
-							className="mb-3"
-							id="formGridZweiterErziehungsberechtigter"
-						>
-							<Accordion>
-								<Accordion.Item eventKey="0">
-									<Accordion.Header className="text-break">
-										2. Erziehungsberechtigter
-									</Accordion.Header>
-									<Accordion.Body className="text-wrap">
-										<Row className="mb-4">
-											<Form.Group controlId="validationErsterErziehungsberechtigter">
-												<FloatingLabel
-													controlId="formErsterErziehungsberechtigter"
-													label="Verhältnis"
-													className="pt-1"
-												>
-													<Form.Select required>
-														<option value="3">Vater</option>
-														<option value="4">Mutter</option>
-														<option value="5">Großvater</option>
-														<option value="6">Großmutter</option>
-														<option value="7">Onkel</option>
-														<option value="8">Tante</option>
-														<option value="9">Bruder</option>
-														<option value="10">Schwester</option>
-														<option value="11">Stiefvater</option>
-														<option value="12">Stiefmutter</option>
-														<option value="13">Erziehungsberechtigter</option>
-														<option value="14">Vormund</option>
-														<option value="15">Pflegeeltern</option>
-														<option value="16">Heim / WG</option>
-														<option value="17">Eltern</option>
-														<option value="18">Erziehungsberechtigt</option>
-														<option value="19">Ansprechperson</option>
-													</Form.Select>
-												</FloatingLabel>
-											</Form.Group>
-										</Row>
-										<Row className="mb-4 mt-4 ">
-											<Form.Group controlId="validationSalutation">
-												<FloatingLabel
-													controlId="formSalutation"
-													label="Anrede"
-													className="pt-1"
-												>
-													<Form.Select required>
-														<option />
-														<option value="1">Frau</option>
-														<option value="2">Herr</option>
-														<option value="3">Divers</option>
-													</Form.Select>
-												</FloatingLabel>
-											</Form.Group>
-										</Row>
-										<Row className="mb-4 mt-4 ">
-											<Form.Group controlId="validationTitelVor">
-												<FloatingLabel
-													controlId="formTitelVor"
-													label="Titel vor "
-													className="pt-1"
-												>
-													<Form.Control
-														type="text"
-														placeholder=""
-													// ref={inputRefVorname}
-													// onBlur={handleBlurVorname}
-													// className="pt-4"
-													// pattern="[A-Z][a-z]*"
-													/>
-													<Form.Control.Feedback
-														type="invalid"
-														className="mx-2 mb-1"
-													/>
-												</FloatingLabel>
-											</Form.Group>
-											<Form.Group controlId="validationTitelNach">
-												<FloatingLabel
-													controlId="formTitelNach"
-													label="Titel nach "
-													className="pt-1"
-												>
-													<Form.Control
-														type="text"
-														placeholder=""
-													// ref={inputRefVorname}
-													// onBlur={handleBlurVorname}
-													// className="pt-4"
-													// pattern="[A-Z][a-z]*"
-													/>
-													<Form.Control.Feedback
-														type="invalid"
-														className="mx-2 mb-1"
-													/>
-												</FloatingLabel>
-											</Form.Group>
-										</Row>
-										<Row className="mb-1 mt-4 ">
-											<Form.Group controlId="validationVorname">
-												<FloatingLabel
-													controlId="formVorname"
-													label="Vorname"
-													className="pt-1"
-												>
-													<Form.Control
-														required
-														type="text"
-														placeholder="Vorname"
-														ref={inputRefVorname}
-														onBlur={handleBlurVorname}
-													// className="pt-4"
-													// pattern="[A-Z][a-z]*"
-													/>
-													<Form.Control.Feedback
-														type="invalid"
-														className="mx-2 "
-													>
-														Bitte geben Sie den Vornamen des
-														Erziehungsberechtigten an.
-													</Form.Control.Feedback>
-												</FloatingLabel>
-											</Form.Group>
-										</Row>
-										<Row className="mb-3 mt-4 ">
-											<Form.Group controlId="validationNachname">
-												<FloatingLabel
-													controlId="formNachname"
-													label="Nachname"
-													className="pt-1"
-												>
-													<Form.Control
-														required
-														type="text"
-														placeholder="Nachname"
-														ref={inputRefNachname}
-														onBlur={handleBlurNachname}
-													//pattern="[A-Z][a-z]*"
-													/>
-													<Form.Control.Feedback
-														type="invalid"
-														className="mx-2"
-													>
-														Bitte geben Sie den Nachnamen des
-														Erziehungsberechtigten an.
-													</Form.Control.Feedback>
-												</FloatingLabel>
-											</Form.Group>
-										</Row>
-										<Row className="mb-5 mt-4 ">
-											<Form.Group controlId="validationAdresse">
-												<FloatingLabel
-													controlId="formAdresse"
-													label="Strasse, Hausnummer"
-													className="pt-1"
-												>
-													<Form.Control
-														required
-														type="text"
-														pattern="^[^\d]+\s+\d+.*$"
-														value={adress}
-														onChange={handleBlurAdress}
-														onBlur={parseAddress}
-													//pattern="[A-Z][a-z]*"
-													/>
-													<Form.Control.Feedback
-														type="invalid"
-														className="mx-2"
-													>
-														Bitte geben Sie Ihre Adresse in der Form Strasse,
-														Hausnummer Top Stiege etc. ein.
-													</Form.Control.Feedback>
-													<Row className="mb-3 mt-4 ">
-														<Form.Group controlId="validationPlzOrt">
-															<FloatingLabel
-																controlId="formPlzOrt"
-																label="PLZ, Ort"
-																className="pt-1"
-															>
-																<Form.Control
-																	required
-																	type="text"
-																	pattern="^[1-9]\d{3}, [^\d]{2,}$"
-																	value={plzOrt}
-																	onChange={handleBlurPlzOrt}
-																	onBlur={parsePlzOrt}
-																/>
-																<Form.Control.Feedback
-																	type="invalid"
-																	className="mx-2"
-																>
-																	Bitte geben Sie Ihre PLZ und Ort in der Form
-																	PLZ, Ortsname ein.
-																</Form.Control.Feedback>
-															</FloatingLabel>
-														</Form.Group>
-													</Row>
-													<Row>
-														<Form.Group controlId="validationWohnland">
-															<FloatingLabel
-																controlId="formWohnland"
-																label="Wohnland"
-																className="pt-1"
-															>
-																<Form.Select required>
-																	<option />
-																	<option value="Afghanistan">
-																		Afghanistan
-																	</option>
-																	<option value="Albania">Albania</option>
-																	<option value="Algeria">Algeria</option>
-																	<option value="Andorra">Andorra</option>
-																	<option value="Angola">Angola</option>
-																	<option value="Antigua and Barbuda">
-																		Antigua and Barbuda
-																	</option>
-																	<option value="Argentina">Argentina</option>
-																	<option value="Armenia">Armenia</option>
-																	<option value="Australia">Australia</option>
-																	<option value="Austria">Austria</option>
-																	<option value="Azerbaijan">Azerbaijan</option>
-																	<option value="Bahamas">Bahamas</option>
-																	<option value="Bahrain">Bahrain</option>
-																	<option value="Bangladesh">Bangladesh</option>
-																	<option value="Barbados">Barbados</option>
-																	<option value="Belarus">Belarus</option>
-																	<option value="Belgium">Belgium</option>
-																	<option value="Belize">Belize</option>
-																	<option value="Benin">Benin</option>
-																	<option value="Bhutan">Bhutan</option>
-																	<option value="Bolivia">Bolivia</option>
-																	<option value="Bosnia and Herzegovina">
-																		Bosnia and Herzegovina
-																	</option>
-																	<option value="Botswana">Botswana</option>
-																	<option value="Brazil">Brazil</option>
-																	<option value="Brunei">Brunei</option>
-																	<option value="Bulgaria">Bulgaria</option>
-																	<option value="Burkina Faso">
-																		Burkina Faso
-																	</option>
-																	<option value="Burundi">Burundi</option>
-																	<option value="Côte d'Ivoire">
-																		Côte d'Ivoire
-																	</option>
-																	<option value="Cabo Verde">Cabo Verde</option>
-																	<option value="Cambodia">Cambodia</option>
-																	<option value="Cameroon">Cameroon</option>
-																	<option value="Canada">Canada</option>
-																	<option value="Central African Republic">
-																		Central African Republic
-																	</option>
-																	<option value="Chad">Chad</option>
-																	<option value="Chile">Chile</option>
-																	<option value="China">China</option>
-																	<option value="Colombia">Colombia</option>
-																	<option value="Comoros">Comoros</option>
-																	<option value="Congo (Congo-Brazzaville)">
-																		Congo (Congo-Brazzaville)
-																	</option>
-																	<option value="Costa Rica">Costa Rica</option>
-																	<option value="Croatia">Croatia</option>
-																	<option value="Cuba">Cuba</option>
-																	<option value="Cyprus">Cyprus</option>
-																	<option value="Czechia (Czech Republic)">
-																		Czechia (Czech Republic)
-																	</option>
-																	<option value="Democratic Republic of the Congo">
-																		Democratic Republic of the Congo
-																	</option>
-																	<option value="Denmark">Denmark</option>
-																	<option value="Djibouti">Djibouti</option>
-																	<option value="Dominica">Dominica</option>
-																	<option value="Dominican Republic">
-																		Dominican Republic
-																	</option>
-																	<option value="Ecuador">Ecuador</option>
-																	<option value="Egypt">Egypt</option>
-																	<option value="El Salvador">
-																		El Salvador
-																	</option>
-																	<option value="Equatorial Guinea">
-																		Equatorial Guinea
-																	</option>
-																	<option value="Eritrea">Eritrea</option>
-																	<option value="Estonia">Estonia</option>
-																	<option value="Eswatini">Eswatini</option>
-																	<option value="Ethiopia">Ethiopia</option>
-																	<option value="Fiji">Fiji</option>
-																	<option value="Finland">Finland</option>
-																	<option value="France">France</option>
-																	<option value="Gabon">Gabon</option>
-																	<option value="Gambia">Gambia</option>
-																	<option value="Georgia">Georgia</option>
-																	<option value="Germany">Germany</option>
-																	<option value="Ghana">Ghana</option>
-																	<option value="Greece">Greece</option>
-																	<option value="Grenada">Grenada</option>
-																	<option value="Guatemala">Guatemala</option>
-																	<option value="Guinea">Guinea</option>
-																	<option value="Guinea-Bissau">
-																		Guinea-Bissau
-																	</option>
-																	<option value="Guyana">Guyana</option>
-																	<option value="Haiti">Haiti</option>
-																	<option value="Holy See">Holy See</option>
-																	<option value="Honduras">Honduras</option>
-																	<option value="Hungary">Hungary</option>
-																	<option value="Iceland">Iceland</option>
-																	<option value="India">India</option>
-																	<option value="Indonesia">Indonesia</option>
-																	<option value="Iran">Iran</option>
-																	<option value="Iraq">Iraq</option>
-																	<option value="Ireland">Ireland</option>
-																	<option value="Israel">Israel</option>
-																	<option value="Italy">Italy</option>
-																	<option value="Jamaica">Jamaica</option>
-																	<option value="Japan">Japan</option>
-																	<option value="Jordan">Jordan</option>
-																	<option value="Kazakhstan">Kazakhstan</option>
-																	<option value="Kenya">Kenya</option>
-																	<option value="Kiribati">Kiribati</option>
-																	<option value="Kuwait">Kuwait</option>
-																	<option value="Kyrgyzstan">Kyrgyzstan</option>
-																	<option value="Laos">Laos</option>
-																	<option value="Latvia">Latvia</option>
-																	<option value="Lebanon">Lebanon</option>
-																	<option value="Lesotho">Lesotho</option>
-																	<option value="Liberia">Liberia</option>
-																	<option value="Libya">Libya</option>
-																	<option value="Liechtenstein">
-																		Liechtenstein
-																	</option>
-																	<option value="Lithuania">Lithuania</option>
-																	<option value="Luxembourg">Luxembourg</option>
-																	<option value="Madagascar">Madagascar</option>
-																	<option value="Malawi">Malawi</option>
-																	<option value="Malaysia">Malaysia</option>
-																	<option value="Maldives">Maldives</option>
-																	<option value="Mali">Mali</option>
-																	<option value="Malta">Malta</option>
-																	<option value="Marshall Islands">
-																		Marshall Islands
-																	</option>
-																	<option value="Mauritania">Mauritania</option>
-																	<option value="Mauritius">Mauritius</option>
-																	<option value="Mexico">Mexico</option>
-																	<option value="Micronesia">Micronesia</option>
-																	<option value="Moldova">Moldova</option>
-																	<option value="Monaco">Monaco</option>
-																	<option value="Mongolia">Mongolia</option>
-																	<option value="Montenegro">Montenegro</option>
-																	<option value="Morocco">Morocco</option>
-																	<option value="Mozambique">Mozambique</option>
-																	<option value="Myanmar (formerly Burma)">
-																		Myanmar (formerly Burma)
-																	</option>
-																	<option value="Namibia">Namibia</option>
-																	<option value="Nauru">Nauru</option>
-																	<option value="Nepal">Nepal</option>
-																	<option value="Netherlands">
-																		Netherlands
-																	</option>
-																	<option value="New Zealand">
-																		New Zealand
-																	</option>
-																	<option value="Nicaragua">Nicaragua</option>
-																	<option value="Niger">Niger</option>
-																	<option value="Nigeria">Nigeria</option>
-																	<option value="North Korea">
-																		North Korea
-																	</option>
-																	<option value="North Macedonia (formerly Macedonia)">
-																		North Macedonia (formerly Macedonia)
-																	</option>
-																	<option value="Norway">Norway</option>
-																	<option value="Oman">Oman</option>
-																	<option value="Pakistan">Pakistan</option>
-																	<option value="Palau">Palau</option>
-																	<option value="Palestine State">
-																		Palestine State
-																	</option>
-																	<option value="Panama">Panama</option>
-																	<option value="Papua New Guinea">
-																		Papua New Guinea
-																	</option>
-																	<option value="Paraguay">Paraguay</option>
-																	<option value="Peru">Peru</option>
-																	<option value="Philippines">
-																		Philippines
-																	</option>
-																	<option value="Poland">Poland</option>
-																	<option value="Portugal">Portugal</option>
-																	<option value="Qatar">Qatar</option>
-																	<option value="Romania">Romania</option>
-																	<option value="Russia">Russia</option>
-																	<option value="Rwanda">Rwanda</option>
-																	<option value="Saint Kitts and Nevis">
-																		Saint Kitts and Nevis
-																	</option>
-																	<option value="Saint Lucia">
-																		Saint Lucia
-																	</option>
-																	<option value="Saint Vincent and the Grenadines">
-																		Saint Vincent and the Grenadines
-																	</option>
-																	<option value="Samoa">Samoa</option>
-																	<option value="San Marino">San Marino</option>
-																	<option value="Sao Tome and Principe">
-																		Sao Tome and Principe
-																	</option>
-																	<option value="Saudi Arabia">
-																		Saudi Arabia
-																	</option>
-																	<option value="Senegal">Senegal</option>
-																	<option value="Serbia">Serbia</option>
-																	<option value="Seychelles">Seychelles</option>
-																	<option value="Sierra Leone">
-																		Sierra Leone
-																	</option>
-																	<option value="Singapore">Singapore</option>
-																	<option value="Slovakia">Slovakia</option>
-																	<option value="Slovenia">Slovenia</option>
-																	<option value="Solomon Islands">
-																		Solomon Islands
-																	</option>
-																	<option value="Somalia">Somalia</option>
-																	<option value="South Africa">
-																		South Africa
-																	</option>
-																	<option value="South Korea">
-																		South Korea
-																	</option>
-																	<option value="South Sudan">
-																		South Sudan
-																	</option>
-																	<option value="Spain">Spain</option>
-																	<option value="Sri Lanka">Sri Lanka</option>
-																	<option value="Sudan">Sudan</option>
-																	<option value="Suriname">Suriname</option>
-																	<option value="Sweden">Sweden</option>
-																	<option value="Switzerland">
-																		Switzerland
-																	</option>
-																	<option value="Syria">Syria</option>
-																	<option value="Tajikistan">Tajikistan</option>
-																	<option value="Tanzania">Tanzania</option>
-																	<option value="Thailand">Thailand</option>
-																	<option value="Timor-Leste">
-																		Timor-Leste
-																	</option>
-																	<option value="Togo">Togo</option>
-																	<option value="Tonga">Tonga</option>
-																	<option value="Trinidad and Tobago">
-																		Trinidad and Tobago
-																	</option>
-																	<option value="Tunisia">Tunisia</option>
-																	<option value="Turkey">Turkey</option>
-																	<option value="Turkmenistan">
-																		Turkmenistan
-																	</option>
-																	<option value="Tuvalu">Tuvalu</option>
-																	<option value="Uganda">Uganda</option>
-																	<option value="Ukraine">Ukraine</option>
-																	<option value="United Arab Emirates">
-																		United Arab Emirates
-																	</option>
-																	<option value="United Kingdom">
-																		United Kingdom
-																	</option>
-																	<option value="United States of America">
-																		United States of America
-																	</option>
-																	<option value="Uruguay">Uruguay</option>
-																	<option value="Uzbekistan">Uzbekistan</option>
-																	<option value="Vanuatu">Vanuatu</option>
-																	<option value="Venezuela">Venezuela</option>
-																	<option value="Vietnam">Vietnam</option>
-																	<option value="Yemen">Yemen</option>
-																	<option value="Zambia">Zambia</option>
-																	<option value="Zimbabwe">Zimbabwe</option>
-																</Form.Select>
-																<Form.Control.Feedback
-																	type="invalid"
-																	className="mx-2"
-																>
-																	Bitte geben Sie ihr Wohnland an.
-																</Form.Control.Feedback>
-															</FloatingLabel>
-														</Form.Group>
-													</Row>
-												</FloatingLabel>
-											</Form.Group>
-										</Row>
-										<Form.Group
-											as={Col}
-											className="mt-5 mb-3"
-											controlId="validationPhone"
-										>
-											<FloatingLabel
-												label="Tel. Nr."
-												controlId="formPhone"
-												className="pt-1"
-											>
-												<Form.Control
-													required
-													type="tel"
-													// placeholder="+43 123 456 7890"
-													value={phoneNumber}
-													onChange={handlePhoneChange}
-													isInvalid={!isValid}
-												/>
-												<Form.Control.Feedback
-													type={isValid ? "valid" : "invalid"}
-													className="mx-2"
-												>
-													{isValid ? (
-														""
-													) : (
-														<strong>
-															Bitte geben Sie die Tel. Nr. des Bewerbers im
-															Format +43 664 12345678 ein.
-														</strong>
-													)}
-												</Form.Control.Feedback>
-												<Container className="mt-2">
-													<Form.Text id="telHelpBlock" muted>
-														Über diese Tel. Nr. müssen Sie im Verlauf des
-														Aufnahmeprozesses erreichbar sein sowie bei Anfragen
-														von Lehr- sowie Administrativen-Personen.
-														{/* Die E-Mail
-                    Adresse muss von einem Erziehungsberechtigten abgerufen
-                    werden. */}
-													</Form.Text>
-												</Container>
-											</FloatingLabel>
-										</Form.Group>
-										<Form.Group
-											as={Col}
-											className="mt-3 mb-3"
-											controlId="validationEmail"
-										>
-											<FloatingLabel
-												label="E-mail"
-												controlId="formEmail"
-												className="pt-1"
-											>
-												<Form.Control
-													disabled
-													required
-													type="email"
-													value={email}
-													onChange={handleEmailChange}
-													isInvalid={!isEmailValid}
-													className={isEmailValid ? "valid-input" : ""}
-												//placeholder="ihre@email.hier"
-												/>
-												<Form.Control.Feedback
-													type={isEmailValid ? "valid" : "invalid"}
-													className="mx-2"
-												>
-													{isEmailValid ? (
-														""
-													) : (
-														<strong>
-															Bitte geben Sie die E-mail des Bewerbers an.
-														</strong>
-													)}
-												</Form.Control.Feedback>
-												<Container className="mt-2">
-													<Form.Text id="emailHelpBlock" muted>
-														Über diese E-Mail Adresse müssen Sie im Verlauf des
-														Aufnahmeprozesses erreichbar sein. An diese E-Mail
-														Adresse werden Bestätigungen und
-														Terminverständigungen geschickt. Eine Änderung ist
-														unbedingt bekannt zu geben.
-														{/* Die E-Mail
-                    Adresse muss von einem Erziehungsberechtigten abgerufen
-                    werden. */}
-													</Form.Text>
-												</Container>
-											</FloatingLabel>
-										</Form.Group>
-									</Accordion.Body>
-								</Accordion.Item>
-							</Accordion>
-						</Form.Group>
-
-						<Button variant="success" type="submit" onClick={handleSubmit2}>
+						<Button variant="success" type="submit" >
 							Bestätigen
 						</Button>
 					</Form>
 				</Col>
-				{/* <Modal show={showModal} onHide={() => setShowModal(false)} backdrop="static">
-          <Modal.Header closeButton>
-            <Modal.Title>Abschlusszeugnisse</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>Wir haben ihnen an die E-Mailadresse <strong>{email}</strong> soeben eine Nachricht mit ihren Daten gesendet. Ihre Anmeldung ist erst vollständig abgeschlossen, wenn Sie entweder
-          <p></p>
-          <ul><li> auf diese E-Mail antworten und uns digitale Kopien der <strong>Abschlusszeugnisse ihrer bisherigen Ausbildungen</strong> zusenden</li></ul>
-          <ul><li>oder uns die <strong>Abschlusszeugnisse ihrer bisherigen Ausbildungen</strong> in der Direktion der HTBLuVA Salzburg vorbeibringen.</li></ul>
-          </Modal.Body>
-          
-          <Modal.Footer>
-            <Button variant="success" onClick={() => setShowModal(false)}>
-              OK
-            </Button>
-          </Modal.Footer>
-        </Modal> */}
-			</Row>
-		</Container>
-	);
-}
+				<Modal
+					show={showModalSchoolReport}
+					onHide={() => setShowModalSchoolReport(false)}
+					backdrop="static"
+				>
+					<Modal.Header closeButton>
+						<Modal.Title>Abschlusszeugnisse</Modal.Title>
+					</Modal.Header>
+					<Modal.Body>
+						Wir haben ihnen an die E-Mailadresse <strong>{email}</strong> soeben
+						{/* eine Nachricht gesendet. Ihre Anmeldung ist erst
+						vollständig abgeschlossen, wenn Sie entweder
+						<p />
+						<ul>
+							<li>
+								{" "}
+								auf diese E-Mail antworten und uns digitale Kopien der{" "}
+								<strong>
+									Abschlusszeugnisse ihrer bisherigen Ausbildungen
+								</strong>{" "}
+								zusenden
+							</li>
+						</ul>
+						<ul>
+							<li>
+								oder uns die{" "}
+								<strong>
+									Abschlusszeugnisse ihrer bisherigen Ausbildungen
+								</strong>{" "}
+								in der Direktion der HTBLuVA Salzburg vorbeibringen.
+							</li> */}
+						{/* </ul> */}
+					</Modal.Body>
 
-export default Tagesschule2;
+					<Modal.Footer>
+						<Button variant="success" onClick={() => setShowModalSchoolReport(false)}>
+							OK
+						</Button>
+					</Modal.Footer>
+				</Modal>
+				<Modal
+					show={showModalEmail}
+					onHide={() => setShowModalEmail(false)}
+					backdrop="static"
+				>
+					<Modal.Header closeButton>
+						<Modal.Title>Sitzung gespeichert</Modal.Title>
+					</Modal.Header>
+					<Modal.Body>
+						Wir haben ihnen an die E-Mailadresse <strong>{email}</strong> soeben
+						eine Nachricht gesendet. Ihre Anmeldung ist fortsetzbar, indem Sie
+						auf den Link in der E-Mail klicken.
+						<p />
+
+					</Modal.Body>
+
+					<Modal.Footer>
+						<Button variant="success" onClick={() => setShowModalEmail(false)}>
+							OK
+						</Button>
+					</Modal.Footer>
+				</Modal>
+			</Row>
+		</Container >
+	);
+};
+
+export default Abendschule2;

@@ -1,7 +1,8 @@
-import { PhoneNumberUtil, PhoneNumberType } from "google-libphonenumber";
-import { useState, useRef, useEffect } from "react";
+import { PhoneNumberFormat, PhoneNumberType, PhoneNumberUtil } from "google-libphonenumber";
 import axios from "axios";
 import { sha3_512 } from 'js-sha3';
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
 import {
 	Accordion,
 	Button,
@@ -11,10 +12,15 @@ import {
 	Form,
 	Modal,
 	ProgressBar,
-	Row,
+	Row
 } from "react-bootstrap";
 
 const Abendschule1: React.FC = () => {
+
+	interface Option {
+		id: number;
+		name: string;
+	}
 	const [selectedFachrichtung, setSelectedFachrichtung] = useState("");
 	const [validated, setValidated] = useState(true);
 	const [currentDate] = useState(getYear());
@@ -26,11 +32,14 @@ const Abendschule1: React.FC = () => {
 	const [isBirthdateValid, setIsBirthdateValid] = useState(false);
 	const inputRefVorname = useRef<HTMLInputElement>(null);
 	const inputRefNachname = useRef<HTMLInputElement>(null);
-	const [showModal, setShowModal] = useState<boolean>(false);
+	const [vorname, setVorname] = useState("");
+	const [nachname, setNachname] = useState("");
 	const [isSubmitted, setIsSubmitted] = useState(false);
-	// const currentDateForOption = new Date();
-	// const specificDateCutoff = new Date(currentDateForOption.getFullYear(), 1, 1);
+	const [options, setOptions] = useState<Option[]>([]);
+	const [showAlert, setShowAlert] = useState<boolean>(true);
 	const [hash, setHash] = useState('');
+	const [showModalEmail, setShowModalEmail] = useState<boolean>(false);
+	const [showModalDuplicate, setShowModalDuplicate] = useState<boolean>(false);
 
 
 	const handleBirthdateChange = (
@@ -40,40 +49,53 @@ const Abendschule1: React.FC = () => {
 		setIsBirthdateValid(validateBirthdate(event.target.value, 17)); // 14 is the age limit
 		setBirthdate(event.target.value);
 	};
-	const generateHash = () => {
-		const combinedInput = email + phoneNumber + inputRefNachname + inputRefVorname;
-		const hash = sha3_512(combinedInput).substring(0, 20); // Adjust length as needed
-		setHash(hash);
-	};
 
-	const handlePhoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setPhoneNumber(event.target.value.trim());
-
-
-	};
-
-
-	const handlePhoneBlur = () => {
+	const handlePhoneBlur = (event: React.ChangeEvent<HTMLInputElement>) => {
+		const inputPhoneNumber = event.target.value.trim();
+		setPhoneNumber(inputPhoneNumber);
 		const phoneUtil = PhoneNumberUtil.getInstance();
-		let isE164 = false;
 		let isValid = false;
 
 		try {
-			const inputNumber = phoneUtil.parse(phoneNumber);
-			isE164 = phoneUtil.getNumberType(inputNumber) === PhoneNumberType.MOBILE;
-			isValid = phoneUtil.isValidNumber(inputNumber);
+			// Parse the number without specifying a country code
+			const inputNumber = phoneUtil.parse(inputPhoneNumber);
+			// Check if the number is valid and possible
+			isValid = phoneUtil.isValidNumber(inputNumber) && phoneUtil.isPossibleNumber(inputNumber);
+			// Format the number in the international format
+			const formattedNumber = phoneUtil.format(inputNumber, PhoneNumberFormat.INTERNATIONAL);
+			// Check if the number is in the correct format
+			const regex = /^\+\d{1,3} \d{1,3} \d{1,8}$/; // This pattern allows for any country code, area code, and local number
+			isValid = isValid && regex.test(formattedNumber);
 		} catch (err) {
 			console.error(err);
 		}
 
-		setIsValid(isE164 ? isValid : false);
+		setIsValid(isValid);
 	};
+	// const handlePhoneBlur = (event: React.ChangeEvent<HTMLInputElement>) => {
+
+
+	// 	setPhoneNumber(event.target.value.trim());
+	// 	const phoneUtil = PhoneNumberUtil.getInstance();
+	// 	let isE164 = false;
+	// 	let isValid = false;
+
+	// 	try {
+	// 		const inputNumber = phoneUtil.parse(phoneNumber);
+	// 		isE164 = phoneUtil.getNumberType(inputNumber) === PhoneNumberType.MOBILE;
+	// 		isValid = phoneUtil.isValidNumber(inputNumber);
+	// 	} catch (err) {
+	// 		console.error(err);
+	// 	}
+
+	// 	setIsValid(isE164 ? isValid : false);
+	// };
 
 	const validateBirthdate = (birthdate: string, ageLimit: number) => {
 		const birthdateParts = birthdate.split(".");
-		const birthYear = parseInt(birthdateParts[0], 10);
-		const birthMonth = parseInt(birthdateParts[1], 10);
-		const birthDay = parseInt(birthdateParts[2], 10);
+		const birthYear = Number.parseInt(birthdateParts[0], 10);
+		const birthMonth = Number.parseInt(birthdateParts[1], 10);
+		const birthDay = Number.parseInt(birthdateParts[2], 10);
 
 		const currentDate = new Date();
 		const currentYear = currentDate.getFullYear();
@@ -121,6 +143,7 @@ const Abendschule1: React.FC = () => {
 		if (inputRefVorname.current) {
 			const capitalized = capitalizeFirstLetter(inputRefVorname.current.value.trim());
 			inputRefVorname.current.value = capitalized;
+			setVorname(capitalized);
 		}
 	};
 
@@ -128,16 +151,52 @@ const Abendschule1: React.FC = () => {
 		if (inputRefNachname.current) {
 			const capitalized = capitalizeFirstLetter(inputRefNachname.current.value.trim());
 			inputRefNachname.current.value = capitalized;
+			setNachname(capitalized);
 		}
 	};
+	// useEffect(() => {
+	// 	if (showAlert) {
+
+	// 		setShowAlert(true);
+
+	// 	}
+	// }, [showAlert]);
+
+	// useEffect(() => {
+	// 	if (isSubmitted) {
+	// 		setShowModalEmail(true);
+	// 	}
+	// }, [isSubmitted]);
+
+	// useEffect(() => {
+	// 	if (isSubmitted) {
+	// 		setShowModalDuplicate(true);
+	// 	}
+	// }, [isSubmitted]);
 
 	useEffect(() => {
-		if (isSubmitted) {
-			setShowModal(true);
-		}
-	}, [isSubmitted]);
+		const fetchOptions = async () => {
+			try {
+				const response = await axios.get('/options/fachrichtungen_abendschule/');
+				setOptions(response.data);
+			} catch (error) {
+				console.error('Error fetching options:', error);
+			}
+		};
 
-	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+		fetchOptions();
+	}, []);
+
+	useEffect(() => {
+		const generateHash = async () => {
+
+			const combinedInput = email + phoneNumber + vorname + nachname;
+			const hash = sha3_512(combinedInput); // Adjust length as needed
+			setHash(hash);
+		};
+		generateHash();
+	}, [email, phoneNumber, vorname, nachname]);
+	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 
 		const form = event.currentTarget;
@@ -145,60 +204,121 @@ const Abendschule1: React.FC = () => {
 			form.checkValidity() && isEmailValid && isValid && isBirthdateValid;
 
 		setValidated(true);
+		// const formData = new FormData();
+		const now = new Date();
+		const angemeldet = `${now.getFullYear()}-${(`0${now.getMonth() + 1}`).slice(-2)}-${(`0${now.getDate()}`).slice(-2)} ${(`0${now.getHours()}`).slice(-2)}:${(`0${now.getMinutes()}`).slice(-2)}:${(`0${now.getSeconds()}`).slice(-2)}`;
+		const currentYear = currentDate.substring(0, 4);
+		const nextYear = (Number.parseInt(currentYear) + 1).toString().substring(2, 4);
+		const schoolYear = `${currentYear}/${nextYear}`;
+		const clientData = {
+			kontaktmailadresse: email,
+			anmeldenummer: hash,
+			vorname: inputRefVorname.current?.value || "Error",
+			schuljahr: schoolYear,
+			nachname: inputRefNachname.current?.value || "Error",
+			fachrichtung1: selectedFachrichtung,
+			laendervorwahl1: phoneNumber.substring(0, 3),
+			vorwahl1: phoneNumber.substring(3, 6),
+			nummer1: phoneNumber.substring(6),
+			dsgvo: Number.parseInt("1"),
+			finalisiert: Number.parseInt("0"),
+			angemeldet: angemeldet,
+			geburtsdatum: birthdate,
+			// ... add other fields as needed
+		};
 
+		//console.log(clientData);
+		axios.post("https://localhost/registration/abendschule/", clientData, {
+			headers: {
+				'Content-Type': 'application/json',
+			},
 
-		// formData.append("email", email);
-		// formData.append("phoneNumber", phoneNumber);
-		// //formData.append("birthdate", birthdate);
-		// formData.append("hash", hash);
-		// formData.append("vorname", inputRefVorname.current?.value || "Error");
-		// formData.append("nachname", inputRefNachname.current?.value || "Error");
-		// formData.append("fachrichtung", selectedFachrichtung);
-
-		// formData.append("laendervorwahl", phoneNumber.substring(0, 3));
-		// formData.append("vorwahl", phoneNumber.substring(3, 6));
-		// formData.append("nummer", phoneNumber.substring(6));
-		// formData.append("dsgvo", "1");
-		// formData.append("finalisiert", "0");
-		// formData.append("Geburtsdatum", birthdate);
-
-		try {
-			// Construct the full URL for the POST request
-			const serverUrl = 'https://localhost';
-			const endpoint = '/registration/abendschule';
-			const fullUrl = `${serverUrl}${endpoint}`;
-
-			const dataForm = {
-				// key1: 'value1',
-				// key2: 'value2',
-				// ... other data fields
-			};
-
-			// Make the POST request
-			const response = await fetch(fullUrl, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(dataForm),
-			});
-			if (!response.ok) {
-				throw new Error('Network response was not ok');
+		}).then((response) => {
+			console.log(response);
+			if (formIsValid && !isSubmitted && response.status === 200) {
+				// setShowAlert(true);
+				setIsSubmitted(true);
+				setShowModalEmail(true);
 			}
 
-			const data = await response.json();
-			console.log('Success:', data);
-		} catch (error) {
-			console.error('Error:', error);
-		}
+		}).catch(error => {
+			console.error(error);
+			if (error.response && error.response.status === 409) {
+				setShowModalDuplicate(true);
+			}
+		});
 	};
+
+	// const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+	// 	event.preventDefault();
+
+	// 	const form = event.currentTarget;
+	// 	const formIsValid =
+	// 		form.checkValidity() && isEmailValid && isValid && isBirthdateValid;
+
+	// 	setValidated(true);
+
+	// 	const formData = new FormData();
+
+
+	// 	formData.append("email", email);
+	// 	// formData.append("phoneNumber", phoneNumber);
+	// 	//formData.append("birthdate", birthdate);
+	// 	formData.append("hash", hash);
+	// 	formData.append("vorname", inputRefVorname.current?.value || "Error");
+	// 	formData.append("nachname", inputRefNachname.current?.value || "Error");
+	// 	formData.append("fachrichtung", selectedFachrichtung);
+
+	// 	formData.append("laendervorwahl", phoneNumber.substring(0, 3));
+	// 	formData.append("vorwahl", phoneNumber.substring(3, 6));
+	// 	formData.append("nummer", phoneNumber.substring(6));
+	// 	formData.append("dsgvo", "1");
+	// 	formData.append("finalisiert", "0");
+	// 	formData.append("angemeldet", Date.now().toString());
+	// 	formData.append("Geburtsdatum", birthdate);
+
+	// 	try {
+	// 		// Construct the full URL for the POST request
+	// 		const serverUrl = 'https://localhost';
+	// 		const endpoint = '/registration/abendschule';
+	// 		const fullUrl = `${serverUrl}${endpoint}`;
+
+	// 		// const dataForm = {
+	// 		// 	// key1: 'value1',
+	// 		// 	// key2: 'value2',
+	// 		// 	// ... other data fields
+	// 		// };
+
+	// 		// Make the POST request
+
+	// 		// if (!response.ok) {
+	// 		// 	throw new Error('Network response was not ok');
+	// 		// }
+
+
+	// 		const response = await fetch(fullUrl, {
+	// 			method: 'POST',
+	// 			headers: {
+	// 				'Content-Type': 'application/json',
+	// 			},
+	// 			body: JSON.stringify(formData),
+	// 		});
+
+	// 		const data = await response.json();
+	// 		if (formIsValid && !isSubmitted && response.ok) {
+	// 			setIsSubmitted(true);
+	// 			setShowModal(true);
+	// 		}
+
+	// 		console.log('Success:', data);
+	// 	} catch (error) {
+	// 		console.error('Error:', error);
+	// 	}
+	// };
 	// 		.then(response => {
 	// 			// Handle the response here
 	// 			console.log(response.json());
-	// 			if (formIsValid && !isSubmitted && response.ok) {
-	// 				setIsSubmitted(true);
-	// 				setShowModal(true);
-	// 			}
+	// 		
 	// 		})
 	// 		.catch(error => {
 	// 			// Handle errors here
@@ -209,19 +329,20 @@ const Abendschule1: React.FC = () => {
 	// } catch (error) {
 	// 	console.error(error);
 	// }
+	console.log('%cBuilt by %c@D.Renner https://github.com/DataPhaseDan', 'color: #333; font-size: 1.2em; font-weight: bold;', 'color: #007bff; font-size: 1.2em; font-weight: bold; text-decoration: underline;');
 	return (
 		<Container className="p-5 border" style={{ backgroundColor: "whitesmoke" }}>
 			<Row className="justify-content-center">
 				<Col xs={8}>
 					<h2>Anmeldefortschritt</h2>
 					<ProgressBar animated now={50} label={"50%"} />
-	
+
 					<h2 className="mt-5 mb-5">Anmeldung an der HTL für Berufstätige</h2>
 					<h3 className="mb-5">Schuljahr {currentDate}</h3>
 					<p>
 						<strong>Sie können sich nur einmal anmelden!</strong>
 					</p>
-	
+
 					<p className="h6">
 						Für die Anmeldung sind die Abschlusszeugnisse ihrer bisherigen
 						Ausbildungen notwendig.
@@ -270,7 +391,7 @@ const Abendschule1: React.FC = () => {
 								</FloatingLabel>
 							</Form.Group>
 						</Row>
-	
+
 						<Form.Group
 							as={Col}
 							className="mt-5 mb-3"
@@ -328,11 +449,12 @@ const Abendschule1: React.FC = () => {
 								<Form.Control
 									required
 									type="tel"
-									// placeholder="+43 123 456 7890"
+									//placeholder="+43 123 456 7890"
 									value={phoneNumber}
-									onChange={handlePhoneChange}
-									onBlur={handlePhoneBlur}
+									onChange={handlePhoneBlur}
+									// onBlur={handlePhoneBlur}
 									isInvalid={!isValid}
+								//pattern="^\+\d{1,3} \d{1,3} \d{1,8}$"
 								/>
 								<Form.Control.Feedback
 									type={isValid ? "valid" : "invalid"}
@@ -343,7 +465,7 @@ const Abendschule1: React.FC = () => {
 									) : (
 										<strong>
 											Bitte geben Sie die Tel. Nr. des Bewerbers im Format +43
-											664 12345678 ein.
+											66x 12345678 ein.
 										</strong>
 									)}
 								</Form.Control.Feedback>
@@ -358,7 +480,7 @@ const Abendschule1: React.FC = () => {
 								</Container>
 							</FloatingLabel>
 						</Form.Group>
-	
+
 						<Form.Group
 							className="mb-3 mt-5"
 							controlId="validationFachrichtung"
@@ -370,18 +492,19 @@ const Abendschule1: React.FC = () => {
 								className="pt-1"
 							>
 								<Form.Select required onChange={handleSelectedFachrichtung}>
-									<option />
-									<option>Abend-HTL für Berufstätige (Bautechnik)</option>
-									<option>Abend-HTL für Berufstätige (Elektrotechnik)</option>
-									<option>Abend-HTL für Berufstätige (Informatik)</option>
-									<option>Abend-HTL für Berufstätige (Maschinenbau)</option>
+									<option value="" />
+									{options.map((option) => (
+										<option value={option.id}>
+											{option.name}
+										</option>
+									))}
 								</Form.Select>
 								<Form.Control.Feedback type="invalid" className="mx-2">
 									Ihre 1. Wahl:
 								</Form.Control.Feedback>
 							</FloatingLabel>
 						</Form.Group>
-	
+
 						<Row className="mb-5">
 							<Form.Group controlId="validationGeburtsdatum">
 								<FloatingLabel
@@ -394,7 +517,7 @@ const Abendschule1: React.FC = () => {
 										type="date"
 										id="inputBirthDate"
 										required
-										//pattern="\d{2}\.\d{2}\.\d{4}"
+										pattern="\d{2}\.\d{2}\.\d{4}"
 										title="Bitte geben Sie ihr Geburtsdatum ein."
 										value={birthdate}
 										onChange={handleBirthdateChange}
@@ -412,7 +535,7 @@ const Abendschule1: React.FC = () => {
 								</FloatingLabel>
 							</Form.Group>
 						</Row>
-	
+
 						<Form.Group className="mb-3" id="formGridCheckbox">
 							<Accordion>
 								<Accordion.Item eventKey="0">
@@ -453,7 +576,7 @@ const Abendschule1: React.FC = () => {
 														Rechtsansprüche noch offen sind.
 													</em>
 												</p>
-	
+
 												<p className="h6">
 													Als personenbezogene Daten werden verarbeitet:
 												</p>
@@ -467,11 +590,10 @@ const Abendschule1: React.FC = () => {
 														Staatsbürgerschaft, Telefonnummern.
 													</em>
 												</p>
-	
+
 												<p className="h6">
 													Verwendungszwecke für die personenbezogene
-													Datenverarbeitung sind:
-													{/* <br /> */}
+													Datenverarbeitung {/* <br /> */}
 												</p>
 												<p>
 													<em>
@@ -523,41 +645,58 @@ const Abendschule1: React.FC = () => {
 							className="mb-3"
 						/>
 						{/* <p>{hash}</p> */}
-						<Button onClick={generateHash} variant="success" type="submit">
+						<Button variant="success" type="submit">
 							Bestätigen
 						</Button>
 					</Form>
+
+
+					<Modal
+						show={showModalEmail}
+						onHide={() => setShowModalEmail(false)}
+						backdrop="static"
+					>
+						<Modal.Header closeButton>
+							<Modal.Title>E-Mail zur Verifizierung</Modal.Title>
+						</Modal.Header>
+						<Modal.Body>
+							Um die angegebene E-Mailadresse <strong>{email}</strong> zu
+							verifizieren, wurde eine Nachricht and diese Adresse versendet. Sie
+							können erst mit der Anmeldung fortfahren, wenn Sie den Erhalt dieser
+							Nachricht bestätigt haben. Sollten Sie keine E-Mail erhalten haben,
+							prüfen Sie neben dem Posteingangsordner bitte auch ihren
+							Spam-Ordner.
+						</Modal.Body>
+						<Modal.Footer>
+							<Button variant="success" onClick={() => setShowModalEmail(false)}>
+								OK
+							</Button>
+						</Modal.Footer>
+					</Modal>
+					<Modal
+						show={showModalDuplicate}
+						onHide={() => setShowModalDuplicate(false)}
+						backdrop="static"
+					>
+						<Modal.Header >
+							<Modal.Title>Bereits Registriert</Modal.Title>
+						</Modal.Header>
+						<Modal.Body>
+							An die angegebene E-Mailadresse <strong>{email}</strong> wurde eine Nachricht versendet um Ihren Bewerbungsprozess fortzusetzen. Sollten Sie keine E-Mail erhalten haben,
+							prüfen Sie neben dem Posteingangsordner bitte auch ihren
+							Spam-Ordner.
+						</Modal.Body>
+						<Modal.Footer>
+							<Button variant="success" onClick={() => setShowModalDuplicate(false)}>
+								OK
+							</Button>
+						</Modal.Footer>
+					</Modal>
 				</Col>
-				<Modal
-					show={showModal}
-					onHide={() => setShowModal(false)}
-					backdrop="static"
-				>
-					<Modal.Header closeButton>
-						<Modal.Title>E-Mail zur Verifizierung</Modal.Title>
-					</Modal.Header>
-					<Modal.Body>
-						Um die angegebene E-Mailadresse <strong>{email}</strong> zu
-						verifizieren, wurde eine Nachricht and diese Adresse versendet. Sie
-						können erst mit der Anmeldung fortfahren, wenn Sie den Erhalt dieser
-						Nachricht bestätigt haben. Sollten Sie keine E-Mail erhalten haben,
-						prüfen Sie neben dem Posteingangsordner bitte auch ihren
-						Spam-Ordner.
-					</Modal.Body>
-					<Modal.Footer>
-						<Button variant="success" onClick={() => setShowModal(false)}>
-							OK
-						</Button>
-					</Modal.Footer>
-				</Modal>
 			</Row>
 		</Container>
-	);	
+
+	);
 };
-
-
-
-
-
 
 export default Abendschule1;
