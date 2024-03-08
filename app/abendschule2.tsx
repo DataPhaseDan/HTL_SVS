@@ -3,8 +3,8 @@
 // import { PhoneNumberUtil, PhoneNumberType } from "google-libphonenumber";
 import axios from "axios";
 import { useForm, Controller, Control, ControllerRenderProps, set } from "react-hook-form";
-// import { parsePhoneNumberFromString } from "libphonenumber-js";
-import React, { useState, useEffect, useRef } from "react";
+import type React from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import {
@@ -17,6 +17,7 @@ import {
 	Modal,
 	ProgressBar,
 	Row,
+	Accordion
 } from "react-bootstrap";
 
 type FormData = {
@@ -24,9 +25,13 @@ type FormData = {
 	titelVor: string;
 	titelNach: string;
 	anmeldenummer: string;
+	kontaktmailadresse: string;
 	vorname: string;
 	nachname: string;
 	telnr: string;
+	laendervorwahl1: string;
+	vorwahl1: string;
+	nummer1: string;
 	email: string;
 	geburtsdatum: string;
 	weitereVornamen: string;
@@ -38,10 +43,15 @@ type FormData = {
 	alltagssprache: string;
 	religion: string;
 	svNummer: string;
+	svGebDat: string;
 	sozialversicherungstraeger: string;
 	SVTAUT: string;
+	strasse: string;
 	adresse: string;
 	plzort: string;
+	hausnummer: string;
+	plz: string;
+	ort: string;
 	wohnland: string;
 	letzteschulform: string;
 };
@@ -198,13 +208,10 @@ const Abendschule2: React.FC = () => {
 	const [OptionsSozialversicherungstraeger, setOptionsSozialversicherungstraeger] = useState<Option[]>([]);
 	const [OptionsGeschlecht, setOptionsGeschlecht] = useState<Option[]>([]);
 	const [OptionsAnrede, setOptionsAnrede] = useState<Option2[]>([]);
-
-
-
 	const { register, watch, handleSubmit, control, setValue, formState: { errors } } = useForm<FormData>();
 
 	const SVTAUTValue = watch('SVTAUT');
-	const [anmeldenummer, setAnmeldenummer] = useState("");
+	// const [anmeldenummer, setAnmeldenummer] = useState("");
 
 	const location = useLocation();
 	const searchParams = new URLSearchParams(location.search);
@@ -215,39 +222,37 @@ const Abendschule2: React.FC = () => {
 
 	}
 
-
-
 	const [email, setEmail] = useState("");
 	// const [isChecked, setIsChecked] = useState(false);
-	const [anrede, setAnrede] = useState("");
-	const [titelVor, setTitelVor] = useState("");
-	const [titelNach, setTitelNach] = useState("");
-	const [weitereVornamen, setWeitereVornamen] = useState("");
-	const [geschlecht, setGeschlecht] = useState("");
-	const [geburtsort, setGeburtsort] = useState("");
-	const [geburtsland, setGeburtsland] = useState("");
-	const [staatsbuergerschaft, setStaatsbuergerschaft] = useState("");
-	const [muttersprache, setMuttersprache] = useState("");
-	const [alltagssprache, setAlltagssprache] = useState("");
-	const [religion, setReligion] = useState("");
-	const [svNummer, setSvNummer] = useState("");
-	const [sozialversicherungstraeger, setSozialversicherungstraeger] = useState("");
-	const [strasse, setStrasse] = useState("");
-	const [Hausnummer, setHausnummer] = useState("");
-	const [Plz, setPlz] = useState("");
-	const [Ort, setOrt] = useState("");
-	const [wohnland, setWohnland] = useState("");
-	const [letzteschulform, setLetzteschulform] = useState("");
+	// const [anrede, setAnrede] = useState("");
+	// const [titelVor, setTitelVor] = useState("");
+	// const [titelNach, setTitelNach] = useState("");
+	// const [weitereVornamen, setWeitereVornamen] = useState("");
+	// const [geschlecht, setGeschlecht] = useState("");
+	// const [geburtsort, setGeburtsort] = useState("");
+	// const [geburtsland, setGeburtsland] = useState("");
+	// const [staatsbuergerschaft, setStaatsbuergerschaft] = useState("");
+	// const [muttersprache, setMuttersprache] = useState("");
+	// const [alltagssprache, setAlltagssprache] = useState("");
+	// const [religion, setReligion] = useState("");
+	// const [svNummer, setSvNummer] = useState("");
+	// const [sozialversicherungstraeger, setSozialversicherungstraeger] = useState("");
+	// const [strasse, setStrasse] = useState("");
+	// const [Hausnummer, setHausnummer] = useState("");
+	// const [Plz, setPlz] = useState("");
+	// const [Ort, setOrt] = useState("");
+	// const [wohnland, setWohnland] = useState("");
+	// const [letzteschulform, setLetzteschulform] = useState("");
 	const [validated, setValidated] = useState(true);
 	const [currentDate] = useState(getYear());
 	// const [isValid, setIsValid] = useState<boolean>(false);
 	// const [isEmailValid, setIsEmailValid] = useState<boolean>(false);
-	const [phoneNumber, setPhonenumber] = useState("");
+	// const [phoneNumber, setPhonenumber] = useState("");
 	// const [isValid, setIsValid] = useState<boolean>(false);
-	const [birthdate, setBirthdate] = useState("");
+	// const [birthdate, setBirthdate] = useState("");
 	// const [isBirthdateValid, setIsBirthdateValid] = useState(false);
-	const [vorname, setVorname] = useState("");
-	const [nachname, setNachname] = useState("");
+	// const [vorname, setVorname] = useState("");
+	// const [nachname, setNachname] = useState("");
 	const [showModalEmail, setShowModalEmail] = useState<boolean>(false);
 	const [showModalSchoolReport, setShowModalSchoolReport] = useState<boolean>(false);
 
@@ -255,10 +260,10 @@ const Abendschule2: React.FC = () => {
 	// const [showModal, setShowModal] = useState<boolean>(false);
 	// const [isSubmitted, setIsSubmitted] = useState(false);
 	// const [radioState, setRadioState] = useState(true);
-	const [adress, setAdress] = useState("");
-	const [plzOrt, setPlzOrt] = useState("");
+	// const [adress, setAdress] = useState("");
+	// const [plzOrt, setPlzOrt] = useState("");
 	// const [, setRadioStateGeschlecht] = useState("");
-	const formData = new FormData();
+	// const formData = new FormData();
 	const [prefillData, setPrefillData] = useState<FormData | null>(null);
 
 	// const handleRadioChangeGeschlecht = (
@@ -267,9 +272,9 @@ const Abendschule2: React.FC = () => {
 	// 	setRadioStateGeschlecht(event.target.value);
 	// };
 
-	const handleBlurPlzOrt = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setPlzOrt(event.target.value);
-	};
+	// const handleBlurPlzOrt = (event: React.ChangeEvent<HTMLInputElement>) => {
+	// 	setPlzOrt(event.target.value);
+	// };
 	// const handlePhoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 	// 	setPhoneNumber(event.target.value.trim());
 
@@ -291,39 +296,39 @@ const Abendschule2: React.FC = () => {
 	// 	setIsValid(isE164 ? isValid : false);
 	// };
 
-	const parsePlzOrt = () => {
-		const parts = plzOrt.split(", ");
-		const plz = parts[0];
-		const ort = parts[1];
-		setPlz(plz);
-		setOrt(ort);
-		// console.log(`PLZ: ${plz}, Ort: ${ort}`);
-	};
+	// const parsePlzOrt = () => {
+	// 	const parts = plzOrt.split(", ");
+	// 	const plz = parts[0];
+	// 	const ort = parts[1];
+	// 	setPlz(plz);
+	// 	setOrt(ort);
+	// 	// console.log(`PLZ: ${plz}, Ort: ${ort}`);
+	// };
 
 	// const handleRadioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 	// 	setRadioState(event.target.value === "1");
 	// };
 
-	const handleBlurAdress = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setAdress(event.target.value);
-	};
+	// const handleBlurAdress = (event: React.ChangeEvent<HTMLInputElement>) => {
+	// 	setAdress(event.target.value);
+	// };
 
-	const parseAddress = () => {
-		const parts = adress.split(/(\d+)/);
-		const streetName = parts[0].trim();
-		const streetNumber = parts[1];
-		setStrasse(streetName);
-		setHausnummer(streetNumber);
-		//console.log(`Street Name: ${streetName}, Street Number: ${streetNumber}`);
-	};
+	// const parseAddress = () => {
+	// 	const parts = adress.split(/(\d+)/);
+	// 	const streetName = parts[0].trim();
+	// 	const streetNumber = parts[1];
+	// 	setStrasse(streetName);
+	// 	setHausnummer(streetNumber);
+	// 	//console.log(`Street Name: ${streetName}, Street Number: ${streetNumber}`);
+	// };
 
-	const handleSvNumberChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		let value = event.target.value.replace(/\s/g, ""); // remove all spaces
-		if (value.length > 4) {
-			value = `${value.slice(0, 4)} ${value.slice(4)}`; // add a space after the 4th character
-		}
-		setSvNummer(value);
-	};
+	// const handleSvNumberChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+	// 	let value = event.target.value.replace(/\s/g, ""); // remove all spaces
+	// 	if (value.length > 4) {
+	// 		value = `${value.slice(0, 4)} ${value.slice(4)}`; // add a space after the 4th character
+	// 	}
+	// 	setSvNummer(value);
+	// };
 	// const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 	//   setIsChecked(event.target.checked);
 	// };
@@ -383,16 +388,16 @@ const Abendschule2: React.FC = () => {
 	// 	}
 	// };
 
-	const handleBlurGeburtsort = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const capitalized = capitalizeFirstLetter(event.target.value);
-		// setGeburtsort(capitalized);
-		setValue('geburtsort', capitalized);
-	};
-	const handleBlurWeitereVornamen = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const capitalized = capitalizeFirstLetterOfEachWord(event.target.value);
-		// setWeitereVornamen(capitalized);
-		setValue('weitereVornamen', capitalized);
-	};
+	// const handleBlurGeburtsort = (event: React.ChangeEvent<HTMLInputElement>) => {
+	// 	const capitalized = capitalizeFirstLetter(event.target.value);
+	// 	// setGeburtsort(capitalized);
+	// 	setValue('geburtsort', capitalized);
+	// };
+	// const handleBlurWeitereVornamen = (event: React.ChangeEvent<HTMLInputElement>) => {
+	// 	const capitalized = capitalizeFirstLetterOfEachWord(event.target.value);
+	// 	// setWeitereVornamen(capitalized);
+	// 	setValue('weitereVornamen', capitalized);
+	// };
 
 	// const handleBlurNachname = () => {
 	// 	if (inputRefNachname.current) {
@@ -407,6 +412,9 @@ const Abendschule2: React.FC = () => {
 
 
 	//event.persist();
+
+
+
 
 
 	useEffect(() => {
@@ -498,12 +506,59 @@ const Abendschule2: React.FC = () => {
 				console.error('Error fetching options:', error);
 			}
 		};
+		fetchOptionsAnrede();
+		fetchOptionsTitelVor();
+		fetchOptionsTitelNach();
+		fetchOptionsGeschlecht();
+		fetchOptionsGeburtsland();
+		fetchOptionsStaatsbuergerschaft();
+		fetchOptionsErstsprache();
+		fetchOptionsZweitsprache();
+		fetchOptionsReligionsbekenntnis();
+		fetchOptionsWohnland();
+		fetchOptionsSozialversicherungstraeger();
+	}
+		, []);
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	useEffect(() => {
+
 		const fetchData = async () => {
 			try {
 				const response = await axios.get(`https://localhost/anmeldungen/abendschule/sessionfill/${session}`);
 				if (response.data && response.data.length > 0) {
 					const data = response.data[0];
 					setPrefillData(data as FormData)
+					setValue('anrede', data.anrede);
+					setValue('titelVor', data.titelvor);
+					setValue('titelNach', data.titelnach);
+					setValue('geschlecht', data.geschlecht);
+					setValue('vorname', data.vorname);
+					setValue('nachname', data.nachname);
+					setValue('telnr', `${data.laendervorwahl1}${data.vorwahl1}${data.nummer1}`);
+					setValue('email', data.kontaktmailadresse);
+					setValue('geburtsdatum', data.geburtsdatum.substring(0, 10));
+					setValue('weitereVornamen', data.vornamen);
+					setValue('geburtsort', data.geburtsort);
+					setValue('geburtsland', data.geburtsland);
+					setValue('staatsbuergerschaft', data.staatsbuergerschaft);
+					setValue('muttersprache', data.erstsprache);
+					setValue('alltagssprache', data.zweitsprache);
+					setValue('religion', data.religionsbekenntnis);
+					setValue('svGebDat', data.sozialversicherungsGebDat);
+					setValue('svNummer', `${data.sozialversicherungsnummer} ${data.sozialversicherungsgebdat}`);
+					setValue("SVTAUT", data.sozialversicherungaut.toString());
+					setValue('sozialversicherungstraeger', data.sozialversicherungstraeger);
+					setValue('strasse', data.strasse);
+					setValue('hausnummer', data.hausnummer);
+					setValue('adresse', `${data.strasse} ${data.hausnummer}`);
+					setValue('plzort', `${data.postleitzahl}, ${data.wohnort}`);
+					setValue('plz', data.postleitzahl);
+					setValue('ort', data.wohnort);
+					setValue('wohnland', data.wohnland);
+					setValue('letzteschulform', data.letzteschulform);
+
+					// setValue('fachrichtung1', data.fachrichtung1);
+
 
 					// Assuming the data is an array and you want the first item
 					// setAnrede(data.anrede);
@@ -540,21 +595,10 @@ const Abendschule2: React.FC = () => {
 				console.error(error);
 			}
 		};
-		fetchOptionsAnrede();
-		fetchOptionsTitelVor();
-		fetchOptionsTitelNach();
-		fetchOptionsGeschlecht();
-		fetchOptionsGeburtsland();
-		fetchOptionsStaatsbuergerschaft();
-		fetchOptionsErstsprache();
-		fetchOptionsZweitsprache();
-		fetchOptionsReligionsbekenntnis();
-		fetchOptionsWohnland();
-		fetchOptionsSozialversicherungstraeger();
+
 		fetchData();
 
 	}, [session]);
-
 	// const { control } = useForm({
 	// 	defaultValues: {
 	// 		anrede: anrede,
@@ -589,28 +633,7 @@ const Abendschule2: React.FC = () => {
 	// TODO: ensure that every field of the form is prefilled
 
 	const onSubmit = (data: FormData) => {
-		formData.append("anrede", data.anrede);
-		formData.append("titelvor", data.titelVor);
-		formData.append("titelnach", data.titelNach);
-		formData.append("vornamen", data.weitereVornamen);
-		formData.append("kontaktmailadresse", data.email);
-		formData.append("anmeldenummer", data.anmeldenummer);
-		formData.append("geschlecht", data.geschlecht);
-		formData.append("geburtsort", data.geburtsort);
-		formData.append("geburtsland", data.geburtsland);
-		formData.append("staatsbuergerschaft", data.staatsbuergerschaft);
-		formData.append("erstsprache", data.muttersprache);
-		formData.append("zweitsprache", data.alltagssprache);
-		formData.append("religionsbekenntnis", data.religion);
-		formData.append("sozialversicherungaut", data.SVTAUT);
-		formData.append("sozialversicherungsnummer", data.svNummer);
-		formData.append("sozialversicherungstraeger", data.sozialversicherungstraeger);
-		formData.append("strasse", data.adresse.split(/(\d+)/)[0]);
-		formData.append("hausnummer", data.adresse.split(/(\d+)/)[1]);
-		formData.append("postleitzahl", data.plzort.split(", ")[0]);
-		formData.append("wohnort", data.plzort.split(", ")[1]);
-		formData.append("wohnland", data.wohnland);
-		formData.append("letzteschulform", data.letzteschulform);
+		data.anmeldenummer = prefillData?.anmeldenummer || '';
 
 		console.log("Client_Start -----------");
 		console.log(data);
@@ -620,7 +643,7 @@ const Abendschule2: React.FC = () => {
 
 
 
-		axios.post("https://localhost/registration/abendschule/session/", formData, {
+		axios.post("https://localhost/registration/abendschule/session/", data, {
 			headers: {
 				'Content-Type': 'application/json',
 			},
@@ -692,8 +715,8 @@ const Abendschule2: React.FC = () => {
 									className="pt-1"
 								>
 									<Controller
-										defaultValue={prefillData?.titelVor || ''}
 										name="titelVor"
+										defaultValue={prefillData?.titelVor || ''}
 										control={control}
 										rules={{ required: false }}
 										render={({ field }) => (
@@ -755,14 +778,14 @@ const Abendschule2: React.FC = () => {
 								>
 									<Controller
 										name="vorname"
+										defaultValue={prefillData?.vorname} // Set the default value based on the fetched data
 										control={control}
-										defaultValue={prefillData?.vorname || ''} // Set the default value based on the fetched data
 										render={({ field }) => (
 											<Form.Control
 												type="text"
+												disabled // Keep the disabled attribute if needed
 												placeholder="Vorname"
 												{...field} // Spread the field props to the Form.Control
-												disabled // Keep the disabled attribute if needed
 											/>
 										)}
 									/>
@@ -781,13 +804,13 @@ const Abendschule2: React.FC = () => {
 									className="pt-1"
 								>
 									<Controller
-										name="vorname"
+										name="nachname"
 										control={control}
-										defaultValue={prefillData?.nachname || ''} // Set the default value based on the fetched data
+										defaultValue={prefillData?.nachname} // Set the default value based on the fetched data
 										render={({ field }) => (
 											<Form.Control
 												type="text"
-												placeholder="Vorname"
+												placeholder="Nachname"
 												{...field} // Spread the field props to the Form.Control
 												disabled // Keep the disabled attribute if needed
 											/>
@@ -870,10 +893,11 @@ const Abendschule2: React.FC = () => {
 								<Controller
 									name="email"
 									control={control}
-									defaultValue={prefillData?.email || ''} // Set the default value based on the fetched data
+									defaultValue={prefillData?.email} // Set the default value based on the fetched data
 									render={({ field }) => (
 										<Form.Control
 											type="email"
+											disabled
 											placeholder="E-mail"
 											{...field} // Spread the field props to the Form.Control
 										// disabled // Keep the disabled attribute if needed
@@ -918,10 +942,11 @@ const Abendschule2: React.FC = () => {
 								<Controller
 									name="telnr"
 									control={control}
-									defaultValue={prefillData?.telnr || ''} // Set the default value based on the fetched data
+									defaultValue={prefillData?.telnr} // Set the default value based on the fetched data
 									render={({ field }) => (
 										<Form.Control
 											type="string"
+											disabled
 											placeholder="text"
 											{...field} // Spread the field props to the Form.Control
 										// disabled // Keep the disabled attribute if needed
@@ -963,11 +988,11 @@ const Abendschule2: React.FC = () => {
 									<Controller
 										name="geburtsdatum"
 										control={control}
-										defaultValue={prefillData?.geburtsdatum || ''} // Set the default value based on the fetched data
+										defaultValue={prefillData?.geburtsdatum} // Set the default value based on the fetched data
 										disabled
 										render={({ field }) => (
 											<Form.Control
-												type="date"
+												type="text"
 												// placeholder="E-mail"
 												{...field} // Spread the field props to the Form.Control
 											// disabled // Keep the disabled attribute if needed
@@ -996,6 +1021,7 @@ const Abendschule2: React.FC = () => {
 									<Col className="mx-3 pt-5">
 										<Controller
 											name="SVTAUT"
+											defaultValue={prefillData?.SVTAUT || ''}
 											control={control}
 											rules={{ required: false }} // Set the validation rules as needed
 											render={({ field }) => (
@@ -1016,6 +1042,7 @@ const Abendschule2: React.FC = () => {
 										<Controller
 											name="SVTAUT"
 											control={control}
+											defaultValue={prefillData?.SVTAUT || ''}
 											rules={{ required: false }} // Set the validation rules as needed
 											render={({ field }) => (
 												<Form.Check
@@ -1050,7 +1077,6 @@ const Abendschule2: React.FC = () => {
 											control={control}
 											rules={{ required: false }}
 											defaultValue={prefillData?.sozialversicherungstraeger || ''} // Set the default value based on the fetched data
-
 											render={({ field }) => (
 												<Form.Select {...field} >
 													<option value="" />
@@ -1271,15 +1297,6 @@ const Abendschule2: React.FC = () => {
 											/>
 										)}
 									/>
-									{/* <Form.Control
-
-
-										type="text"
-										defaultValue={`${strasse} ${Hausnummer}`}
-										onChange={handleBlurAdress}
-										onBlur={parseAddress}
-									//pattern="[A-Z][a-z]*"
-									/> */}
 									<Form.Control.Feedback type="invalid" className="mx-2">
 										Bitte geben Sie Ihre Adresse in der Form Strasse Hausnummer
 										Top Stiege etc. ein.
@@ -1294,7 +1311,6 @@ const Abendschule2: React.FC = () => {
 									label="PLZ, Ort"
 									className="pt-1"
 								>
-
 									<Controller
 										name="plzort"
 										control={control}
@@ -1309,12 +1325,6 @@ const Abendschule2: React.FC = () => {
 											/>
 										)}
 									/>
-									{/* <Form.Control
-										type="text"
-										value={plzOrt}
-										onChange={handleBlurPlzOrt}
-										onBlur={parsePlzOrt}
-									/> */}
 									<Form.Control.Feedback type="invalid" className="mx-2">
 										Bitte geben Sie Ihre PLZ und Ort in der Form PLZ, Ortsname
 										ein.

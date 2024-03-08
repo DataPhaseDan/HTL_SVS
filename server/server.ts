@@ -1,20 +1,103 @@
-import express, { Request, Response, NextFunction } from "express";
+import express, { type Request, type Response, type NextFunction } from "express";
 // import session, { Session } from "express-session";
 import nodemailer from "nodemailer";
 import pkg from "pg";
 const { Pool } = pkg;
-import { fileURLToPath } from "url";
+import { fileURLToPath } from "node:url";
 import cors from "cors";
-import path from "path"; // Add the import statement for the 'path' module
+import path from "node:path"; // Add the import statement for the 'path' module
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 import session from "express-session";
-import { serializeUser, deserializeUser } from 'passport-cookie';
+// import { serializeUser, deserializeUser } from 'passport-cookie';
 
 
 interface User {
 	id: string;
 }
+
+
+type FormData = {
+	anrede: string;
+	titelVor: string;
+	titelNach: string;
+	anmeldenummer: string;
+	kontaktmailadresse: string;
+	vorname: string;
+	nachname: string;
+	telnrA: string;
+	laendervorwahl1: string;
+	vorwahl1: string;
+	nummer1: string;
+	geburtsdatum: string;
+	weitereVornamen: string;
+	geschlecht: string;
+	geburtsort: string;
+	geburtsland: string;
+	staatsbuergerschaft: string;
+	muttersprache: string;
+	alltagssprache: string;
+	religion: string;
+	svNummer: string;
+	svGebDat: string;
+	sozialversicherungstraeger: string;
+	SVTAUT: string;
+	strasse: string;
+	adresse: string;
+	plzort: string;
+	hausnummer: string;
+	plz: string;
+	ort: string;
+	plzA: string;
+	ortA: string;
+	plzB: string;
+	ortB: string;
+	wohnland: string;
+	letzteschulform: string;
+	verhaeltnisA: string;
+	anredeA: string;
+	titelvorA: string;
+	titelnachA: string;
+	nachnameA: string;
+	vornameA: string;
+	strasseA: string;
+	adresseA: string;
+	plzortA: string;
+	adresseB: string;
+	plzortB: string;
+	hausnummerA: string;
+	postleitzahlA: string;
+	wohnortA: string;
+	wohnlandA: string;
+	laendervorwahlA2: string;
+	vorwahlA2: string;
+	nummerA2: string;
+	mailadresseA: string;
+	verhaeltnisB: string;
+	anredeB: string;
+	titelvorB: string;
+	titelnachB: string;
+	nachnameB: string;
+	vornameB: string;
+	strasseB: string;
+	hausnummerB: string;
+	postleitzahlB: string;
+	wohnortB: string;
+	wohnlandB: string;
+	laendervorwahlB1: string;
+	vorwahlB1: string;
+	nummerB1: string;
+	laendervorwahlB2: string;
+	vorwahlB2: string;
+	nummerB2: string;
+	mailadresseB: string;
+	geschwisteranzahl: string;
+	geschwisteranschule: string;
+	geschwisternamen: string;
+	erstwunsch: string;
+	erstwunschschule: string;
+	zweitwunschschule: string;
+};
 
 // const options = {
 // 	key: fs.readFileSync("./cert.pem"),
@@ -156,8 +239,8 @@ const transporter = nodemailer.createTransport({
 	host: 'smtp.office365.com',
 	port: 587,
 	auth: {
-		user: 'Test.1abbt@htl-salzburg.ac.at',
-		pass: 'daniel#RENNER90'
+		user: '',
+		pass: ''
 	}
 });
 
@@ -220,14 +303,13 @@ const handleRegistrationPhaseOne =
 					laendervorwahl1,
 					vorwahl1,
 					nummer1,
-					schulpflicht,
 					fachrichtung1,
 					angemeldet
 					) 
 					VALUES($1, $2, $3,
 						$4, $5, $6, $7, $8,
 						$9, $10, $11, $12,
-						$13, $14);`
+						$13);`
 			await pool.query(query, [
 				clientData.finalisiert,
 				clientData.dsgvo,
@@ -240,6 +322,126 @@ const handleRegistrationPhaseOne =
 				clientData.laendervorwahl1,
 				clientData.vorwahl1,
 				clientData.nummer1,
+				clientData.fachrichtung1,
+				clientData.angemeldet
+			]);
+			const url = `https://localhost/anmeldungen/${type}/session?session=${sessionHash}`;
+			try {
+				if (clientData.kontaktmailadresse === "") {
+					throw new Error("No email address provided");
+				}
+				// await transporter.sendMail({
+				// 	from: transporter.options.from?.toString(),
+				// 	to: clientData.kontaktmailadresse,
+				// 	subject: "Setzen Sie Ihre Anmeldung fort",
+				// 	text: `Drücken Sie bitte auf diesen Link um Ihre Anmeldung fortzusetzen: ${url}`,
+				// });
+				// If the email is sent successfully, you can send a success response to the client
+				res.status(200).json({ message: "Email sent successfully" });
+			} catch (error) {
+				// If an error occurs while sending the email, log the error and send an error response
+				console.error(error);
+				// Determine the appropriate status code and message based on the error
+				let statusCode = 500;
+				let message = "An error occurred while sending the email.";
+				if ((error as Error).message === "No email address provided") {
+					statusCode = 400; // Bad Request
+					message = "Sie haben keine Kontaktmailadresse angegeben!";
+				} else if ((error as Error).message === "Keine Session gefunden!") {
+					statusCode = 410; // Gone
+					message = "Keine Session gefunden!";
+				}
+				res.status(statusCode).json({ message: message });
+			}
+		}
+
+		// Send the session link to the user's email
+	};
+const handleRegistrationPhaseOneDay =
+	(type: string) => async (req: Request, res: Response) => {
+		const clientData = req.body;
+		const sessionHash = clientData.anmeldenummer;
+
+		// console.log(clientData);
+		// Check if a session for this user already exists
+		let query =
+			"SELECT * FROM zsv_bewerber WHERE anmeldenummer = $1 AND finalisiert = 0";
+		const result = await pool.query(query, [sessionHash]);
+
+
+		if (result.rows.length === 1) {
+			// A session for this user already exists, so reactivate the session
+			const url = `https://localhost/anmeldungen/${type}/session?session=${sessionHash}`;
+			try {
+				if (clientData.kontaktmailadresse === "") {
+					throw new Error("No email address provided");
+				}
+				// await transporter.sendMail({
+				// 	from: transporter.options.from?.toString(),
+				// 	to: clientData.kontaktmailadresse,
+				// 	subject: "Setzen Sie Ihre Anmeldung fort",
+				// 	text: `Drücken Sie bitte auf diesen Link um Ihre Anmeldung fortzusetzen: ${url}`,
+				// });
+				// If the email is sent successfully, you can send a success response to the client
+				res.status(409).json({ Error: "Email duplicate" });
+			} catch (error) {
+				// If an error occurs while sending the email, log the error and send an error response
+				console.error(error);
+				// Determine the appropriate status code and message based on the error
+				let statusCode = 500;
+				let message = "An error occurred while sending the email.";
+				if ((error as Error).message === "No email address provided") {
+					statusCode = 400; // Bad Request
+					message = "Sie haben keine Kontaktmailadresse angegeben!";
+				} else if ((error as Error).message === "Keine Session gefunden!") {
+					statusCode = 410; // Gone
+					message = "Keine Session gefunden!";
+				}
+				res.status(statusCode).json({ message: message });
+			}
+		} else {
+			// No session for this user exists, so create a new session
+			query =
+				`INSERT INTO zsv_bewerber(
+					finalisiert,
+					dsgvo,
+					schuljahr,
+					kontaktmailadresse,
+					mailadressea,
+					anmeldenummer,
+					nachname,
+					vorname,
+					geburtsdatum,
+					laendervorwahl1,
+					vorwahl1,
+					nummer1,
+					laendervorwahla1,
+					vorwahla1,
+					nummera1,
+					schulpflicht,
+					fachrichtung1,
+					angemeldet
+					) 
+					VALUES($1, $2, $3,
+						$4, $5, $6, $7, $8,
+						$9, $10, $11, $12,
+						$13, $14, $15,$16, $17,$18);`
+			await pool.query(query, [
+				clientData.finalisiert,
+				clientData.dsgvo,
+				clientData.schuljahr,
+				clientData.kontaktmailadresse,
+				clientData.mailadressea,
+				clientData.anmeldenummer,
+				clientData.nachname,
+				clientData.vorname,
+				clientData.geburtsdatum,
+				clientData.laendervorwahl1,
+				clientData.vorwahl1,
+				clientData.nummer1,
+				clientData.laendervorwahla1,
+				clientData.vorwahla1,
+				clientData.nummera1,
 				clientData.schulpflicht,
 				clientData.fachrichtung1,
 				clientData.angemeldet
@@ -276,18 +478,87 @@ const handleRegistrationPhaseOne =
 
 		// Send the session link to the user's email
 	};
-
+// anrede = $1,
+// 	titelvor = $2,
+// 	titelnach = $3,
+// 	vornamen = $4,
+// 	geschlecht = $5,
+// 	sozialversicherungaut = $6,
+// 	sozialversicherungstraeger = $7,
+// 	sozialversicherungsnummer = $8,
+// 	sozialversicherungsgebdat = $9,
+// 	geburtsort = $10,
+// 	geburtsland = $11,
+// 	staatsbuergerschaft = $12,
+// 	erstsprache = $13,
+// 	zweitsprache = $14,
+// 	religionsbekenntnis = $15,
+// 	strasse = $16,
+// 	hausnummer = $17,
+// 	postleitzahl = $18,
+// 	wohnort = $19,
+// 	wohnland = $20,
+// 	laendervorwahl2 = $21,
+// 	vorwahl2 = $22,
+// 	nummer2 = $23,
+// 	schulpflicht = $24,
+// 	verhaeltnisA = $25,
+// 	anredeA = $26,
+// 	titelvorA = $27,
+// 	titelnachA = $28,
+// 	nachnameA = $29,
+// 	vornameA = $30,
+// 	strasseA = $31,
+// 	hausnummerA = $32,
+// 	postleitzahlA = $33,
+// 	wohnortA = $34,
+// 	wohnlandA = $35,
+// 	laendervorwahlA1 = $36,
+// 	vorwahlA1 = $37,
+// 	nummerA1 = $38,
+// 	laendervorwahlA2 = $39,
+// 	vorwahlA2 = $40,
+// 	nummerA2 = $41,
+// 	mailadresseA = $42,
+// 	verhaeltnisB = $43,
+// 	anredeB = $44,
+// 	titelvorB = $45,
+// 	titelnachB = $46,
+// 	nachnameB = $47,
+// 	vornameB = $48,
+// 	strasseB = $49,
+// 	hausnummerB = $50,
+// 	postleitzahlB = $51,
+// 	wohnortB = $52,
+// 	wohnlandB = $53,
+// 	laendervorwahlB1 = $54,
+// 	vorwahlB1 = $55,
+// 	nummerB1 = $56,
+// 	laendervorwahlB2 = $57,
+// 	vorwahlB2 = $58,
+// 	nummerB2 = $59,
+// 	mailadresseB = $60,
+// 	geschwisteranzahl = $61,
+// 	geschwisteranschule = $62,
+// 	geschwisternamen = $63,
+// 	erstwunsch = $64,
+// 	erstwunschschule = $65,
+// 	zweitwunschschule = $66,
+// 	fachrichtung1 = $67,
+// 	fachrichtung2 = $68,
+// 	fachrichtung3 = $69,
+// 	letzteschulform = $70
 
 
 const handleRegistrationPhaseTwo =
 	(type: string) => async (req: Request, res: Response) => {
-		const clientData = req.body;
+		const clientData = req.body as FormData;
 		const sessionHash = clientData.anmeldenummer;
 
 		try {
 			if (sessionHash !== "") {
 				const result = await pool.query(
-					"SELECT * FROM zsv_bewerber WHERE Anmeldenummer = $1 AND finalisiert = 0",
+					"SELECT * FROM zsv_bewerber WHERE anmeldenummer = $1 AND finalisiert = 0",
 					[sessionHash],
 				);
 
@@ -332,129 +603,215 @@ const handleRegistrationPhaseTwo =
 								postleitzahl = $18,
 								wohnort = $19,
 								wohnland = $20,
-								laendervorwahl2 = $21,
-								vorwahl2 = $22,
-								nummer2 = $23,
-								schulpflicht = $24,
-								verhaeltnisA = $25,
-								anredeA = $26,
-								titelvorA = $27,
-								titelnachA = $28,
-								nachnameA = $29,
-								vornameA = $30,
-								strasseA = $31,
-								hausnummerA = $32,
-								postleitzahlA = $33,
-								wohnortA = $34,
-								wohnlandA = $35,
-								laendervorwahlA1 = $36,
-								vorwahlA1 = $37,
-								nummerA1 = $38,
-								laendervorwahlA2 = $39,
-								vorwahlA2 = $40,
-								nummerA2 = $41,
-								mailadresseA = $42,
-								verhaeltnisB = $43,
-								anredeB = $44,
-								titelvorB = $45,
-								titelnachB = $46,
-								nachnameB = $47,
-								vornameB = $48,
-								strasseB = $49,
-								hausnummerB = $50,
-								postleitzahlB = $51,
-								wohnortB = $52,
-								wohnlandB = $53,
-								laendervorwahlB1 = $54,
-								vorwahlB1 = $55,
-								nummerB1 = $56,
-								laendervorwahlB2 = $57,
-								vorwahlB2 = $58,
-								nummerB2 = $59,
-								mailadresseB = $60,
-								geschwisteranzahl = $61,
-								geschwisteranschule = $62,
-								geschwisternamen = $63,
-								erstwunsch = $64,
-								erstwunschschule = $65,
-								zweitwunschschule = $66,
-								fachrichtung1 = $67,
-								fachrichtung2 = $68,
-								fachrichtung3 = $69,
-								letzteschulform = $70
-								WHERE anmeldenummer = $71;`;
+								letzteschulform = $21
+								WHERE anmeldenummer = $22;`;
 						await pool.query(query, [
 							clientData.anrede,
-							clientData.titelvor,
-							clientData.titelnach,
-							clientData.vornamen,
+							Number(clientData.titelVor),
+							Number(clientData.titelNach),
+							clientData.weitereVornamen,
 							clientData.geschlecht,
-							Number(clientData.sozialversicherungaut).toString(),
+							Number(clientData.SVTAUT),
 							clientData.sozialversicherungstraeger,
-							clientData.sozialversicherungsnummer?.substring(0, 4),
-							clientData.sozialversicherungsnummer?.substring(4, 11),
+							// clientData.svNummer,
+							// clientData.svGebDat,
+							clientData.svNummer?.substring(0, 4),
+							clientData.svNummer?.substring(4, 11),
 							clientData.geburtsort,
-							clientData.geburtsland,
-							clientData.staatsbuergerschaft,
-							clientData.erstsprache,
-							clientData.zweitsprache,
-							clientData.religionsbekenntnis,
-							clientData.strasse,
-							clientData.hausnummer,
-							clientData.postleitzahl,
-							clientData.wohnort,
-							clientData.wohnland,
-							clientData.laendervorwahl2,
-							clientData.vorwahl2,
-							clientData.nummer2,
-							clientData.schulpflicht,
-							clientData.verhaeltnisa,
-							clientData.anredeA,
-							clientData.titelvorA,
-							clientData.titelnachA,
+							Number(clientData.geburtsland),
+							Number(clientData.staatsbuergerschaft),
+							Number(clientData.muttersprache),
+							Number(clientData.alltagssprache),
+							Number(clientData.religion),
+							clientData.adresse.substring(0, clientData.adresse.indexOf(" ")),
+							clientData.adresse.substring(clientData.adresse.indexOf(" ") + 1),
+							clientData.plzort.substring(0, clientData.plzort.indexOf(",")),
+							clientData.plzort.substring(clientData.plzort.indexOf(",") + 1),
+							Number(clientData.wohnland),
+							clientData.letzteschulform,
+							clientData.anmeldenummer,
+						]);
+						// If the email is sent successfully, you can send a success response to the client
+						res.status(202).json({ message: "Data Accepted and Written" });
+					} catch (error) {
+						// If an error occurs while sending the email, log the error and send an error response
+						console.error(error);
+						// Determine the appropriate status code and message based on the error
+						let statusCode = 500;
+						let message = "An error occurred while sending the email.";
+						if ((error as Error).message === "No email address provided") {
+							statusCode = 400; // Bad Request
+							message = "Sie haben keine Kontaktmailadresse angegeben!";
+						} else if ((error as Error).message === "Keine Session gefunden!") {
+							statusCode = 411; // Gone
+							message = "Keine Session gefunden!";
+						}
+						res.status(statusCode).json({ message: message });
+					}
+				} else if (result.rows[0].finalisiert === 1) {
+					res.status(410).json({ Error: "Anmeldung bereits finalisiert" });
+				}
+			}
+
+			// console.log(clientData);
+			// Check if a session for this user already exists
+		} catch (error) {
+			console.error(error);
+			res
+				.status(500)
+				.json({ error: "An error occurred while fetching options" });
+		}
+	};
+const handleRegistrationPhaseTwoDay =
+	(type: string) => async (req: Request, res: Response) => {
+		const clientData = req.body as FormData;
+
+
+
+		const sessionHash = clientData.anmeldenummer;
+
+		try {
+			if (sessionHash !== "") {
+				const result = await pool.query(
+					"SELECT * FROM zsv_bewerber WHERE anmeldenummer = $1 AND finalisiert = 0",
+					[sessionHash],
+				);
+
+				console.log("------------");
+				console.log(result.rows);
+				console.log("------------");
+
+				if (result.rows.length === 1) {
+					// A session for this user already exists, so reactivate the session
+					const url = `https://localhost/anmeldungen/${type}/session?session=${sessionHash}`;
+					try {
+						if (clientData.kontaktmailadresse === "") {
+							throw new Error("No email address provided");
+						}
+						// await transporter.sendMail({
+						// 	from: transporter.options.from?.toString(),
+						// 	to: clientData.kontaktmailadresse,
+						// 	subject: "Setzen Sie Ihre Anmeldung fort",
+						// 	text: `Drücken Sie bitte auf diesen Link um Ihre Anmeldung fortzusetzen: ${url}`,
+						// });
+
+						const query = `
+								UPDATE zsv_bewerber
+								SET 
+								anrede = $1,
+								titelvora = $2,
+								titelnacha = $3,
+								vornamen = $4,
+								geschlecht = $5,
+								sozialversicherungaut = $6,
+								sozialversicherungstraeger = $7,
+								sozialversicherungsnummer = $8,
+								sozialversicherungsgebdat = $9,
+								geburtsort = $10,
+								geburtsland = $11,
+								staatsbuergerschaft = $12,
+								erstsprache = $13,
+								zweitsprache = $14,
+								religionsbekenntnis = $15,
+								strasse = $16,
+								hausnummer = $17,
+								postleitzahl = $18,
+								wohnort = $19,
+								wohnland = $20,
+								letzteschulform = $21,
+								nachnamea = $22,
+								vornamea = $23,
+								strassea = $24,
+								hausnummera = $25,
+								postleitzahla = $26,
+								wohnorta = $27,
+								wohnlanda = $28,
+								laendervorwahla1 = $29,
+								vorwahla1 = $30,
+								nummera1 = $31,
+								mailadresseA = $32,
+								nachnameb = $33,
+								vornameb = $34,
+								strasseb = $35,
+								hausnummerb = $36,
+								postleitzahlb = $37,
+								wohnortb = $38,
+								wohnlandb = $39,
+								laendervorwahlb1 = $40,
+								vorwahlb1 = $41,
+								nummerb1 = $42,
+								mailadresseB = $43,
+								erstwunsch = $44,
+								zweitwunschschule = $45,
+								geschwisteranzahl = $46,
+								geschwisteranschule = $47,
+								geschwisternamen = $48,
+								verhaeltnisa = $49,
+								verhaeltnisb = $50,
+								anredea = $51,
+								anredeb = $52,
+								titelvorb = $53,
+								titelnachb = $54
+
+								WHERE anmeldenummer = $55;`;
+						await pool.query(query, [
+							clientData.anrede,
+							Number(clientData.titelvorA),
+							Number(clientData.titelnachA),
+							clientData.weitereVornamen,
+							clientData.geschlecht,
+							Number(clientData.SVTAUT),
+							clientData.sozialversicherungstraeger,
+							// clientData.svNummer,
+							// clientData.svGebDat,
+							clientData.svNummer?.substring(0, 4),
+							clientData.svNummer?.substring(4, 11),
+							clientData.geburtsort,
+							Number(clientData.geburtsland),
+							Number(clientData.staatsbuergerschaft),
+							Number(clientData.muttersprache),
+							Number(clientData.alltagssprache),
+							Number(clientData.religion),
+							clientData.adresse.substring(0, clientData.adresse.indexOf(" ")),
+							clientData.adresse.substring(clientData.adresse.indexOf(" ") + 1),
+							clientData.plzort.substring(0, clientData.plzort.indexOf(",")),
+							clientData.plzort.substring(clientData.plzort.indexOf(",") + 1),
+							Number(clientData.wohnland),
+							clientData.letzteschulform,
 							clientData.nachnameA,
 							clientData.vornameA,
-							clientData.strasseA,
-							clientData.hausnummerA,
-							clientData.postleitzahlA,
-							clientData.wohnortA,
-							clientData.wohnlandA,
-							clientData.laendervorwahlA1,
-							clientData.vorwahlA1,
-							clientData.nummerA1,
-							clientData.laendervorwahlA2,
-							clientData.vorwahlA2,
-							clientData.nummerA2,
+							clientData.adresseA.substring(0, clientData.adresseA.indexOf(" ")),
+							clientData.adresseA.substring(clientData.adresseA.indexOf(" ") + 1),
+							clientData.plzortA.substring(0, clientData.plzortA.indexOf(",")),
+							clientData.plzortA.substring(clientData.plzortA.indexOf(",") + 1),
+							Number(clientData.wohnlandA),
+							clientData.laendervorwahl1,
+							clientData.vorwahl1,
+							clientData.nummer1,
 							clientData.mailadresseA,
-							clientData.verhaeltnisb,
-							clientData.anredeB,
-							clientData.titelvorB,
-							clientData.titelnachB,
 							clientData.nachnameB,
 							clientData.vornameB,
-							clientData.strasseB,
-							clientData.hausnummerB,
-							clientData.postleitzahlB,
-							clientData.wohnortB,
-							clientData.wohnlandB,
+							clientData.adresseB.substring(0, clientData.adresseB.indexOf(" ")),
+							clientData.adresseB.substring(clientData.adresseB.indexOf(" ") + 1),
+							clientData.plzortB.substring(0, clientData.plzortB.indexOf(",")),
+							clientData.plzortB.substring(clientData.plzortB.indexOf(",") + 1),
+							Number(clientData.wohnlandB),
 							clientData.laendervorwahlB1,
 							clientData.vorwahlB1,
 							clientData.nummerB1,
-							clientData.laendervorwahlB2,
-							clientData.vorwahlB2,
-							clientData.nummerB2,
 							clientData.mailadresseB,
+							clientData.erstwunsch,
+							clientData.zweitwunschschule,
 							clientData.geschwisteranzahl,
 							clientData.geschwisteranschule,
 							clientData.geschwisternamen,
-							clientData.erstwunsch,
-							clientData.erstwunschschule,
-							clientData.zweitwunschschule,
-							clientData.fachrichtung1,
-							clientData.fachrichtung2,
-							clientData.fachrichtung3,
-							clientData.letzteschulform,
-							clientData.anmeldenummer,
+							clientData.verhaeltnisA,
+							clientData.verhaeltnisB,
+							clientData.anredeA,
+							clientData.anredeB,
+							clientData.titelvorB,
+							clientData.titelnachB,
+							clientData.anmeldenummer
 						]);
 						// If the email is sent successfully, you can send a success response to the client
 						res.status(202).json({ message: "Data Accepted and Written" });
@@ -495,7 +852,6 @@ interface Option {
 
 }
 
-// TODO: setup passport.js for oauth2 middleware
 app.get("/options/fachrichtungen_abendschule/", async (req: Request, res: Response) => {
 	try {
 		const result = await pool.query<Option>('SELECT ID, Name FROM zsv_fachrichtungen_abendschule');
@@ -620,9 +976,9 @@ app.get("/options/verhaeltnis/", async (req: Request, res: Response) => {
 // Serve static files from the "build" directory
 // Parse JSON bodies
 
-app.post("/registration/tagesschule/", handleRegistrationPhaseOne("tagesschule"));
+app.post("/registration/tagesschule/", handleRegistrationPhaseOneDay("tagesschule"));
 app.post("/registration/abendschule/", handleRegistrationPhaseOne("abendschule"));
-app.post("/registration/tagesschule/session/", handleRegistrationPhaseTwo("tagesschule"));
+app.post("/registration/tagesschule/session/", handleRegistrationPhaseTwoDay("tagesschule"));
 app.post("/registration/abendschule/session/", handleRegistrationPhaseTwo("abendschule"));
 
 // app.post('/send-email', async (req:Request, res:Response) => {

@@ -1,7 +1,8 @@
 import { PhoneNumberFormat, PhoneNumberType, PhoneNumberUtil } from "google-libphonenumber";
 import axios from "axios";
 import { sha3_512 } from 'js-sha3';
-import React, { useEffect, useRef, useState } from "react";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
 import {
 	Accordion,
 	Button,
@@ -31,6 +32,8 @@ const Abendschule1: React.FC = () => {
 	const [isBirthdateValid, setIsBirthdateValid] = useState(false);
 	const inputRefVorname = useRef<HTMLInputElement>(null);
 	const inputRefNachname = useRef<HTMLInputElement>(null);
+	const [vorname, setVorname] = useState("");
+	const [nachname, setNachname] = useState("");
 	const [isSubmitted, setIsSubmitted] = useState(false);
 	const [options, setOptions] = useState<Option[]>([]);
 	const [showAlert, setShowAlert] = useState<boolean>(true);
@@ -45,11 +48,6 @@ const Abendschule1: React.FC = () => {
 		//const birthdateValue = event.target.value;
 		setIsBirthdateValid(validateBirthdate(event.target.value, 14)); // 14 is the age limit
 		setBirthdate(event.target.value);
-	};
-	const generateHash = () => {
-		const combinedInput = email + phoneNumber + inputRefNachname + inputRefVorname;
-		const hash = sha3_512(combinedInput); // Adjust length as needed
-		setHash(hash);
 	};
 
 	const handlePhoneBlur = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -95,9 +93,9 @@ const Abendschule1: React.FC = () => {
 
 	const validateBirthdate = (birthdate: string, ageLimit: number) => {
 		const birthdateParts = birthdate.split(".");
-		const birthYear = parseInt(birthdateParts[0], 10);
-		const birthMonth = parseInt(birthdateParts[1], 10);
-		const birthDay = parseInt(birthdateParts[2], 10);
+		const birthYear = Number.parseInt(birthdateParts[0], 10);
+		const birthMonth = Number.parseInt(birthdateParts[1], 10);
+		const birthDay = Number.parseInt(birthdateParts[2], 10);
 
 		const currentDate = new Date();
 		const currentYear = currentDate.getFullYear();
@@ -145,6 +143,7 @@ const Abendschule1: React.FC = () => {
 		if (inputRefVorname.current) {
 			const capitalized = capitalizeFirstLetter(inputRefVorname.current.value.trim());
 			inputRefVorname.current.value = capitalized;
+			setVorname(capitalized);
 		}
 	};
 
@@ -152,6 +151,7 @@ const Abendschule1: React.FC = () => {
 		if (inputRefNachname.current) {
 			const capitalized = capitalizeFirstLetter(inputRefNachname.current.value.trim());
 			inputRefNachname.current.value = capitalized;
+			setNachname(capitalized);
 		}
 	};
 	// useEffect(() => {
@@ -187,7 +187,15 @@ const Abendschule1: React.FC = () => {
 		fetchOptions();
 	}, []);
 
+	useEffect(() => {
+		const generateHash = async () => {
 
+			const combinedInput = email + phoneNumber + vorname + nachname;
+			const hash = sha3_512(combinedInput); // Adjust length as needed
+			setHash(hash);
+		};
+		generateHash();
+	}, [email, phoneNumber, vorname, nachname]);
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 
@@ -200,7 +208,7 @@ const Abendschule1: React.FC = () => {
 		const now = new Date();
 		const angemeldet = `${now.getFullYear()}-${(`0${now.getMonth() + 1}`).slice(-2)}-${(`0${now.getDate()}`).slice(-2)} ${(`0${now.getHours()}`).slice(-2)}:${(`0${now.getMinutes()}`).slice(-2)}:${(`0${now.getSeconds()}`).slice(-2)}`;
 		const currentYear = currentDate.substring(0, 4);
-		const nextYear = (parseInt(currentYear) + 1).toString().substring(2, 4);
+		const nextYear = (Number.parseInt(currentYear) + 1).toString().substring(2, 4);
 		const schoolYear = `${currentYear}/${nextYear}`;
 		const clientData = {
 			kontaktmailadresse: email,
@@ -212,16 +220,16 @@ const Abendschule1: React.FC = () => {
 			laendervorwahl1: phoneNumber.substring(0, 3),
 			vorwahl1: phoneNumber.substring(3, 6),
 			nummer1: phoneNumber.substring(6),
-			dsgvo: parseInt("1"),
-			finalisiert: parseInt("0"),
+			dsgvo: Number.parseInt("1"),
+			finalisiert: Number.parseInt("0"),
 			angemeldet: angemeldet,
 			geburtsdatum: birthdate,
-			schulpflicht: parseInt("1")
+			schulpflicht: Number.parseInt("1")
 			// ... add other fields as needed
 		};
 
 		//console.log(clientData);
-		axios.post("https://localhost/registration/abendschule/", clientData, {
+		axios.post("https://localhost/registration/tagesschule/", clientData, {
 			headers: {
 				'Content-Type': 'application/json',
 			},
@@ -322,6 +330,7 @@ const Abendschule1: React.FC = () => {
 	// } catch (error) {
 	// 	console.error(error);
 	// }
+	console.log('%cBuilt by %c@D.Renner https://github.com/DataPhaseDan', 'color: #333; font-size: 1.2em; font-weight: bold;', 'color: #007bff; font-size: 1.2em; font-weight: bold; text-decoration: underline;');
 	return (
 		<Container className="p-5 border" style={{ backgroundColor: "whitesmoke" }}>
 			<Row className="justify-content-center">
@@ -422,8 +431,8 @@ const Abendschule1: React.FC = () => {
 										werden Bestätigungen und Terminverständigungen geschickt.
 										Eine Änderung ist unbedingt bekannt zu geben.
 										Die E-Mail
-											Adresse muss von einem Erziehungsberechtigten abgerufen
-											werden.
+										Adresse muss von einem Erziehungsberechtigten abgerufen
+										werden.
 									</Form.Text>
 								</Container>
 							</FloatingLabel>
@@ -522,7 +531,7 @@ const Abendschule1: React.FC = () => {
 									>
 										{isBirthdateValid
 											? ""
-											: "Bitte wählen Sie das Geburtsdatum des Bewerbers, sie müssen mindestens 17 Jahre alt sein ."}
+											: "Bitte wählen Sie das Geburtsdatum des Bewerbers, sie müssen mindestens 14 Jahre alt sein ."}
 									</Form.Control.Feedback>
 								</FloatingLabel>
 							</Form.Group>
@@ -637,7 +646,7 @@ const Abendschule1: React.FC = () => {
 							className="mb-3"
 						/>
 						{/* <p>{hash}</p> */}
-						<Button onClick={generateHash} variant="success" type="submit">
+						<Button variant="success" type="submit">
 							Bestätigen
 						</Button>
 					</Form>
